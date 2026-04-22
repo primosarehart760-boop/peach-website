@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏢 桃子公司 · AI 时代的一人公司范本</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/launcher.css">
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav">
+  <div class="container nav-content">
+    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>桃子公司</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active">首页</a>
+      <a href="methodology.html" class="nav-link">🎯 方法论</a>
+      <a href="office.html" class="nav-link">🎬 办公室</a>
+      <a href="team.html" class="nav-link">👥 团队</a>
+      <a href="cases.html" class="nav-link">📂 案例</a>
+      <a href="docs.html" class="nav-link">📖 文档</a>
+      <div class="theme-switcher">
+        <button class="theme-btn active" data-theme="editorial" title="Editorial Peach">🍑</button>
+        <button class="theme-btn" data-theme="airbnb" title="Airbnb">🏠</button>
+        <button class="theme-btn" data-theme="linear" title="Linear">⚡</button>
+        <button class="theme-btn" data-theme="pinterest" title="Pinterest">📌</button>
+        <button class="theme-btn" data-theme="stripe" title="Stripe">💳</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero · AI 输入框主入口 -->
+<section style="padding-top: var(--space-4xl); padding-bottom: var(--space-2xl);">
+  <div class="container">
+    <div style="text-align: center; max-width: 860px; margin: 0 auto;">
+      <p class="hand animate-in stagger-1" style="margin-bottom: var(--space-sm); color: var(--peach);">一个人即一家 AI 产品公司</p>
+      <h1 class="animate-in stagger-2" style="margin-bottom: var(--space-md); font-size: clamp(48px, 7vw, 88px); line-height: 1.05;">
+        🏢 <span style="font-style: italic;">桃子公司</span>
+      </h1>
+      <p class="animate-in stagger-3" style="font-size: 18px; color: var(--ink-soft); margin-bottom: var(--space-2xl); line-height: 1.6;">
+        告诉它你要做什么产品 · 19 位员工立即开工 · 75 秒出大厂级方案
+      </p>
+
+      <!-- AI 大输入框 -->
+      <form id="peach-launcher" class="animate-in stagger-4" onsubmit="return launchCompany(event)" style="position: relative; margin-bottom: var(--space-lg);">
+        <div style="position: relative; background: white; border: 2px solid var(--paper-dark); border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); transition: border-color 0.2s, box-shadow 0.2s;"
+             onmouseover="this.style.borderColor='var(--peach)'"
+             onmouseout="this.style.borderColor='var(--paper-dark)'">
+          <textarea id="peach-input" rows="2" placeholder="例：招商银行 · 智能信贷审核      或      字节跳动 · 短视频 AI 选题推荐"
+                    style="width: 100%; padding: 20px 140px 20px 24px; border: none; background: transparent; font-family: var(--font-serif); font-size: 20px; line-height: 1.5; resize: none; outline: none; color: var(--ink); border-radius: 18px;"></textarea>
+          <button type="submit" class="btn btn-primary" style="position: absolute; right: 12px; bottom: 12px; padding: 10px 22px; font-size: 15px;">
+            ✨ 启动公司
+          </button>
+        </div>
+      </form>
+
+      <!-- 行业快选 chips -->
+      <div class="animate-in stagger-4" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-xl);">
+        <button class="industry-chip" data-chip="金融">💰 金融</button>
+        <button class="industry-chip" data-chip="教育">🎓 教育</button>
+        <button class="industry-chip" data-chip="医疗">🏥 医疗</button>
+        <button class="industry-chip" data-chip="短剧">🎬 短剧</button>
+        <button class="industry-chip" data-chip="电商">🛍 电商</button>
+        <button class="industry-chip" data-chip="短视频">📱 短视频</button>
+        <button class="industry-chip" data-chip="制造">🏭 制造</button>
+        <button class="industry-chip" data-chip="汽车">🚗 汽车</button>
+        <button class="industry-chip" data-chip="政企">🏛 政企</button>
+        <button class="industry-chip" data-chip="家装">🏡 家装</button>
+        <button class="industry-chip" data-chip="情感陪伴">💝 情感陪伴</button>
+        <button class="industry-chip" data-chip="游戏">🎮 游戏</button>
+        <button class="industry-chip" data-chip="SaaS">🏢 SaaS</button>
+      </div>
+
+      <p class="hand" style="color: var(--ink-faint); font-size: 15px;">
+        也可以 <a href="office.html" style="color: var(--peach); border-bottom: 1px dashed var(--peach);">先进办公室看看</a> · 或 <a href="methodology.html" style="color: var(--peach); border-bottom: 1px dashed var(--peach);">翻方法论矩阵</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 三重身份 -->
+<section style="background: linear-gradient(180deg, var(--paper), var(--paper-light));">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: var(--space-2xl);">
+      <p class="hand">真正的 AI 产品公司</p>
+      <h2 class="section-title" style="margin-top: var(--space-sm);">三重身份 · 一套骨架</h2>
+      <p class="section-subtitle">不是"做 AI 的一个人"· 是一家真公司的完整运作</p>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="card animate-in stagger-1" style="border-top: 4px solid var(--peach);">
+        <div style="font-size: 40px; margin-bottom: var(--space-md);">🧑‍🎤</div>
+        <h3>AI 产品经理</h3>
+        <p class="hand" style="margin: var(--space-sm) 0;">懂业务 · 懂用户 · 懂方法</p>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 14px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ 六步分析铁律（画像到具体人）</li>
+          <li>→ VELA 33 大厂级模板</li>
+          <li>→ PRD 15 板块（超越 VELA 9）</li>
+          <li>→ 3 总监审查 · BLOCKING 清单</li>
+        </ul>
+      </div>
+
+      <div class="card animate-in stagger-2" style="border-top: 4px solid var(--sage);">
+        <div style="font-size: 40px; margin-bottom: var(--space-md);">🎯</div>
+        <h3>AI 训练师</h3>
+        <p class="hand" style="margin: var(--space-sm) 0;">懂模型 · 懂评测 · 懂调优</p>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 14px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ 模型选型 5 维矩阵（禁境外）</li>
+          <li>→ 评测集 500 × 5 × 3 分布</li>
+          <li>→ Prompt 工程 6 层设计</li>
+          <li>→ 数据飞轮 + 降级策略</li>
+        </ul>
+      </div>
+
+      <div class="card animate-in stagger-3" style="border-top: 4px solid #b38f7a;">
+        <div style="font-size: 40px; margin-bottom: var(--space-md);">🎨</div>
+        <h3>UI 设计专家</h3>
+        <p class="hand" style="margin: var(--space-sm) 0;">懂审美 · 懂工具 · 懂落地</p>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 14px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ 60+ design-* Skill（Airbnb / Linear / Stripe）</li>
+          <li>→ 两阶段设计法（规范先行 · 代码后行）</li>
+          <li>→ Design Token 三层体系</li>
+          <li>→ 5 主题实时切换</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: var(--space-2xl);">
+      <a href="methodology.html" class="btn btn-primary">🎯 深入看三重方法论</a>
+    </div>
+  </div>
+</section>
+
+<!-- 2 档 SOP -->
+<section>
+  <div class="container">
+    <div style="text-align: center; margin-bottom: var(--space-2xl);">
+      <p class="hand">两种调用方式 · 一套骨架</p>
+      <h2 class="section-title" style="margin-top: var(--space-sm);">2 档 SOP · 按场景选</h2>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card" style="border: 2px solid var(--peach); position: relative; padding: var(--space-2xl);">
+        <div style="position: absolute; top: -12px; left: 24px; background: var(--paper); padding: 2px 12px; font-family: var(--font-hand); color: var(--peach); font-size: 18px;">档位 A · 闪电展示</div>
+        <div style="font-size: 36px; margin-bottom: var(--space-md);">⚡</div>
+        <h3>快速展示场景 · 2 分钟</h3>
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: var(--space-md) 0; font-size: 14px;">
+          <span style="color: var(--ink-faint);">时间</span><span><strong>2 分钟</strong></span>
+          <span style="color: var(--ink-faint);">文档</span><span>2-3 份（项目定）</span>
+          <span style="color: var(--ink-faint);">产出</span><span>定位 + 功能 + 技术 + Demo</span>
+          <span style="color: var(--ink-faint);">目的</span><span>60 秒看到能力</span>
+        </div>
+        <p style="font-size: 13px; color: var(--ink-faint); line-height: 1.7;">
+          CEO + 1-2 员工 + 1 专家 · 并发 30 秒产出 · CEO 整合 + Demo 生成。
+        </p>
+      </div>
+
+      <div class="card" style="border: 2px solid var(--sage); position: relative; padding: var(--space-2xl);">
+        <div style="position: absolute; top: -12px; left: 24px; background: var(--paper); padding: 2px 12px; font-family: var(--font-hand); color: var(--sage-dark); font-size: 18px;">档位 B · 标准全套</div>
+        <div style="font-size: 36px; margin-bottom: var(--space-md);">🏢</div>
+        <h3>真做产品 / 工作场景</h3>
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: var(--space-md) 0; font-size: 14px;">
+          <span style="color: var(--ink-faint);">时间</span><span><strong>灵活</strong></span>
+          <span style="color: var(--ink-faint);">文档</span><span>灵活（1 到 33 全套）</span>
+          <span style="color: var(--ink-faint);">标准</span><span>严格 VELA 33 模板</span>
+          <span style="color: var(--ink-faint);">Demo</span><span>大厂设计标准 · 可改</span>
+        </div>
+        <p style="font-size: 13px; color: var(--ink-faint); line-height: 1.7;">
+          CEO + 任意员工 + 任意专家 · 3 总监审查 BLOCKING · CEO 整合 3+3+1。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 核心价值 -->
+<section>
+  <div class="container">
+    <h2 class="squiggle section-title">你会看到什么</h2>
+    <p class="section-subtitle">3 分钟完整体验一人公司怎么运转</p>
+    <div class="grid grid-3">
+      <div class="card animate-in stagger-1">
+        <div style="font-size: 48px; margin-bottom: var(--space-md);">🎬</div>
+        <h3>办公室仿真</h3>
+        <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
+          19 位数字员工在剪纸风办公室工作 · 2 分钟流水线动画 · 可倍速 · 看到项目怎么从需求到交付
+        </p>
+        <a href="office.html" style="color: var(--peach); margin-top: var(--space-md); display: inline-block;">进去看看 →</a>
+      </div>
+      <div class="card animate-in stagger-2">
+        <div style="font-size: 48px; margin-bottom: var(--space-md);">👥</div>
+        <h3>员工名片墙</h3>
+        <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
+          CEO + 3 总监 + 10 执行员工 · 每人独立人格 · 独特职责 · 点开看完整文档
+        </p>
+        <a href="team.html" style="color: var(--peach); margin-top: var(--space-md); display: inline-block;">认识他们 →</a>
+      </div>
+      <div class="card animate-in stagger-3">
+        <div style="font-size: 48px; margin-bottom: var(--space-md);">📂</div>
+        <h3>真实案例库</h3>
+        <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
+          AI 一人公司项目 · 覆盖金融 / 教育 / 电商 · 每个都有 Brief + PRD + Demo
+        </p>
+        <a href="cases.html" style="color: var(--peach); margin-top: var(--space-md); display: inline-block;">看案例 →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 行业 × B/G/C 三端 -->
+<section style="background: var(--paper-light);">
+  <div class="container">
+    <h2 class="squiggle section-title">覆盖领域</h2>
+    <p class="section-subtitle">11 个行业 × B 端 / G 端 / C 端 · 每个都有方法论</p>
+    <div class="grid grid-4">
+      <div class="card">
+        <h4 style="color: var(--peach);">🎓 教育</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">成人考证 · K12 · 素质教育</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 陪练 · 错题诊断 · 个性化学习</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">💰 金融</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">招行 · 蚂蚁 · 度小满</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">智能信贷 · 风控 · 客服</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">🏥 医疗</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">平安好医生 · 春雨</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 辅诊 · 医学咨询</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">📱 短视频</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">抖音 · 快手 · 小红书</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">推荐 · AI 剪辑 · 理解</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">🎬 短剧</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">红果 · 九州 · 番茄</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 剧本 · 生图 · 配音</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">🛍 电商</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">淘宝 · 拼多多 · SHEIN</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 客服 · 推荐 · 选品</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">🏭 制造</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">三一 · 宁德 · 富士康</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 质检 · 预测维护</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">🚗 汽车</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">理想 · 蔚来 · 比亚迪</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">座舱大模型 · 智驾</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">🏛 政企</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">税务 · 公安 · 教育局</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">政务助手 · 合规审查</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">🏡 家装</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">贝壳 · 土巴兔 · 好好住</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 设计 · 效果图 · 报价</p>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--peach);">✍ 内容</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">小红书 · 知乎 · 36氪</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 创作 · 选题 · 分发</p>
+      </div>
+      <div class="card" style="border-color: var(--peach);">
+        <h4 style="color: var(--peach);">💝 情感陪伴 ⭐新</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">星野 · Character.AI · Talkie</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">2025 爆款 · 付费强</p>
+      </div>
+      <div class="card" style="border-color: var(--peach);">
+        <h4 style="color: var(--peach);">🎮 游戏 ⭐新</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">米哈游 · 腾讯 · Roblox</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">AI NPC · 美术 · 配音</p>
+      </div>
+      <div class="card" style="border-color: var(--peach);">
+        <h4 style="color: var(--peach);">🏢 企业 SaaS ⭐新</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">飞书 · 钉钉 · Notion</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">NRR > 110%</p>
+      </div>
+      <div class="card" style="border-color: var(--peach);">
+        <h4 style="color: var(--peach);">🌍 跨境电商 ⭐新</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">SHEIN · TEMU · Amazon</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">出海 · 多语种</p>
+      </div>
+      <div class="card" style="border-color: var(--peach);">
+        <h4 style="color: var(--peach);">🐾 宠物 ⭐新</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">波奇 · 小佩 · Pura</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 问诊 · 新手焦虑</p>
+      </div>
+      <div class="card" style="border-color: var(--peach);">
+        <h4 style="color: var(--peach);">🔮 占卜 ⭐新</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">测测 · Co-Star</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">⚠️ 灰色 · 娱乐定位</p>
+      </div>
+      <div class="card" style="border-color: var(--peach);">
+        <h4 style="color: var(--peach);">🌾 农业 ⭐新</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">极飞 · 大疆农业</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">G + B · 乡村振兴</p>
+      </div>
+      <div class="card" style="border-color: var(--peach);">
+        <h4 style="color: var(--peach);">⚡ 新能源 ⭐新</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">宁德 · 比亚迪 · 隆基</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">双碳 · 储能元年</p>
+      </div>
+      <div class="card" style="border-color: var(--peach);">
+        <h4 style="color: var(--peach);">🏗 数字化项目 ⭐新</h4>
+        <p style="color: var(--ink-faint); font-size: 13px;">埃森哲 · 华为云 · 阿里云</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">大 B · 项目制 · ¥500 万-5 亿</p>
+      </div>
+      <div class="card" style="background: var(--peach); color: white; border: none;">
+        <h4 style="color: white;">+ 你的行业</h4>
+        <p style="color: rgba(255,255,255,0.8); font-size: 13px;">桃子公司通用引擎</p>
+        <p style="margin-top: var(--space-sm); font-size: 14px;">CEO 实时识别 · 不限预设</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 双模式 -->
+<section>
+  <div class="container">
+    <h2 class="squiggle section-title">两种工作模式</h2>
+    <div class="grid grid-2">
+      <div class="card animate-in stagger-1">
+        <div style="font-size: 64px; margin-bottom: var(--space-md);">⚡</div>
+        <h3 style="color: var(--peach);">闪电模式</h3>
+        <p class="hand" style="margin-bottom: var(--space-md);">快速展示 · 2 分钟出三件套</p>
+        <ul style="list-style: none; color: var(--ink-soft); line-height: 2;">
+          <li>✓ Product Brief 800 字</li>
+          <li>✓ Design & Tech Brief 800 字</li>
+          <li>✓ 可交互 Demo（HTML · 5 tab）</li>
+        </ul>
+        <p style="margin-top: var(--space-md); font-size: 14px; color: var(--ink-faint);">
+          触发词：<code style="background: var(--paper-dark); padding: 2px 8px; border-radius: var(--radius-sm);">桃子公司 闪电 · {公司} · {产品}</code>
+        </p>
+      </div>
+      <div class="card animate-in stagger-2">
+        <div style="font-size: 64px; margin-bottom: var(--space-md);">🐢</div>
+        <h3 style="color: var(--sage);">深度模式</h3>
+        <p class="hand" style="margin-bottom: var(--space-md);">工作正式 · 30-60 分钟出 33 份大厂文档</p>
+        <ul style="list-style: none; color: var(--ink-soft); line-height: 2;">
+          <li>✓ VELA 9 板块 PRD（500+ 行）</li>
+          <li>✓ 技术 / 设计 / 数据等 10+ 份文档</li>
+          <li>✓ Figma 原型 + HTML Demo + Mock 后端</li>
+          <li>✓ 3 总监深审 + CEO 冲突仲裁</li>
+        </ul>
+        <p style="margin-top: var(--space-md); font-size: 14px; color: var(--ink-faint);">
+          触发词：<code style="background: var(--paper-dark); padding: 2px 8px; border-radius: var(--radius-sm);">桃子公司 · {公司} · {产品}</code>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Living Agent -->
+<section style="background: var(--paper-light);">
+  <div class="container">
+    <h2 class="squiggle section-title">Living Agent · 员工会成长</h2>
+    <p class="section-subtitle">每个员工都能吃新资料 · 自我复盘 · 迭代人格</p>
+    <div class="grid grid-3">
+      <div class="card animate-in stagger-1">
+        <h4>📚 吃新资料</h4>
+        <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
+          老板上传新文档 · Agent 下次任务自动学习
+        </p>
+      </div>
+      <div class="card animate-in stagger-2">
+        <h4>🔄 自我复盘</h4>
+        <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
+          每次任务后写 retrospect · 记录做得好 / 弱 / 下次改
+        </p>
+      </div>
+      <div class="card animate-in stagger-3">
+        <h4>🧬 人格迭代</h4>
+        <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
+          Agent 提 proposal · 老板审批 · 版本控制更新
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section>
+  <div class="container" style="text-align: center;">
+    <h2 class="section-title">准备好看一场 2 分钟的一人公司运转了吗？</h2>
+    <a href="office.html" class="btn btn-primary" style="font-size: 18px; padding: 16px 40px; margin-top: var(--space-xl);">
+      🎬 进入办公室
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--paper-dark); margin-top: var(--space-3xl);">
+  <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);">
+    <div>
+      <p style="font-family: var(--font-serif); font-size: 18px;">🏢 桃子公司</p>
+      <p style="color: var(--ink-faint); font-size: 14px; margin-top: var(--space-xs);">一个人即一家 AI 产品公司 · v0.3 · 2026</p>
+    </div>
+    <div style="color: var(--ink-faint); font-size: 13px;">
+      <p>本地优先 · 零花钱策略 · 断网可跑</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/theme.js"></script>
+<script src="js/launcher.js"></script>
+</body>
+</html>

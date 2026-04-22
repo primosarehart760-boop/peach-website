@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>桃子公司 · 方法论总览 · Peach Studio Methodology</title>
+  <meta name="description" content="真正的 AI 产品公司 · AI PM + AI 训练师 + UI 设计 三重身份方法论工作台">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/launcher.css">
+  <style>
+    /* Methodology page specific */
+    .page-header {
+      text-align: center;
+      padding: var(--space-4xl) 0 var(--space-2xl);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .page-header .eyebrow {
+      font-family: var(--font-hand);
+      color: var(--peach);
+      font-size: 22px;
+      margin-bottom: var(--space-md);
+    }
+    .page-header h1 {
+      font-size: clamp(40px, 6vw, 64px);
+      margin-bottom: var(--space-md);
+      line-height: 1.1;
+    }
+    .page-header h1 .accent {
+      color: var(--peach);
+      font-style: italic;
+    }
+    .page-header .lead {
+      font-size: 18px;
+      color: var(--ink-soft);
+      line-height: 1.6;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Stats bar · 学 VELA DocForge */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-lg);
+      margin: var(--space-2xl) auto var(--space-3xl);
+      flex-wrap: wrap;
+      max-width: 1200px;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg) var(--space-xl);
+      text-align: center;
+      min-width: 130px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: all 0.3s;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--peach);
+      box-shadow: 0 8px 24px rgba(209,106,78,0.15);
+    }
+    .stat-card .num {
+      font-family: var(--font-serif);
+      font-size: 36px;
+      color: var(--peach);
+      font-weight: 600;
+      line-height: 1;
+    }
+    .stat-card .label {
+      font-size: 12px;
+      color: var(--ink-faint);
+      margin-top: var(--space-xs);
+      letter-spacing: 1px;
+    }
+
+    /* Identity triad · 三重身份 */
+    .identity-triad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-xl);
+      margin: var(--space-3xl) 0;
+    }
+    .identity-card {
+      background: white;
+      border: 2px solid var(--paper-dark);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .identity-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }
+    .identity-card.pm::before { background: linear-gradient(90deg, var(--peach), var(--peach-light)); }
+    .identity-card.trainer::before { background: linear-gradient(90deg, var(--sage), var(--sage-light)); }
+    .identity-card.design::before { background: linear-gradient(90deg, #b38f7a, #d4b89e); }
+    .identity-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--peach);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+    }
+    .identity-card .icon { font-size: 40px; margin-bottom: var(--space-md); }
+    .identity-card h3 {
+      font-size: 22px;
+      margin-bottom: var(--space-sm);
+    }
+    .identity-card .tagline {
+      font-family: var(--font-hand);
+      color: var(--peach);
+      font-size: 18px;
+      margin-bottom: var(--space-md);
+    }
+    .identity-card .meta {
+      font-size: 13px;
+      color: var(--ink-faint);
+      margin-bottom: var(--space-md);
+    }
+    .identity-card ul {
+      list-style: none;
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.8;
+    }
+    .identity-card ul li { padding-left: 16px; position: relative; }
+    .identity-card ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--peach);
+    }
+
+    /* Tab navigation */
+    .tab-nav {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-xs);
+      background: var(--paper-light);
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xs);
+      margin: var(--space-3xl) auto;
+      max-width: fit-content;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--ink-soft);
+      font-family: var(--font-sans);
+      font-weight: 500;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { background: var(--paper-dark); }
+    .tab-btn.active {
+      background: var(--peach);
+      color: white;
+      box-shadow: 0 4px 12px rgba(209,106,78,0.25);
+    }
+
+    /* Tab content */
+    .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Section title */
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-md);
+    }
+    .section-title .num {
+      font-family: var(--font-hand);
+      color: var(--peach);
+      font-size: 28px;
+    }
+    .section-desc {
+      font-size: 15px;
+      color: var(--ink-soft);
+      margin-bottom: var(--space-xl);
+      max-width: 800px;
+      line-height: 1.7;
+    }
+
+    /* Six steps */
+    .six-steps {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: var(--space-md);
+      margin-bottom: var(--space-3xl);
+    }
+    .step-card {
+      background: white;
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      text-align: center;
+      position: relative;
+      transition: all 0.3s;
+    }
+    .step-card:hover {
+      border-color: var(--peach);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+    .step-card .step-num {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: var(--peach);
+      font-style: italic;
+    }
+    .step-card h4 {
+      font-size: 15px;
+      margin: var(--space-sm) 0;
+    }
+    .step-card p {
+      font-size: 12px;
+      color: var(--ink-faint);
+      line-height: 1.5;
+    }
+
+    /* VELA matrix · 学 DocForge 表格 */
+    .vela-matrix {
+      background: white;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--paper-dark);
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      margin-bottom: var(--space-2xl);
+    }
+    .vela-matrix .phase-row {
+      background: linear-gradient(90deg, var(--paper-dark), var(--paper-light));
+      padding: var(--space-md) var(--space-xl);
+      font-family: var(--font-serif);
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--ink);
+      border-bottom: 2px solid var(--paper-dark);
+      border-top: 1px solid var(--paper-dark);
+    }
+    .vela-matrix .phase-row:first-child { border-top: none; }
+    .doc-row {
+      display: grid;
+      grid-template-columns: 0.3fr 2fr 3fr 1fr;
+      gap: var(--space-md);
+      padding: var(--space-md) var(--space-xl);
+      border-bottom: 1px solid var(--paper-light);
+      align-items: center;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    .doc-row:hover { background: var(--paper-light); }
+    .doc-row:last-child { border-bottom: none; }
+    .doc-row .doc-num {
+      font-family: var(--font-serif);
+      color: var(--peach);
+      font-weight: 600;
+    }
+    .doc-row .doc-name {
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .doc-row .doc-desc {
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+    .doc-row .doc-status {
+      text-align: right;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .status-core { background: #fef3e6; color: var(--peach-dark); }
+    .status-support { background: #eaf0e0; color: var(--sage-dark); }
+    .status-extra { background: #f0e5d8; color: #8b6f5a; }
+
+    /* SOP grid */
+    .sop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-lg);
+      margin-bottom: var(--space-2xl);
+    }
+    .sop-card {
+      background: white;
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .sop-card::before {
+      content: attr(data-num);
+      position: absolute;
+      top: -10px;
+      right: 16px;
+      font-family: var(--font-serif);
+      font-size: 72px;
+      color: var(--paper-dark);
+      font-style: italic;
+      line-height: 1;
+      opacity: 0.6;
+    }
+    .sop-card:hover {
+      border-color: var(--sage);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(154,168,137,0.15);
+    }
+    .sop-card h4 {
+      font-size: 17px;
+      margin-bottom: var(--space-sm);
+      position: relative;
+      z-index: 1;
+    }
+    .sop-card p {
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+    .sop-card .sop-tags {
+      margin-top: var(--space-md);
+      display: flex;
+      gap: var(--space-xs);
+      flex-wrap: wrap;
+    }
+    .sop-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      background: var(--paper-light);
+      border: 1px solid var(--paper-dark);
+      border-radius: 10px;
+      color: var(--ink-soft);
+    }
+
+    /* Model matrix */
+    .model-matrix {
+      background: white;
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-2xl);
+    }
+    .model-matrix h4 {
+      font-size: 18px;
+      margin-bottom: var(--space-md);
+    }
+    .model-matrix table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .model-matrix th {
+      text-align: left;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--paper-light);
+      color: var(--ink-soft);
+      font-weight: 600;
+      border-bottom: 2px solid var(--paper-dark);
+    }
+    .model-matrix td {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--paper-light);
+    }
+    .model-matrix tr.allowed td:first-child { color: var(--sage-dark); font-weight: 600; }
+    .model-matrix tr.banned td:first-child { color: var(--peach-dark); font-weight: 600; text-decoration: line-through; }
+    .badge-allow {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      background: #eaf0e0;
+      color: var(--sage-dark);
+    }
+    .badge-ban {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      background: #fde4da;
+      color: var(--peach-dark);
+    }
+    .badge-main {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      background: var(--peach);
+      color: white;
+    }
+
+    /* Design skill grid */
+    .skill-categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-lg);
+      margin-bottom: var(--space-2xl);
+    }
+    .skill-cat {
+      background: white;
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+    }
+    .skill-cat h4 {
+      font-size: 17px;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .skill-cat .count {
+      font-family: var(--font-serif);
+      color: var(--peach);
+      font-size: 14px;
+    }
+    .skill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: var(--space-md);
+    }
+    .skill-chip {
+      font-size: 12px;
+      padding: 4px 10px;
+      background: var(--paper-light);
+      border: 1px solid var(--paper-dark);
+      border-radius: 14px;
+      color: var(--ink-soft);
+      transition: all 0.2s;
+    }
+    .skill-chip:hover {
+      background: var(--peach);
+      color: white;
+      border-color: var(--peach);
+    }
+    .skill-chip.star {
+      background: var(--peach);
+      color: white;
+      border-color: var(--peach);
+    }
+
+    /* Two modes comparison */
+    .modes-comp {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xl);
+      margin-bottom: var(--space-2xl);
+    }
+    .mode-card {
+      background: white;
+      border: 2px solid var(--paper-dark);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      position: relative;
+    }
+    .mode-card.a { border-color: var(--peach); }
+    .mode-card.b { border-color: var(--sage); }
+    .mode-card .mode-label {
+      position: absolute;
+      top: -12px;
+      left: 24px;
+      background: white;
+      padding: 2px 12px;
+      font-family: var(--font-hand);
+      font-size: 18px;
+    }
+    .mode-card.a .mode-label { color: var(--peach); }
+    .mode-card.b .mode-label { color: var(--sage-dark); }
+    .mode-card h3 {
+      font-size: 22px;
+      margin-bottom: var(--space-md);
+    }
+    .mode-card .mode-meta {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-sm) var(--space-md);
+      font-size: 14px;
+      margin-bottom: var(--space-md);
+    }
+    .mode-card .mode-meta dt {
+      color: var(--ink-faint);
+      font-weight: 500;
+    }
+    .mode-card .mode-meta dd {
+      color: var(--ink);
+    }
+
+    /* Workflow diagram */
+    .workflow-strip {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: var(--space-sm);
+      margin-bottom: var(--space-2xl);
+      position: relative;
+    }
+    .workflow-step {
+      background: white;
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      text-align: center;
+      font-size: 12px;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .workflow-step:hover {
+      border-color: var(--peach);
+      transform: translateY(-2px);
+    }
+    .workflow-step .wf-num {
+      font-family: var(--font-serif);
+      color: var(--peach);
+      font-size: 22px;
+      font-style: italic;
+    }
+    .workflow-step h5 {
+      font-size: 13px;
+      margin: 4px 0;
+      font-family: var(--font-sans);
+      font-weight: 600;
+    }
+    .workflow-step p {
+      color: var(--ink-faint);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* CTA footer */
+    .cta-footer {
+      margin-top: var(--space-4xl);
+      padding: var(--space-3xl);
+      background: linear-gradient(135deg, var(--paper-light), var(--paper));
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-xl);
+      text-align: center;
+    }
+    .cta-footer h2 {
+      font-size: 32px;
+      margin-bottom: var(--space-md);
+    }
+    .cta-footer p {
+      font-size: 16px;
+      color: var(--ink-soft);
+      margin-bottom: var(--space-xl);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-actions {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      padding: 14px 32px;
+      background: var(--peach);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+    .btn-primary:hover {
+      background: var(--peach-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(209,106,78,0.3);
+    }
+    .btn-ghost {
+      padding: 14px 32px;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+    .btn-ghost:hover {
+      border-color: var(--peach);
+      color: var(--peach);
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .identity-triad { grid-template-columns: 1fr; }
+      .six-steps { grid-template-columns: repeat(2, 1fr); }
+      .modes-comp { grid-template-columns: 1fr; }
+      .workflow-strip { grid-template-columns: 1fr; }
+      .doc-row { grid-template-columns: 0.3fr 2fr; }
+      .doc-row .doc-desc, .doc-row .doc-status { grid-column: 1 / -1; padding-left: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 导航（跟主站统一） -->
+<nav class="nav">
+  <div class="container nav-content">
+    <a href="index.html" class="nav-logo"><span class="emoji">🍑</span>桃子公司</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">首页</a>
+      <a href="methodology.html" class="nav-link active">🎯 方法论</a>
+      <a href="office.html" class="nav-link">🎬 办公室</a>
+      <a href="team.html" class="nav-link">👥 团队</a>
+      <a href="cases.html" class="nav-link">📂 案例</a>
+      <a href="docs.html" class="nav-link">📖 文档</a>
+    </div>
+  </div>
+</nav>
+
+<!-- 页面头 -->
+<section>
+  <div class="container wide">
+    <div class="page-header">
+      <p class="eyebrow">一人公司 · 真 AI 产品公司</p>
+      <h1>桃子公司 <span class="accent">方法论</span> 总览</h1>
+      <p class="lead">
+        我们不是"做 AI 的一个人"· 是一家真正运作的 AI 产品公司 ——
+        <strong>AI 产品经理</strong> · <strong>AI 训练师</strong> · <strong>UI 设计专家</strong> 三重身份 ·
+        六步分析 + VELA 33 模板 + 10 SOP + 60 设计技能 · 构成一人即公司的全套工作流。
+      </p>
+    </div>
+
+    <!-- 统计数字 -->
+    <div class="stats-bar">
+      <div class="stat-card"><div class="num">19</div><div class="label">AI 员工</div></div>
+      <div class="stat-card"><div class="num">20</div><div class="label">行业专家</div></div>
+      <div class="stat-card"><div class="num">33</div><div class="label">VELA 模板</div></div>
+      <div class="stat-card"><div class="num">27</div><div class="label">支撑模板</div></div>
+      <div class="stat-card"><div class="num">10</div><div class="label">训练师 SOP</div></div>
+      <div class="stat-card"><div class="num">60+</div><div class="label">UI 设计 Skill</div></div>
+      <div class="stat-card"><div class="num">2</div><div class="label">SOP 档位</div></div>
+    </div>
+
+    <!-- 三重身份 -->
+    <div class="identity-triad">
+      <div class="identity-card pm">
+        <div class="icon">🧑‍🎤</div>
+        <h3>AI 产品经理</h3>
+        <div class="tagline">懂业务 · 懂用户 · 懂方法</div>
+        <div class="meta">6 年 AI PM · AI 一人公司项目沉淀</div>
+        <ul>
+          <li>六步分析铁律（画像到具体人）</li>
+          <li>VELA 33 大厂级模板</li>
+          <li>PRD 15 板块（超越 VELA 9）</li>
+          <li>3 总监审查 · BLOCKING 清单</li>
+          <li>产品全生命周期 SOP</li>
+        </ul>
+      </div>
+      <div class="identity-card trainer">
+        <div class="icon">🎯</div>
+        <h3>AI 训练师</h3>
+        <div class="tagline">懂模型 · 懂评测 · 懂调优</div>
+        <div class="meta">10 大 SOP · 从选型到备案全链路</div>
+        <ul>
+          <li>模型选型 5 维矩阵（境内合规）</li>
+          <li>评测集 500 × 5 × 3 分布</li>
+          <li>Prompt 工程 6 层设计</li>
+          <li>LoRA 微调 + DPO 偏好</li>
+          <li>数据飞轮 + 降级策略</li>
+        </ul>
+      </div>
+      <div class="identity-card design">
+        <div class="icon">🎨</div>
+        <h3>UI 设计专家</h3>
+        <div class="tagline">懂审美 · 懂工具 · 懂落地</div>
+        <div class="meta">60+ design-* Skill · Editorial → 大厂风</div>
+        <ul>
+          <li>Airbnb / Linear / Stripe / Pinterest 风</li>
+          <li>两阶段设计法（规范先行 · 代码后行）</li>
+          <li>Design Token 三层体系</li>
+          <li>5 主题实时切换</li>
+          <li>Figma 原型 + 切图规范</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Tab 切换 -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="pm">🧑‍🎤 AI 产品经理方法论</button>
+      <button class="tab-btn" data-tab="trainer">🎯 AI 训练师 10 SOP</button>
+      <button class="tab-btn" data-tab="design">🎨 UI 设计 60 Skill</button>
+      <button class="tab-btn" data-tab="company">🏢 一人公司运作</button>
+    </div>
+
+    <!-- Tab 1 · AI PM -->
+    <div class="tab-content active" id="tab-pm">
+
+      <h2 class="section-title"><span class="num">01</span>六步分析铁律</h2>
+      <p class="section-desc">
+        任何"做一个产品"的需求 · 必须按顺序完成这六步 · 不是 ABC 选择菜单 · 是强制顺序。一人公司沉淀的方法论 —— 跳过任一步 · 后面的方案都是空中楼阁。
+      </p>
+      <div class="six-steps">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <h4>用户画像</h4>
+          <p>具体到一个人 · 林小雨 28 岁上海 4A · 不是"25-35 白领"标签</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <h4>核心定位</h4>
+          <p>一句话 + "不是什么"清单 · 跟错位竞品划清界限</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <h4>北极星指标</h4>
+          <p>3 候选选 1 · 辅助 3 维（健康 / 深度 / 商业）</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">04</div>
+          <h4>数据获取</h4>
+          <p>4 层（冷启动 / MVP / 增长 / 规模）+ 合规</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">05</div>
+          <h4>竞品深扫</h4>
+          <p>8 家 × 5 维 · 找"真空带"</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">06</div>
+          <h4>壁垒推导</h4>
+          <p>差异化 3 条 + 壁垒 3 层 + 优势 5 条</p>
+        </div>
+      </div>
+
+      <h2 class="section-title"><span class="num">02</span>VELA 33 模板矩阵</h2>
+      <p class="section-desc">
+        字节阿里大厂级 AI 产品文档标准 · 按产品 6 阶段分布 · 每份都有严格 Role + Context + Output Format + Constraints · 可以比模板更好 · 不能比模板差。
+      </p>
+      <div class="vela-matrix">
+        <div class="phase-row">📊 P1 · 市场洞察与立项（5 份）</div>
+        <div class="doc-row"><div class="doc-num">01</div><div class="doc-name">市场数据报告</div><div class="doc-desc">艾瑞 / QuestMobile / IDC · TAM-SAM-SOM</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">02</div><div class="doc-name">竞品深度体验报告</div><div class="doc-desc">8 家真实注册跑 10 场景 · 优点 + 借鉴</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">03</div><div class="doc-name">商业计划书 BP</div><div class="doc-desc">3 年里程碑 + 单位经济 + 融资计划</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">04</div><div class="doc-name">项目立项报告</div><div class="doc-desc">可行性评审决议 · 多方签字</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">05</div><div class="doc-name">SWOT 分析</div><div class="doc-desc">4 象限 + 4 对角策略</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+
+        <div class="phase-row">👥 P2 · 用户研究与洞察（5 份）</div>
+        <div class="doc-row"><div class="doc-num">06</div><div class="doc-name">用户调研报告</div><div class="doc-desc">定量 + 定性 · 样本量 + 置信度</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">07</div><div class="doc-name">用户画像文档</div><div class="doc-desc">3 层用户模型 + JTBD + 画像-功能映射</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">08</div><div class="doc-name">问卷设计与数据报告</div><div class="doc-desc">KANO / RFM / 样本代表性</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">09</div><div class="doc-name">用户访谈记录</div><div class="doc-desc">50 人访谈设计 + 10 问模板 + 金句库</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">10</div><div class="doc-name">用户旅程地图</div><div class="doc-desc">30 天完整旅程 + 触点 + 情绪 + 埋点</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+
+        <div class="phase-row">📐 P3 · 产品规划与设计（5 份）</div>
+        <div class="doc-row"><div class="doc-num">11</div><div class="doc-name">PRD 产品需求文档 ⭐</div><div class="doc-desc">9 章 + 交互逻辑表 + 边界异常矩阵 + 反指标</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">12</div><div class="doc-name">产品路线图</div><div class="doc-desc">MVP / V1 / V2 + RICE 优先级</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">13</div><div class="doc-name">功能清单 FeatureList</div><div class="doc-desc">一级 / 二级 / 描述 · 30+ 条</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">14</div><div class="doc-name">信息架构图 IA</div><div class="doc-desc">页面地图 · 导航结构</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">15</div><div class="doc-name">业务流程图</div><div class="doc-desc">横向 + 泳道 + 4 色分区</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+
+        <div class="phase-row">🎨 P4 · 设计与体验（4 份）</div>
+        <div class="doc-row"><div class="doc-num">16</div><div class="doc-name">数据指标体系</div><div class="doc-desc">北极星 + 反指标 + 埋点清单</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">17</div><div class="doc-name">交互原型文档</div><div class="doc-desc">Figma / Excalidraw · 8+ 页原型</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">18</div><div class="doc-name">UI 设计规范 DesignSystem</div><div class="doc-desc">Token 三层 + 组件库 + Variants</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">19</div><div class="doc-name">设计走查清单</div><div class="doc-desc">视觉一致性三方对齐（Figma ↔ Token ↔ 代码）</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+
+        <div class="phase-row">🛠 P5 · 技术开发与测试（6 份）</div>
+        <div class="doc-row"><div class="doc-num">20</div><div class="doc-name">技术报告</div><div class="doc-desc">架构图 4 层 + POC + 成本估算</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">21</div><div class="doc-name">模型选型评估 ⭐</div><div class="doc-desc">5 维决策 + 禁用清单 + 场景映射</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">22</div><div class="doc-name">API 接口文档</div><div class="doc-desc">RESTful + SSE 流式 + 错误码</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">23</div><div class="doc-name">数据库设计</div><div class="doc-desc">PG + Redis + Milvus + ClickHouse 4 存储</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">24</div><div class="doc-name">埋点需求文档</div><div class="doc-desc">核心 25+ 事件 · AARRR 漏斗</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">25</div><div class="doc-name">测试用例文档</div><div class="doc-desc">功能 / 性能 / 安全 / AI 四维</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+
+        <div class="phase-row">🚀 P6 · 上线运营与迭代（8 份）</div>
+        <div class="doc-row"><div class="doc-num">26</div><div class="doc-name">产品使用手册</div><div class="doc-desc">给客户 / 用户 / CSM</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">27</div><div class="doc-name">上线 Checklist ⭐</div><div class="doc-desc">28 项 · 功能 / 性能 / 安全 / AI / 合规 / 运维</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">28</div><div class="doc-name">商业化与定价方案</div><div class="doc-desc">订阅 / 买断 / 混合 · 价格锚点</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">29</div><div class="doc-name">运营策略文档</div><div class="doc-desc">冷启动 + 增长 + 内容日历 + 活动 SOP</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">30</div><div class="doc-name">ASO 应用商店材料</div><div class="doc-desc">标题 + 副标题 + 关键词 + 截图 5 张</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">31</div><div class="doc-name">项目汇报复盘</div><div class="doc-desc">给领导看 · 政绩 + 安全 + 创新</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">32</div><div class="doc-name">AI 合规与隐私 ⭐</div><div class="doc-desc">个保法 + 算法备案 + 生成式 AI 办法</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">33</div><div class="doc-name">数据分析周月报</div><div class="doc-desc">北极星 + 3 看板 + Badcase 归因</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+      </div>
+
+      <h2 class="section-title"><span class="num">03</span>PRD 15 板块 · 超越 VELA 9 章</h2>
+      <p class="section-desc">
+        VELA 11_PRD 标准 9 章 · 桃子公司在此基础上自加 6 板块 · 针对 AI 产品的特殊需要。15 板块不是灌水 · 每一项都经过一人公司项目验证 · 任何一层追问都兜得住。
+      </p>
+
+      <div class="vela-matrix">
+        <div class="phase-row">📋 PRD 15 板块 · 按实际写作顺序</div>
+        <div class="doc-row"><div class="doc-num">01</div><div class="doc-name">文档信息 + 三阶段评审框架</div><div class="doc-desc">Kickoff → 业务/技术/设计 Review → 终审</div><div class="doc-status"><span class="status-badge status-core">VELA</span></div></div>
+        <div class="doc-row"><div class="doc-num">02</div><div class="doc-name">产品定位</div><div class="doc-desc">一句话公式 + JTBD</div><div class="doc-status"><span class="status-badge status-core">VELA</span></div></div>
+        <div class="doc-row"><div class="doc-num">03</div><div class="doc-name">北极星指标体系</div><div class="doc-desc">北极星 + 一级驱动 + 反指标 Counter-metrics</div><div class="doc-status"><span class="status-badge status-core">VELA</span></div></div>
+        <div class="doc-row"><div class="doc-num">04</div><div class="doc-name">SWOT 分析</div><div class="doc-desc">4 象限 + 4 对角策略（SO / ST / WO / WT）</div><div class="doc-status"><span class="status-badge status-extra">桃子</span></div></div>
+        <div class="doc-row"><div class="doc-num">05</div><div class="doc-name">使用场景</div><div class="doc-desc">STAR 3 场景 + Mermaid 流程图</div><div class="doc-status"><span class="status-badge status-core">VELA</span></div></div>
+        <div class="doc-row"><div class="doc-num">06</div><div class="doc-name">用户决策路径</div><div class="doc-desc">DAY -30 → DAY 0 · 7 步决策</div><div class="doc-status"><span class="status-badge status-extra">桃子</span></div></div>
+        <div class="doc-row"><div class="doc-num">07</div><div class="doc-name">核心路径总结</div><div class="doc-desc">6 条黄金路径 · 新人/订阅/深度/续费/召回/危机</div><div class="doc-status"><span class="status-badge status-extra">桃子</span></div></div>
+        <div class="doc-row"><div class="doc-num">08</div><div class="doc-name">功能需求</div><div class="doc-desc">交互逻辑表 + 边界异常矩阵 6 种</div><div class="doc-status"><span class="status-badge status-core">VELA</span></div></div>
+        <div class="doc-row"><div class="doc-num">09</div><div class="doc-name">需求拆解表（含字段）</div><div class="doc-desc">每需求对应的数据字段 + API + Owner</div><div class="doc-status"><span class="status-badge status-extra">桃子</span></div></div>
+        <div class="doc-row"><div class="doc-num">10</div><div class="doc-name">页面地图</div><div class="doc-desc">C 端 + B 端全部页面清单</div><div class="doc-status"><span class="status-badge status-extra">桃子</span></div></div>
+        <div class="doc-row"><div class="doc-num">11</div><div class="doc-name">非功能需求</div><div class="doc-desc">性能 / 安全 / 兼容 / 无障碍 / 可用性 量化</div><div class="doc-status"><span class="status-badge status-core">VELA</span></div></div>
+        <div class="doc-row"><div class="doc-num">12</div><div class="doc-name">产品线协同</div><div class="doc-desc">多产品线如何联动 · 数据飞轮 · 资源分配</div><div class="doc-status"><span class="status-badge status-extra">桃子</span></div></div>
+        <div class="doc-row"><div class="doc-num">13</div><div class="doc-name">版本规划与变更日志</div><div class="doc-desc">MVP / V1 / V2 · 每版北极星目标</div><div class="doc-status"><span class="status-badge status-core">VELA</span></div></div>
+        <div class="doc-row"><div class="doc-num">14</div><div class="doc-name">反指标监控方案</div><div class="doc-desc">监控方式 + 报警阈值 + 响应 SOP</div><div class="doc-status"><span class="status-badge status-core">VELA</span></div></div>
+        <div class="doc-row"><div class="doc-num">15</div><div class="doc-name">开放问题与待决策</div><div class="doc-desc">影响范围 + 决策人 + 截止日</div><div class="doc-status"><span class="status-badge status-core">VELA</span></div></div>
+      </div>
+    </div>
+
+    <!-- Tab 2 · AI 训练师 -->
+    <div class="tab-content" id="tab-trainer">
+
+      <h2 class="section-title"><span class="num">01</span>AI 训练师 10 大 SOP</h2>
+      <p class="section-desc">
+        这不是"懂点 AI 术语"· 是从模型选型到备案上线的全链路方法论。每个 SOP 都有精确数字和可执行动作 · 不是 PPT 空话。
+      </p>
+
+      <div class="sop-grid">
+        <div class="sop-card" data-num="01">
+          <h4>🎯 模型选型</h4>
+          <p>5 维决策矩阵（合规 / 中文 / 场景 / 成本 / 延迟）· 3 链路（主 / 备用 / 降级）· 场景映射 6 类任务。</p>
+          <div class="sop-tags"><span class="sop-tag">Qwen Max 主</span><span class="sop-tag">豆包 Pro 备</span><span class="sop-tag">DeepSeek V3 降</span></div>
+        </div>
+        <div class="sop-card" data-num="02">
+          <h4>📏 评测集设计</h4>
+          <p>500 条起步 · 5 大类 × 每类 100 · 3 分布（40 通过 / 30 边界 / 30 拒绝）· 合规 100% 硬门槛。</p>
+          <div class="sop-tags"><span class="sop-tag">专业</span><span class="sop-tag">情感</span><span class="sop-tag">穿帮</span><span class="sop-tag">合规</span><span class="sop-tag">记忆</span></div>
+        </div>
+        <div class="sop-card" data-num="03">
+          <h4>🔬 评测方法</h4>
+          <p>LLM-as-Judge（自动周度）+ 人工精标（周 50 条）+ Promptfoo A/B（上线前必跑）· 不同模型自评避偏袒。</p>
+          <div class="sop-tags"><span class="sop-tag">穿帮率 &lt; 0.5%</span><span class="sop-tag">幻觉率 &lt; 5%</span></div>
+        </div>
+        <div class="sop-card" data-num="04">
+          <h4>✍️ Prompt 工程</h4>
+          <p>三层结构（Meta / System / User）+ 6 层设计（Role / Context / Task / Constraints / Examples / Output）+ 反引导话术库。</p>
+          <div class="sop-tags"><span class="sop-tag">Few-shot</span><span class="sop-tag">禁词拦截</span><span class="sop-tag">反破防</span></div>
+        </div>
+        <div class="sop-card" data-num="05">
+          <h4>🔧 模型调优</h4>
+          <p>Badcase 飞轮（周度）+ SFT 微调（10k 数据）+ DPO 偏好对齐（1k pair）+ LoRA 行业专属（500 案例训练 2 周）。</p>
+          <div class="sop-tags"><span class="sop-tag">A100 × 1</span><span class="sop-tag">月度迭代</span></div>
+        </div>
+        <div class="sop-card" data-num="06">
+          <h4>🔁 数据飞轮</h4>
+          <p>5 环（用户对话 → 每日摘要 → 人工标注 → 训练数据 → 上线验证）· 越用越聪明 · 竞品追赶成本指数级。</p>
+          <div class="sop-tags"><span class="sop-tag">M1 · 85%</span><span class="sop-tag">M12 · 95%</span></div>
+        </div>
+        <div class="sop-card" data-num="07">
+          <h4>🛡 降级策略</h4>
+          <p>主链挂 → 备用 → 降级 → 兜底话术 · 切换 &lt; 30 秒 · 健康检查每 10 秒 · 用户无感。</p>
+          <div class="sop-tags"><span class="sop-tag">错误率 &gt; 5%</span><span class="sop-tag">延迟 &gt; 10s</span></div>
+        </div>
+        <div class="sop-card" data-num="08">
+          <h4>🚨 内容安全</h4>
+          <p>3 层防御（正则 10ms + AI 盾 300ms + 人工抽检 10%）· 心理危机硬编码拦截 · Prompt 注入 3 类防御。</p>
+          <div class="sop-tags"><span class="sop-tag">涉黄 100%</span><span class="sop-tag">涉政 100%</span><span class="sop-tag">危机 100%</span></div>
+        </div>
+        <div class="sop-card" data-num="09">
+          <h4>📋 算法备案</h4>
+          <p>Day 1 启动（3 月流程）· 6 份必备材料 · 工信部审核 · 备案号公示规范。</p>
+          <div class="sop-tags"><span class="sop-tag">T-90 启动</span><span class="sop-tag">代理 ¥30k</span></div>
+        </div>
+        <div class="sop-card" data-num="10">
+          <h4>🧠 RAG 知识库</h4>
+          <p>分层（4-6 库）+ bge-m3 嵌入 + Milvus 向量 + Rerank 精排 · 命中率 &gt; 85% · P95 &lt; 3s。</p>
+          <div class="sop-tags"><span class="sop-tag">chunk 500 字</span><span class="sop-tag">重叠 50</span></div>
+        </div>
+      </div>
+
+      <h2 class="section-title"><span class="num">02</span>模型选型决策表</h2>
+      <p class="section-desc">
+        桃子公司选型铁律：<strong>境外全系禁用（GPT / Claude / Gemini / Llama）</strong>· 合规是死线不是选项 · 所有对外服务必走境内备案模型。
+      </p>
+
+      <div class="model-matrix">
+        <h4>✅ 允许使用（境内合规）</h4>
+        <table>
+          <thead>
+            <tr><th>模型</th><th>厂商</th><th>场景</th><th>优势</th><th>定位</th></tr>
+          </thead>
+          <tbody>
+            <tr class="allowed">
+              <td>Qwen Max</td><td>阿里百炼</td><td>对话主链 · 内容生成</td><td>中文 9/10 · 家装专业 8/10</td><td><span class="badge-main">主选</span></td>
+            </tr>
+            <tr class="allowed">
+              <td>豆包 Pro</td><td>字节火山</td><td>对话备用 · 降低成本</td><td>中文 9/10 · 成本 ¥8/M</td><td><span class="badge-allow">备用</span></td>
+            </tr>
+            <tr class="allowed">
+              <td>DeepSeek V3</td><td>深度求索</td><td>降级链路 · 兜底</td><td>成本 ¥2/M · 稳定</td><td><span class="badge-allow">降级</span></td>
+            </tr>
+            <tr class="allowed">
+              <td>Qwen 7B</td><td>阿里</td><td>意图分类 · 小模型</td><td>自部署 · 低成本</td><td><span class="badge-allow">辅助</span></td>
+            </tr>
+            <tr class="allowed">
+              <td>bge-m3</td><td>BAAI 开源</td><td>RAG 向量嵌入</td><td>中文强 · 开源免费</td><td><span class="badge-allow">基础</span></td>
+            </tr>
+            <tr class="allowed">
+              <td>SD XL + LoRA</td><td>Stability AI 开源</td><td>文生图 · 行业专属</td><td>可训 LoRA · 自部署</td><td><span class="badge-allow">专业</span></td>
+            </tr>
+            <tr class="allowed">
+              <td>阿里云 AI 盾</td><td>阿里云</td><td>内容安全</td><td>专业机构背书</td><td><span class="badge-allow">必备</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="model-matrix">
+        <h4>❌ 禁用清单（合规死线）</h4>
+        <table>
+          <thead>
+            <tr><th>模型</th><th>厂商</th><th>禁用理由</th><th>违规代价</th></tr>
+          </thead>
+          <tbody>
+            <tr class="banned"><td>GPT-4o / GPT-5</td><td>OpenAI · 海外</td><td>算法备案不过 · 数据出境</td><td><span class="badge-ban">罚 ¥100-1000 万</span></td></tr>
+            <tr class="banned"><td>Claude Sonnet / Opus</td><td>Anthropic · 海外</td><td>合规同上</td><td><span class="badge-ban">产品下架</span></td></tr>
+            <tr class="banned"><td>Gemini 全系</td><td>Google · 海外</td><td>合规同上</td><td><span class="badge-ban">公司被约谈</span></td></tr>
+            <tr class="banned"><td>Llama 全系</td><td>Meta · 开源无备案</td><td>自用可 · 对外不行</td><td><span class="badge-ban">监管风险</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="section-title"><span class="num">03</span>评测集设计 · 500 × 5 × 3</h2>
+      <p class="section-desc">
+        评测集是模型上线前的硬门槛 · 不是走过场 · 是真一条条人工标注 + LLM 评测。合规类必须 100% · 不达线不上线。
+      </p>
+
+      <div class="vela-matrix">
+        <div class="phase-row">📦 500 条评测集 · 5 大类 × 100 条</div>
+        <div class="doc-row"><div class="doc-num">类 1</div><div class="doc-name">家装专业问答（100）</div><div class="doc-desc">报价 20 + 工艺 20 + 材料 20 + 流程 20 + 风格 20 · 数字不错 + 引用真实案例 + 不油腻</div><div class="doc-status"><span class="status-badge status-core">&gt; 90%</span></div></div>
+        <div class="doc-row"><div class="doc-num">类 2</div><div class="doc-name">情感关怀 / 信任建立（100）</div><div class="doc-desc">焦虑安抚 30 + 夫妻决策 20 + 预算纠结 20 + 时间紧迫 15 + 公婆同住 15 · 共情 + 不销售腔</div><div class="doc-status"><span class="status-badge status-core">&gt; 85%</span></div></div>
+        <div class="doc-row"><div class="doc-num">类 3</div><div class="doc-name">穿帮测试（100）</div><div class="doc-desc">AI 身份 30 + 工具请求 30 + 替代专业 20 + 系统信息 20 · 坦诚 AI 管家 · 不装人 · 不破防</div><div class="doc-status"><span class="status-badge status-core">&gt; 99%</span></div></div>
+        <div class="doc-row"><div class="doc-num">类 4</div><div class="doc-name">合规红线（100）</div><div class="doc-desc">涉黄 30 + 涉政 20 + 心理危机 20 + 禁词诱导 15 + 非厦门 15 · 100% 拦截率 · 不可漏</div><div class="doc-status"><span class="status-badge status-core">100%</span></div></div>
+        <div class="doc-row"><div class="doc-num">类 5</div><div class="doc-name">长时记忆（100）</div><div class="doc-desc">2 天内 40 + 7 天内 30 + 跨月 20 + 一致性 10 · 命中率 + 不编造</div><div class="doc-status"><span class="status-badge status-core">&gt; 85%</span></div></div>
+      </div>
+
+      <div class="vela-matrix">
+        <div class="phase-row">🎲 3 分布 · 40 / 30 / 30</div>
+        <div class="doc-row"><div class="doc-num">📗</div><div class="doc-name">明确通过（40%）</div><div class="doc-desc">200 条 · AI 必须答对 · 是产品核心体验</div><div class="doc-status"><span class="status-badge status-support">必过</span></div></div>
+        <div class="doc-row"><div class="doc-num">📙</div><div class="doc-name">边界场景（30%）</div><div class="doc-desc">150 条 · 灰色地带 · 考察鲁棒性</div><div class="doc-status"><span class="status-badge status-support">容忍</span></div></div>
+        <div class="doc-row"><div class="doc-num">📕</div><div class="doc-name">明确拒绝（30%）</div><div class="doc-desc">150 条 · 穿帮 / 涉黄 / 危机 / 工具 · 必须拒</div><div class="doc-status"><span class="status-badge status-core">必拒</span></div></div>
+      </div>
+
+    </div>
+
+    <!-- Tab 3 · UI 设计 -->
+    <div class="tab-content" id="tab-design">
+      <h2 class="section-title"><span class="num">01</span>60+ UI 设计 Skill · 按行业匹配</h2>
+      <p class="section-desc">
+        每个 Skill 对应一家真实大厂的设计系统规范 —— 色板、字体、间距、组件、动效、交互原则都有精确参数。触发方式：对话中说"参考 Airbnb 风做一个页面"· Claude 自动调用 design-airbnb Skill 执行。
+      </p>
+
+      <div class="skill-categories">
+        <div class="skill-cat">
+          <h4>⭐ 首选工作流 <span class="count">1</span></h4>
+          <div class="skill-list">
+            <span class="skill-chip star">两阶段设计法</span>
+          </div>
+          <p style="font-size:12px; color:var(--ink-faint); margin-top:var(--space-md); line-height:1.6;">
+            Stage 1 先出完整 DESIGN.md 规范（色板 / 字体 / 组件 / 动效）· Stage 2 才写 index.html 实现。规范过审再写代码 · 从根上避免返工。
+          </p>
+        </div>
+        <div class="skill-cat">
+          <h4>🤖 AI / 大模型 <span class="count">14</span></h4>
+          <div class="skill-list">
+            <span class="skill-chip">Claude</span><span class="skill-chip">MiniMax</span><span class="skill-chip">Cohere</span><span class="skill-chip">Mistral</span><span class="skill-chip">xAI</span><span class="skill-chip">Replicate</span><span class="skill-chip">Together</span><span class="skill-chip">Runway</span><span class="skill-chip">ElevenLabs</span><span class="skill-chip">Ollama</span><span class="skill-chip">VoltAgent</span><span class="skill-chip">Lovable</span><span class="skill-chip">Composio</span><span class="skill-chip">OpenCode</span>
+          </div>
+        </div>
+        <div class="skill-cat">
+          <h4>💻 开发者 / 科技 <span class="count">13</span></h4>
+          <div class="skill-list">
+            <span class="skill-chip">Linear</span><span class="skill-chip">Notion</span><span class="skill-chip">Figma</span><span class="skill-chip">Framer</span><span class="skill-chip">Cursor</span><span class="skill-chip">Vercel</span><span class="skill-chip">Supabase</span><span class="skill-chip">PostHog</span><span class="skill-chip">Sentry</span><span class="skill-chip">Raycast</span><span class="skill-chip">Warp</span><span class="skill-chip">Mintlify</span><span class="skill-chip">Webflow</span>
+          </div>
+        </div>
+        <div class="skill-cat">
+          <h4>💳 金融 / SaaS <span class="count">11</span></h4>
+          <div class="skill-list">
+            <span class="skill-chip">Stripe</span><span class="skill-chip">Revolut</span><span class="skill-chip">Wise</span><span class="skill-chip">Coinbase</span><span class="skill-chip">Kraken</span><span class="skill-chip">Airtable</span><span class="skill-chip">Cal.com</span><span class="skill-chip">Miro</span><span class="skill-chip">Intercom</span><span class="skill-chip">Resend</span><span class="skill-chip">Zapier</span>
+          </div>
+        </div>
+        <div class="skill-cat">
+          <h4>🏢 企业 / 基础设施 <span class="count">8</span></h4>
+          <div class="skill-list">
+            <span class="skill-chip">Apple</span><span class="skill-chip">NVIDIA</span><span class="skill-chip">IBM</span><span class="skill-chip">HashiCorp</span><span class="skill-chip">MongoDB</span><span class="skill-chip">ClickHouse</span><span class="skill-chip">Clay</span><span class="skill-chip">Sanity</span>
+          </div>
+        </div>
+        <div class="skill-cat">
+          <h4>🌐 互联网 / 生活 <span class="count">6</span></h4>
+          <div class="skill-list">
+            <span class="skill-chip">Airbnb</span><span class="skill-chip">Spotify</span><span class="skill-chip">Pinterest</span><span class="skill-chip">Uber</span><span class="skill-chip">SpaceX</span><span class="skill-chip">Superhuman</span>
+          </div>
+        </div>
+        <div class="skill-cat">
+          <h4>🚗 豪华汽车 <span class="count">5</span></h4>
+          <div class="skill-list">
+            <span class="skill-chip">Tesla</span><span class="skill-chip">BMW</span><span class="skill-chip">Ferrari</span><span class="skill-chip">Lamborghini</span><span class="skill-chip">Renault</span>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-title"><span class="num">02</span>Design Token · 三层体系</h2>
+      <p class="section-desc">
+        设计 → 代码的真相源。Figma Variables ↔ tokens.json ↔ tailwind.config.ts 三方对齐 · 改一个色板全链路同步 · 前端不再手抠代码。
+      </p>
+
+      <div class="vela-matrix">
+        <div class="phase-row">🎨 Token 三层架构</div>
+        <div class="doc-row"><div class="doc-num">L1</div><div class="doc-name">Global · 基础原子</div><div class="doc-desc">color/primary/50-900 · spacing/xs-3xl · radius/sm-xl · font/family-size-weight</div><div class="doc-status"><span class="status-badge status-core">基础</span></div></div>
+        <div class="doc-row"><div class="doc-num">L2</div><div class="doc-name">Semantic · 语义绑定</div><div class="doc-desc">bg-primary → {primary.500} · text-primary → {primary.900} · cta / border · 可复用</div><div class="doc-status"><span class="status-badge status-support">语义</span></div></div>
+        <div class="doc-row"><div class="doc-num">L3</div><div class="doc-name">Component · 组件绑定</div><div class="doc-desc">bubble-user-bg → {cta} · button-primary-bg → {cta} · 组件级精细控制</div><div class="doc-status"><span class="status-badge status-extra">组件</span></div></div>
+      </div>
+
+      <h2 class="section-title"><span class="num">03</span>5 主题一键切换</h2>
+      <p class="section-desc">
+        同一套内容骨架 · 切换主题风格即可适配不同行业。跟客户说"你们做金融的 · 一键切 Stripe 风"· 当场演示。
+      </p>
+
+      <div class="skill-categories">
+        <div class="skill-cat">
+          <h4>🍑 Editorial Peach <span class="count">主</span></h4>
+          <p style="font-size:13px; color:var(--ink-soft);">桃子公司本站风 · Paper/Peach/Sage 色板 + Instrument Serif · 文艺温暖</p>
+        </div>
+        <div class="skill-cat">
+          <h4>🏠 Airbnb 都市温暖 <span class="count">辅</span></h4>
+          <p style="font-size:13px; color:var(--ink-soft);">Rausch Red + 白底 + 三层卡片阴影 · 适合生活服务 / 家装 / 餐饮</p>
+        </div>
+        <div class="skill-cat">
+          <h4>⚡ Linear 效率冷冽 <span class="count">辅</span></h4>
+          <p style="font-size:13px; color:var(--ink-soft);">深色 + 高饱和紫 + 几何感 · 适合 B 端工具 / 技术型产品</p>
+        </div>
+        <div class="skill-cat">
+          <h4>📌 Pinterest 暖色拼贴 <span class="count">辅</span></h4>
+          <p style="font-size:13px; color:var(--ink-soft);">Pinterest Red + 暖灰 + 大圆角 + 瀑布流 · 适合内容 / UGC</p>
+        </div>
+        <div class="skill-cat">
+          <h4>💳 Stripe 金融专业 <span class="count">辅</span></h4>
+          <p style="font-size:13px; color:var(--ink-soft);">精致紫 + 白底 + 渐变高光 · 适合金融 / SaaS / 支付</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tab 4 · 一人公司运作 -->
+    <div class="tab-content" id="tab-company">
+
+      <h2 class="section-title"><span class="num">01</span>2 档 SOP · 不是 4 档</h2>
+      <p class="section-desc">
+        桃子公司只有 2 档 · 不是以前 4 档那么复杂。骨架通用 · 调用深度不同。两档都走六步分析铁律 · 区别只在深度。
+      </p>
+
+      <div class="modes-comp">
+        <div class="mode-card a">
+          <span class="mode-label">档位 A · 闪电展示</span>
+          <h3>⚡ 快速展示场景 · 2 分钟</h3>
+          <dl class="mode-meta">
+            <dt>时间</dt><dd><strong>2 分钟</strong></dd>
+            <dt>文档数</dt><dd>2-3 份（项目定）</dd>
+            <dt>内容</dt><dd>产品定位 + 核心功能 + 技术方案 + Demo</dd>
+            <dt>Demo</dt><dd>可跑 · 真图真功能</dd>
+            <dt>目的</dt><dd>60 秒让对方看到能力</dd>
+          </dl>
+          <p style="font-size:13px; color:var(--ink-faint); line-height:1.7;">
+            典型调用：CEO + 1-2 员工（PM + 前端）+ 1 行业专家 · 并发 30 秒产出 · CEO 整合 + Demo 生成。
+          </p>
+        </div>
+        <div class="mode-card b">
+          <span class="mode-label">档位 B · 标准全套</span>
+          <h3>🏢 真做产品 / 工作场景</h3>
+          <dl class="mode-meta">
+            <dt>时间</dt><dd><strong>灵活</strong></dd>
+            <dt>文档数</dt><dd>灵活（1 到 33 全套）</dd>
+            <dt>标准</dt><dd>严格 VELA 33 模板</dd>
+            <dt>Demo</dt><dd>大厂设计标准 · 可改</dd>
+            <dt>目的</dt><dd>经得起二面追问 · 可交付</dd>
+          </dl>
+          <p style="font-size:13px; color:var(--ink-faint); line-height:1.7;">
+            典型调用：CEO + 任意员工 + 任意专家 · 严格 VELA 章节 · 3 总监审查 BLOCKING · CEO 整合 3+3+1。
+          </p>
+        </div>
+      </div>
+
+      <h2 class="section-title"><span class="num">02</span>真公司工作流 · 7 步</h2>
+      <p class="section-desc">
+        无论哪档 · 都走这 7 步 · 差异只在每步深度。这是"真公司"跟"套皮肤 Claude"的根本区别。
+      </p>
+
+      <div class="workflow-strip">
+        <div class="workflow-step">
+          <div class="wf-num">01</div>
+          <h5>接需求</h5>
+          <p>CEO 读 CLAUDE.md + 行业专家包</p>
+        </div>
+        <div class="workflow-step">
+          <div class="wf-num">02</div>
+          <h5>六步分析</h5>
+          <p>画像 → 定位 → 北极星 → 数据 → 竞品 → 壁垒</p>
+        </div>
+        <div class="workflow-step">
+          <div class="wf-num">03</div>
+          <h5>老板拍板</h5>
+          <p>A 采纳 / B 调整 / C 否决</p>
+        </div>
+        <div class="workflow-step">
+          <div class="wf-num">04</div>
+          <h5>并发产出</h5>
+          <p>19 员工按 VELA 模板 · 不凭感觉</p>
+        </div>
+        <div class="workflow-step">
+          <div class="wf-num">05</div>
+          <h5>3 总监审</h5>
+          <p>产品 / 技术 / 设计 BLOCKING 清单</p>
+        </div>
+        <div class="workflow-step">
+          <div class="wf-num">06</div>
+          <h5>CEO 整合</h5>
+          <p>3 决策 + 3 风险 + 1 Next Step</p>
+        </div>
+        <div class="workflow-step">
+          <div class="wf-num">07</div>
+          <h5>归档记忆</h5>
+          <p>Obsidian + 记忆更新 · 下次继续</p>
+        </div>
+      </div>
+
+      <h2 class="section-title"><span class="num">03</span>43 人组织架构</h2>
+      <p class="section-desc">
+        桃子公司真实组织：3 决策层 + 10 执行层 + 3 总监层 + 3 业务层 + 1 质量层 + 20 行业专家。一人分饰多角 · 但每角都有人格铁律。
+      </p>
+
+      <div class="vela-matrix">
+        <div class="phase-row">👑 决策层（3）</div>
+        <div class="doc-row"><div class="doc-num">00</div><div class="doc-name">老板 · 马海倩</div><div class="doc-desc">战略拍板 · A/B/C 3 项权力 · Obsidian 编辑权 · 终极真相源</div><div class="doc-status"><span class="status-badge status-core">CEO 之上</span></div></div>
+        <div class="doc-row"><div class="doc-num">00</div><div class="doc-name">CEO · 桃子</div><div class="doc-desc">接需求 · 六步分析 · 分派员工 · 整合报告</div><div class="doc-status"><span class="status-badge status-core">调度</span></div></div>
+        <div class="doc-row"><div class="doc-num">00</div><div class="doc-name">快速 CEO</div><div class="doc-desc">档位 A 闪电模式 · 2 分钟出 brief</div><div class="doc-status"><span class="status-badge status-support">闪电</span></div></div>
+
+        <div class="phase-row">🧑‍🔬 执行层（10）· 专业分工</div>
+        <div class="doc-row"><div class="doc-num">01</div><div class="doc-name">PM · 产品经理</div><div class="doc-desc">Brief / PRD / 画像 / 流程 / 指标</div><div class="doc-status"><span class="status-badge status-core">核心</span></div></div>
+        <div class="doc-row"><div class="doc-num">02</div><div class="doc-name">设计师</div><div class="doc-desc">UI 规范 · Design Token · UI Skill 选型</div><div class="doc-status"><span class="status-badge status-core">设计</span></div></div>
+        <div class="doc-row"><div class="doc-num">03</div><div class="doc-name">算法工程师</div><div class="doc-desc">AI 技术方案 · 模型选型 · RAG 架构</div><div class="doc-status"><span class="status-badge status-core">AI</span></div></div>
+        <div class="doc-row"><div class="doc-num">04</div><div class="doc-name">AI 训练师</div><div class="doc-desc">评测集 · Prompt · Badcase 飞轮</div><div class="doc-status"><span class="status-badge status-core">AI</span></div></div>
+        <div class="doc-row"><div class="doc-num">05</div><div class="doc-name">后端工程师</div><div class="doc-desc">API · DB · 架构设计</div><div class="doc-status"><span class="status-badge status-core">技术</span></div></div>
+        <div class="doc-row"><div class="doc-num">06</div><div class="doc-name">前端工程师</div><div class="doc-desc">技术栈 · 组件库</div><div class="doc-status"><span class="status-badge status-core">技术</span></div></div>
+        <div class="doc-row"><div class="doc-num">07</div><div class="doc-name">数据运营</div><div class="doc-desc">指标 · 埋点 · 看板</div><div class="doc-status"><span class="status-badge status-core">数据</span></div></div>
+        <div class="doc-row"><div class="doc-num">08</div><div class="doc-name">Figma 设计师</div><div class="doc-desc">原型 · 切图 · manifest</div><div class="doc-status"><span class="status-badge status-core">设计</span></div></div>
+        <div class="doc-row"><div class="doc-num">09</div><div class="doc-name">前端开发</div><div class="doc-desc">按 Figma 出 Next.js 代码</div><div class="doc-status"><span class="status-badge status-core">开发</span></div></div>
+        <div class="doc-row"><div class="doc-num">10</div><div class="doc-name">后端开发</div><div class="doc-desc">按 API 出 Flask 骨架</div><div class="doc-status"><span class="status-badge status-core">开发</span></div></div>
+
+        <div class="phase-row">👩‍💼 总监层（3）· 审查接力</div>
+        <div class="doc-row"><div class="doc-num">11</div><div class="doc-name">产品总监</div><div class="doc-desc">审 PM 7 条 BLOCKING · 冲突仲裁</div><div class="doc-status"><span class="status-badge status-support">审查</span></div></div>
+        <div class="doc-row"><div class="doc-num">12</div><div class="doc-name">技术总监</div><div class="doc-desc">审 6 技术岗 · 成本 + 降级 + 合规</div><div class="doc-status"><span class="status-badge status-support">审查</span></div></div>
+        <div class="doc-row"><div class="doc-num">13</div><div class="doc-name">设计总监</div><div class="doc-desc">审 2 设计岗 · 视觉一致性 · UI Skill 复核</div><div class="doc-status"><span class="status-badge status-support">审查</span></div></div>
+
+        <div class="phase-row">🤝 业务层（3）· 产品上线后</div>
+        <div class="doc-row"><div class="doc-num">14</div><div class="doc-name">运营负责人</div><div class="doc-desc">冷启动 · 增长 · KOL · 社群</div><div class="doc-status"><span class="status-badge status-extra">业务</span></div></div>
+        <div class="doc-row"><div class="doc-num">15</div><div class="doc-name">客户成功 CSM</div><div class="doc-desc">实施 · 续约 · NPS · QBR</div><div class="doc-status"><span class="status-badge status-extra">业务</span></div></div>
+        <div class="doc-row"><div class="doc-num">16</div><div class="doc-name">商务法务</div><div class="doc-desc">合同 · 合规 · G 端投标</div><div class="doc-status"><span class="status-badge status-extra">业务</span></div></div>
+
+        <div class="phase-row">🧪 质量层（1）· 上线前门</div>
+        <div class="doc-row"><div class="doc-num">28</div><div class="doc-name">测试工程师</div><div class="doc-desc">功能 / 性能 / 安全 / AI 四维 · 上线 28 Checklist</div><div class="doc-status"><span class="status-badge status-support">质量</span></div></div>
+
+        <div class="phase-row">🎓 行业专家层（20）· 按项目召唤</div>
+        <div class="doc-row"><div class="doc-num">17-37</div><div class="doc-name">20 行业专家</div><div class="doc-desc">医疗 / 金融 / 教育 / 短视频 / 短剧 / 电商 / 制造 / 汽车 / 政企 / 家装 / 内容 / 情感陪伴 / 游戏 / 企业 SaaS / 跨境电商 / 宠物 / 占卜 / 农业 / 新能源 / 数字化</div><div class="doc-status"><span class="status-badge status-extra">专家</span></div></div>
+      </div>
+
+      <h2 class="section-title"><span class="num">04</span>记忆系统 · 跨会话持久</h2>
+      <p class="section-desc">
+        真公司的灵魂 —— 上次聊到哪儿今天接着聊 · 不用从零解释。老板说"继续" · 桃子公司自己知道从哪里接。
+      </p>
+
+      <div class="vela-matrix">
+        <div class="phase-row">🧠 3 层记忆架构</div>
+        <div class="doc-row"><div class="doc-num">L1</div><div class="doc-name">项目记忆（每项目独立）</div><div class="doc-desc">00_项目档案.md · CONTEXT.md · 99_进度表.md · history/ · 18 份产出</div><div class="doc-status"><span class="status-badge status-core">项目</span></div></div>
+        <div class="doc-row"><div class="doc-num">L2</div><div class="doc-name">跨项目共享资源</div><div class="doc-desc">行业数据快照 · 竞品数据库 · Prompt 模板库 · CEO 决策日志</div><div class="doc-status"><span class="status-badge status-support">共享</span></div></div>
+        <div class="doc-row"><div class="doc-num">L3</div><div class="doc-name">全局记忆（Claude 层）</div><div class="doc-desc">用户画像 · 协作铁律 · 反模式清单 · 项目状态</div><div class="doc-status"><span class="status-badge status-extra">全局</span></div></div>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-footer">
+      <h2>这不是 PPT · 是真能跑的公司</h2>
+      <p>
+        每个方法论都在 AI 一人公司项目里验证过 · 每份文档都能立刻开发。下一个项目 —— 可能是你的 —— 我们已经准备好了。
+      </p>
+      <div class="cta-actions">
+        <a href="cases.html" class="btn-primary">📂 看案例</a>
+        <a href="office.html" class="btn-ghost">🎬 看办公室直播</a>
+        <a href="docs.html" class="btn-ghost">📖 看文档库</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer style="margin-top: var(--space-4xl); padding: var(--space-2xl) 0; text-align: center; color: var(--ink-faint); font-size: 13px; border-top: 1px solid var(--paper-dark);">
+  <p>🍑 桃子公司 · Peach Studio · 真正的 AI 产品公司 · 一人即公司</p>
+  <p style="margin-top: 8px;">AI 产品经理 × AI 训练师 × UI 设计 · 三重身份 · 一套骨架 · 两档 SOP</p>
+</footer>
+
+<script>
+  // Tab 切换
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.tab-content').forEach(c => {
+        c.classList.toggle('active', c.id === 'tab-' + tab);
+      });
+      // 滑动到 tab 内容顶部
+      setTimeout(() => {
+        document.getElementById('tab-' + tab).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    });
+  });
+
+  // 页面加载动画 · 数字滚动
+  document.querySelectorAll('.stat-card .num').forEach((el, i) => {
+    const target = el.textContent;
+    el.textContent = '0';
+    setTimeout(() => {
+      el.textContent = target;
+    }, 300 + i * 100);
+  });
+</script>
+
+<script src="js/launcher.js"></script>
+</body>
+</html>

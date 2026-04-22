@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📂 桃子公司 · 案例库</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/launcher.css">
+  <style>
+    .case-hero {
+      background: var(--paper-light);
+      border: 2px solid var(--ink);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-xl);
+    }
+    .case-meta {
+      display: flex; gap: var(--space-md); flex-wrap: wrap;
+      margin: var(--space-md) 0;
+    }
+    .case-tag {
+      background: var(--paper-dark);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+    .case-tag.highlight { background: var(--peach); color: white; }
+    .case-deliverables { margin-top: var(--space-md); }
+    .case-deliverable {
+      display: flex; align-items: center; gap: var(--space-sm);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px dashed var(--paper-dark);
+      font-size: 14px;
+    }
+    .case-deliverable:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-content">
+    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>桃子公司</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">首页</a>
+      <a href="methodology.html" class="nav-link">🎯 方法论</a>
+      <a href="office.html" class="nav-link">🎬 办公室</a>
+      <a href="team.html" class="nav-link">👥 团队</a>
+      <a href="cases.html" class="nav-link active">📂 案例</a>
+      <a href="docs.html" class="nav-link">📖 文档</a>
+    </div>
+  </div>
+</nav>
+
+<section>
+  <div class="container">
+    <div style="text-align: center; margin-bottom: var(--space-2xl);">
+      <p class="hand">桃子公司真实案例</p>
+      <h1 style="margin-top: var(--space-sm);">📂 案例库</h1>
+      <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
+        每个案例 = Product Brief + Design Brief + PRD + Demo · 深度 / 闪电模式都跑过
+      </p>
+    </div>
+
+    <!-- 案例 01 · 成人考证 AI 陪练 -->
+    <div class="case-hero">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-md); flex-wrap: wrap;">
+        <div>
+          <h2>成人考证 AI 陪练 · 教育 C 端</h2>
+          <div class="case-meta">
+            <span class="case-tag highlight">✅ 已完成</span>
+            <span class="case-tag">AI 一人公司项目</span>
+            <span class="case-tag">教育</span>
+            <span class="case-tag">C 端</span>
+            <span class="case-tag">深度模式</span>
+            <span class="case-tag">2026-04-21</span>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 16px; color: var(--ink-soft); margin-top: var(--space-md);">
+        成人考证方向（考公 / 教师资格 / 司法 / CPA）面临"自学无反馈"痛点。
+        桃子公司用 60 分钟深度模式 · 19 员工 + 20 行业专家 + 3 总监协同 · 产出完整 VELA 大厂级方案。
+      </p>
+
+      <div class="case-deliverables">
+        <div class="case-deliverable">
+          <span>📄</span>
+          <strong>PRD 产品需求文档</strong>
+          <span style="color: var(--ink-faint); margin-left: auto;">488 行 · VELA 9 板块</span>
+        </div>
+        <div class="case-deliverable">
+          <span>🎨</span>
+          <strong>Design Brief 视觉规范</strong>
+          <span style="color: var(--ink-faint); margin-left: auto;">墨绿 + 暖米 + 金黄 · 墨绿 #2E5C4F</span>
+        </div>
+        <div class="case-deliverable">
+          <span>🖥</span>
+          <strong>可交互 Demo（单文件 HTML）</strong>
+          <span style="color: var(--ink-faint); margin-left: auto;">554 行 · 5 tab</span>
+        </div>
+        <div class="case-deliverable">
+          <span>🧠</span>
+          <strong>技术方案 · AI vs 传统拆解</strong>
+          <span style="color: var(--ink-faint); margin-left: auto;">Qwen3-32B + RAG + Flask</span>
+        </div>
+        <div class="case-deliverable">
+          <span>📊</span>
+          <strong>数据指标体系</strong>
+          <span style="color: var(--ink-faint); margin-left: auto;">北极星 · 采纳率</span>
+        </div>
+      </div>
+
+      <div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap;">
+        <a href="file:///Users/a1/Documents/桃子obsidian/桃子资料/项目/2026-04-21_粉笔_成人考证AI陪练/10_Demo/index.html" class="btn btn-primary" target="_blank">🚀 打开 Demo</a>
+        <a href="file:///Users/a1/Documents/桃子obsidian/桃子资料/项目/2026-04-21_粉笔_成人考证AI陪练/01_PRD产品需求文档.md" class="btn btn-secondary" target="_blank">📄 看 PRD</a>
+      </div>
+    </div>
+
+    <!-- 规划中 -->
+    <h2 style="margin-top: var(--space-2xl); margin-bottom: var(--space-lg);">📋 规划中</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+          <h3>招行 · 智能信贷审核</h3>
+          <span class="case-tag">金融 · B 端</span>
+        </div>
+        <p style="color: var(--ink-soft);">
+          基于桃子信贷项目 DNA · 4 Agent 架构 · Qwen3-32B + BGE-M3 + 合规 RAG · 等保三级。
+        </p>
+        <p class="hand" style="margin-top: var(--space-sm);">2 分钟闪电模式可跑</p>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+          <h3>好未来 · K12 AI 口语陪练</h3>
+          <span class="case-tag">教育 · C 端</span>
+        </div>
+        <p style="color: var(--ink-soft);">
+          面向 K12 · Whisper ASR + 口语评测 + Qwen 对话。移动优先 · Airbnb 风。
+        </p>
+        <p class="hand" style="margin-top: var(--space-sm);">2 分钟闪电模式可跑</p>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+          <h3>理想汽车 · AI 座舱助手</h3>
+          <span class="case-tag">汽车 · C 端</span>
+        </div>
+        <p style="color: var(--ink-soft);">
+          车机端侧大模型 + 语音 + 多模态。对标 Mind GPT。
+        </p>
+        <p class="hand" style="margin-top: var(--space-sm);">2 分钟闪电模式可跑</p>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+          <h3>红果短剧 · 制作 SaaS</h3>
+          <span class="case-tag">短剧 · B 端</span>
+        </div>
+        <p style="color: var(--ink-soft);">
+          AI 剧本 + AI 分镜 + AI 配音 + AI 剪辑一条龙 · 降本 80%。
+        </p>
+        <p class="hand" style="margin-top: var(--space-sm);">2 分钟闪电模式可跑</p>
+      </div>
+    </div>
+
+    <!-- 触发指南 -->
+    <div style="margin-top: var(--space-3xl); padding: var(--space-xl); background: var(--paper-light); border-radius: var(--radius-lg); border: 1px solid var(--paper-dark);">
+      <h3>🎯 怎么让桃子公司跑起来？</h3>
+      <p style="color: var(--ink-soft); margin-top: var(--space-sm);">在 Claude Code 终端输入触发词：</p>
+      <div style="background: var(--ink); color: var(--paper); padding: var(--space-md); border-radius: var(--radius-md); margin-top: var(--space-md); font-family: monospace; font-size: 14px;">
+        <div style="color: var(--peach-light);"># 深度模式 · 30-60 分钟出 VELA 33 份文档</div>
+        <div>桃子公司 · 招商银行 · 智能信贷审核</div>
+        <br/>
+        <div style="color: var(--peach-light);"># 闪电模式 · 2 分钟出 Brief + Demo</div>
+        <div>桃子公司 闪电 · 好未来 · K12 AI 口语陪练</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--paper-dark); margin-top: var(--space-3xl);">
+  <div class="container" style="text-align: center; color: var(--ink-faint);">
+    <p>🏢 桃子公司 · 真实案例 · 真实方法论</p>
+  </div>
+</footer>
+
+<script src="js/launcher.js"></script>
+</body>
+</html>

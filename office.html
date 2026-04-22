@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 桃子公司办公室 · 游戏风俯视</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/launcher.css">
+  <style>
+    body {
+      background: #faf6ee;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(209,106,78,0.04) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(154,168,137,0.05) 0%, transparent 50%);
+    }
+
+    .office-page { padding: 100px 0 60px; }
+
+    /* 页面头 */
+    .office-header {
+      text-align: center;
+      max-width: 920px;
+      margin: 0 auto var(--space-2xl);
+    }
+    .office-header .eyebrow {
+      font-family: var(--font-hand);
+      color: var(--peach);
+      font-size: 20px;
+    }
+    .office-header h1 {
+      font-size: clamp(36px, 5vw, 56px);
+      margin: var(--space-sm) 0 var(--space-md);
+    }
+    .office-header h1 .accent { color: var(--peach); font-style: italic; }
+    .office-header .lead {
+      color: var(--ink-soft);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* 状态栏 */
+    .status-bar {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-2xl);
+      flex-wrap: wrap;
+    }
+    .status-item {
+      background: white;
+      border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-lg);
+      padding: 10px 20px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .status-item .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--sage);
+      animation: pulse 2s infinite;
+    }
+    .status-item.busy .dot { background: var(--peach); }
+    .status-item.ceo .dot { background: #d4a574; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+    .status-item .num {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      color: var(--peach);
+    }
+
+    /* ========== 办公楼 · Agent Town 俯视风 ========== */
+
+    /* 主容器 */
+    .office-viewport {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 var(--space-xl);
+    }
+
+    /* 办公楼外壳 · 粗白外墙 + 立体投影 */
+    .office-map {
+      position: relative;
+      padding: 44px 36px 36px;
+      border-radius: 28px;
+      background:
+        repeating-linear-gradient(45deg,
+          rgba(209,106,78,0.025) 0 14px,
+          rgba(154,168,137,0.02) 14px 28px),
+        radial-gradient(ellipse at 25% 15%, rgba(209,106,78,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 85%, rgba(154,168,137,0.05) 0%, transparent 55%),
+        linear-gradient(180deg, #f8f2e4 0%, #eee3cc 100%);
+      border: 10px solid #ffffff;
+      box-shadow:
+        0 2px 0 rgba(31,26,20,0.1),
+        0 12px 24px rgba(31,26,20,0.08),
+        0 40px 80px rgba(31,26,20,0.1),
+        inset 0 0 0 2px rgba(31,26,20,0.08);
+      margin-bottom: 0;
+    }
+
+    /* 6 房间 · 俯视切分 */
+    .office-layout {
+      display: grid;
+      grid-template-areas:
+        "ceo       ceo       directors directors directors"
+        "pm        pm        design    design    design"
+        "tech      tech      tech      tech      data"
+        "biz       biz       biz       test      test"
+        "expert    expert    expert    expert    expert";
+      gap: 22px;
+      min-height: 860px;
+    }
+
+    /* 房间 · 粗白墙 + 像素边 + 地板 */
+    .room {
+      position: relative;
+      padding: 40px 20px 22px;
+      border-radius: 14px;
+      background: #fffdf7;
+      box-shadow:
+        inset 0 0 0 6px #fff,
+        inset 0 0 0 7.5px rgba(31,26,20,0.2),
+        0 1px 0 rgba(31,26,20,0.08),
+        0 6px 14px rgba(31,26,20,0.06);
+      display: flex;
+      flex-direction: column;
+      overflow: visible;
+    }
+
+    /* 门牌 · 挂墙深色铭牌 */
+    .room::before {
+      content: attr(data-zone);
+      position: absolute;
+      top: -12px;
+      left: 18px;
+      background: #1f1a14;
+      color: #f4ede0;
+      padding: 6px 14px;
+      font-family: var(--font-serif);
+      font-size: 14px;
+      letter-spacing: 0.4px;
+      font-weight: 500;
+      border-radius: 6px;
+      box-shadow:
+        0 2px 0 rgba(31,26,20,0.25),
+        0 5px 10px rgba(31,26,20,0.18);
+      z-index: 4;
+      white-space: nowrap;
+    }
+
+    .room .desks {
+      display: grid;
+      gap: 16px;
+      flex: 1;
+      align-content: start;
+      padding-top: 4px;
+    }
+
+    /* 各房间地板纹理（木地板 / 瓷砖） */
+    .room-ceo {
+      grid-area: ceo;
+      background:
+        repeating-linear-gradient(90deg, rgba(212,165,116,0.12) 0 2px, transparent 2px 48px),
+        repeating-linear-gradient(0deg,  rgba(212,165,116,0.08) 0 1px, transparent 1px 26px),
+        #fff9ef;
+    }
+    .room-ceo .desks { grid-template-columns: repeat(2, 1fr); }
+
+    .room-directors {
+      grid-area: directors;
+      background:
+        repeating-linear-gradient(45deg, rgba(181,109,80,0.08) 0 10px, transparent 10px 20px),
+        #fff5ee;
+    }
+    .room-directors .desks { grid-template-columns: repeat(3, 1fr); }
+
+    .room-pm {
+      grid-area: pm;
+      background:
+        repeating-linear-gradient(90deg, rgba(139,110,184,0.1) 0 2px, transparent 2px 42px),
+        #f8f4ff;
+    }
+    .room-pm .desks { grid-template-columns: repeat(2, 1fr); }
+
+    .room-design {
+      grid-area: design;
+      background:
+        repeating-linear-gradient(0deg,  rgba(196,122,134,0.08) 0 1px, transparent 1px 22px),
+        repeating-linear-gradient(90deg, rgba(196,122,134,0.06) 0 1px, transparent 1px 22px),
+        #fff0f2;
+    }
+    .room-design .desks { grid-template-columns: repeat(3, 1fr); }
+
+    .room-tech {
+      grid-area: tech;
+      background:
+        repeating-linear-gradient(90deg, rgba(107,135,196,0.08) 0 2px, transparent 2px 36px),
+        #f0f6ff;
+    }
+    .room-tech .desks { grid-template-columns: repeat(5, 1fr); }
+
+    .room-data {
+      grid-area: data;
+      background:
+        repeating-linear-gradient(45deg, rgba(107,167,126,0.1) 0 7px, transparent 7px 14px),
+        #f0faf2;
+    }
+    .room-data .desks { grid-template-columns: 1fr; }
+
+    .room-biz {
+      grid-area: biz;
+      background:
+        repeating-linear-gradient(90deg, rgba(184,150,86,0.08) 0 2px, transparent 2px 42px),
+        #fffbf0;
+    }
+    .room-biz .desks { grid-template-columns: repeat(3, 1fr); }
+
+    .room-test {
+      grid-area: test;
+      background:
+        repeating-linear-gradient(0deg,  rgba(182,104,136,0.08) 0 1px, transparent 1px 22px),
+        repeating-linear-gradient(90deg, rgba(182,104,136,0.05) 0 1px, transparent 1px 22px),
+        #fff0f6;
+    }
+    .room-test .desks { grid-template-columns: 1fr; }
+
+    .room-expert {
+      grid-area: expert;
+      background:
+        repeating-linear-gradient(45deg, rgba(139,110,184,0.06) 0 6px, transparent 6px 12px),
+        #f5f0ff;
+    }
+    .room-expert .desks {
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      grid-auto-rows: auto;
+      gap: 10px;
+    }
+
+    /* 工位 · 桌椅 + 圆头像 */
+    .desk {
+      position: relative;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 14px 8px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+      min-height: 118px;
+      box-shadow:
+        0 2px 0 rgba(31,26,20,0.18),
+        0 3px 5px rgba(31,26,20,0.04),
+        inset 0 0 0 1.5px rgba(31,26,20,0.22);
+      overflow: visible;
+    }
+    .desk:hover {
+      transform: translateY(-3px);
+      z-index: 10;
+      box-shadow:
+        0 4px 0 rgba(209,106,78,0.35),
+        0 10px 20px rgba(209,106,78,0.15),
+        inset 0 0 0 1.5px var(--peach);
+    }
+
+    /* 椅子 · 桌后一条横线 */
+    .desk::after {
+      content: '';
+      position: absolute;
+      bottom: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32px;
+      height: 5px;
+      background: #1f1a14;
+      border-radius: 2px;
+      opacity: 0.3;
+      box-shadow: 0 1px 2px rgba(31,26,20,0.15);
+    }
+
+    /* 圆头像容器 */
+    .agent-avatar-wrap {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f4ede0, #e9dfc9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        inset 0 0 0 2px #fff,
+        inset 0 0 0 3.5px rgba(31,26,20,0.16),
+        0 2px 0 rgba(31,26,20,0.1);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .agent-emoji {
+      font-size: 28px;
+      line-height: 1;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.12));
+      transition: transform 0.3s;
+    }
+    .desk.working .agent-emoji { animation: bobWork 1.6s ease-in-out infinite; }
+    .desk.thinking .agent-emoji { animation: bobThink 2.4s ease-in-out infinite; }
+    @keyframes bobWork {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-2px) rotate(2deg); }
+    }
+    @keyframes bobThink {
+      0%, 100% { transform: rotate(-4deg); }
+      50% { transform: rotate(4deg); }
+    }
+
+    /* 名字 · 允许换行 · 不截字 */
+    .agent-name {
+      font-family: var(--font-serif);
+      font-size: 13px;
+      color: var(--ink);
+      line-height: 1.22;
+      font-weight: 500;
+      white-space: normal;
+      word-break: keep-all;
+      max-width: 100%;
+      margin: 0;
+    }
+    .agent-role {
+      font-size: 10px;
+      color: var(--ink-faint);
+      line-height: 1.3;
+      white-space: normal;
+      max-width: 100%;
+      margin-top: 0;
+    }
+
+    /* 状态灯 · 呼吸 */
+    .agent-status-dot {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--sage);
+      box-shadow: 0 0 0 2px #fff, 0 0 6px rgba(154,168,137,0.6);
+      z-index: 2;
+    }
+    .desk.working .agent-status-dot {
+      background: var(--peach);
+      box-shadow: 0 0 0 2px #fff, 0 0 8px rgba(209,106,78,0.75);
+      animation: pulse 1.5s infinite;
+    }
+    .desk.meeting .agent-status-dot { background: #d4a574; }
+    .desk.away .agent-status-dot {
+      background: #c8c2b7;
+      box-shadow: 0 0 0 2px #fff;
+    }
+
+    .desk-decor { display: none; }
+
+    /* 专家室紧凑布局 · 白框高 150 · avatar + name + role 全包进框里 */
+    .room-expert .desks {
+      grid-auto-rows: 1fr;
+    }
+    .room-expert .desk {
+      min-height: 150px;
+      padding: 14px 6px 14px;
+      gap: 5px;
+      justify-content: flex-start;
+      align-items: center;
+      overflow: hidden;
+    }
+    .room-expert .agent-avatar-wrap {
+      width: 42px;
+      height: 42px;
+    }
+    .room-expert .agent-emoji { font-size: 22px; }
+    .room-expert .agent-name {
+      display: block;
+      font-size: 12.5px;
+      line-height: 1.25;
+      font-weight: 700;
+      color: #1f1a14;
+      padding: 0 2px;
+      margin-top: 3px;
+      white-space: normal;
+      word-break: keep-all;
+    }
+    .room-expert .agent-role {
+      display: block;
+      max-height: 2.6em;
+      overflow: hidden;
+      font-size: 10px;
+      line-height: 1.28;
+      color: #5a5148;
+      font-weight: 500;
+      padding: 0 4px;
+      margin-top: 2px;
+      white-space: normal;
+      word-break: break-all;
+    }
+
+    @media (max-width: 1180px) {
+      .room-expert .desks { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .room-expert .desks { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    /* ========== 右键菜单 · 像素风 ========== */
+    .ctx-menu {
+      position: fixed;
+      display: none;
+      background: #fffdf7;
+      border: 2px solid #1f1a14;
+      border-radius: 10px;
+      min-width: 192px;
+      padding: 6px 0;
+      box-shadow:
+        0 2px 0 rgba(31,26,20,0.22),
+        0 8px 24px rgba(31,26,20,0.22);
+      z-index: 2000;
+      font-family: var(--font-sans);
+      animation: menuPop 0.12s ease-out;
+    }
+    .ctx-menu.show { display: block; }
+    @keyframes menuPop {
+      from { opacity: 0; transform: translateY(-4px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .ctx-menu-header {
+      padding: 10px 14px 10px;
+      border-bottom: 1px dashed rgba(31,26,20,0.18);
+      margin-bottom: 4px;
+    }
+    .ctx-menu-header .cm-name {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      color: var(--ink);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .ctx-menu-header .cm-role {
+      font-size: 11px;
+      color: var(--ink-faint);
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+    .ctx-menu-item {
+      padding: 9px 14px;
+      font-size: 13px;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.12s;
+      user-select: none;
+    }
+    .ctx-menu-item:hover {
+      background: var(--peach);
+      color: #fff;
+    }
+    .ctx-menu-item .cm-icon {
+      width: 18px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .ctx-menu-sep {
+      height: 1px;
+      background: rgba(31,26,20,0.1);
+      margin: 4px 8px;
+    }
+
+    /* ========== 底部状态栏 · Agent Town 同款 ========== */
+    .bottom-status-bar {
+      position: sticky;
+      bottom: 0;
+      margin-top: 32px;
+      background: #1f1a14;
+      color: #f4ede0;
+      padding: 12px 20px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 12px;
+      font-family: 'SF Mono', Monaco, Consolas, monospace;
+      box-shadow:
+        0 -6px 20px rgba(31,26,20,0.18),
+        inset 0 1px 0 rgba(244,237,224,0.08);
+      z-index: 100;
+    }
+    .bsi {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .bsi .led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--sage);
+      box-shadow: 0 0 6px rgba(154,168,137,0.8);
+      animation: pulse 2s infinite;
+    }
+    .bsi.model { color: #d4a574; }
+    .bsi.ctx-bar {
+      flex: 1;
+      max-width: 260px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ctx-progress {
+      flex: 1;
+      height: 6px;
+      background: rgba(244,237,224,0.18);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .ctx-fill {
+      width: 32%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--sage), var(--peach));
+      transition: width 0.6s;
+    }
+    .bsi.chat .chat-num { color: var(--peach); font-weight: 600; }
+    .bsi.brand {
+      margin-left: auto;
+      font-family: var(--font-serif);
+      font-size: 13px;
+      color: rgba(244,237,224,0.72);
+      font-style: italic;
+    }
+
+    /* 浮层员工详情卡 */
+    .agent-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44,44,44,0.55);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+    }
+    .agent-modal.show { display: flex; animation: fadeModal 0.3s; }
+    @keyframes fadeModal { from { opacity: 0; } to { opacity: 1; } }
+
+    .agent-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      max-width: 520px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      animation: slideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .agent-card-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      width: 32px; height: 32px;
+      border: none;
+      background: var(--paper-light);
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--ink-soft);
+      transition: all 0.2s;
+    }
+    .agent-card-close:hover {
+      background: var(--peach);
+      color: white;
+    }
+
+    .agent-card-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px dashed var(--paper-dark);
+    }
+    .agent-card-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--paper-light), var(--paper-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      flex-shrink: 0;
+    }
+    .agent-card-title h2 {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+    .agent-card-title .subtitle {
+      color: var(--ink-soft);
+      font-size: 14px;
+    }
+    .agent-card-title .dept {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 2px 10px;
+      background: var(--peach);
+      color: white;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .agent-section {
+      margin-bottom: var(--space-lg);
+    }
+    .agent-section h3 {
+      font-size: 15px;
+      color: var(--ink);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .agent-section p,
+    .agent-section li {
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.7;
+    }
+    .agent-section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .agent-section ul li {
+      padding-left: 16px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+    .agent-section ul li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--peach);
+      font-weight: 600;
+    }
+
+    .agent-section.rules ul li::before { content: '⚡'; }
+    .agent-section.banned ul li::before { content: '✗'; color: #c94a4a; }
+
+    /* 小彩蛋 · 装饰元素 */
+    .decor-plant {
+      position: absolute;
+      font-size: 28px;
+      opacity: 0.5;
+    }
+    .decor-plant.p1 { top: 20px; right: 30px; }
+    .decor-plant.p2 { bottom: 30px; left: 20px; }
+
+    /* 响应式 */
+    @media (max-width: 1100px) {
+      .office-layout {
+        grid-template-areas:
+          "ceo ceo"
+          "directors directors"
+          "pm pm"
+          "design design"
+          "tech tech"
+          "data data"
+          "biz biz"
+          "test test"
+          "expert expert";
+        grid-template-columns: 1fr 1fr;
+      }
+      .room-expert .desks { grid-template-columns: repeat(5, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .office-layout { grid-template-columns: 1fr; }
+      .office-layout > * { grid-area: auto; }
+      .room-tech .desks { grid-template-columns: repeat(2, 1fr); }
+      .room-expert .desks { grid-template-columns: repeat(4, 1fr); }
+      .agent-card { padding: var(--space-lg); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav">
+  <div class="container nav-content">
+    <a href="index.html" class="nav-logo"><span class="emoji">🍑</span>桃子公司</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">首页</a>
+      <a href="methodology.html" class="nav-link">🎯 方法论</a>
+      <a href="office.html" class="nav-link active">🎬 办公室</a>
+      <a href="team.html" class="nav-link">👥 团队</a>
+      <a href="cases.html" class="nav-link">📂 案例</a>
+      <a href="docs.html" class="nav-link">📖 文档</a>
+    </div>
+  </div>
+</nav>
+
+<div class="office-page">
+  <div class="container wide">
+
+    <!-- 页面头 -->
+    <div class="office-header">
+      <p class="eyebrow">游戏风俯视 · 真公司办公室</p>
+      <h1>走进 <span class="accent">桃子公司</span> 办公室</h1>
+      <p class="lead">
+        点任意工位看员工的人格 · 铁律 · 禁区 —— 19 位 AI 员工 + 3 位总监 + 20 位行业专家 · 每个都有严格分工 · 每个都能被召唤干活。这不是动画演示 · 是真运作的公司。
+      </p>
+    </div>
+
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <div class="status-item ceo"><span class="dot"></span><span class="num">1</span> CEO</div>
+      <div class="status-item busy"><span class="dot"></span><span class="num">10</span> 执行员工</div>
+      <div class="status-item busy"><span class="dot"></span><span class="num">3</span> 总监审查</div>
+      <div class="status-item"><span class="dot"></span><span class="num">3</span> 业务岗</div>
+      <div class="status-item"><span class="dot"></span><span class="num">1</span> 测试工程师</div>
+      <div class="status-item"><span class="dot"></span><span class="num">20</span> 行业专家（待命）</div>
+    </div>
+
+    <!-- 办公室地图 -->
+    <div class="office-viewport">
+      <div class="office-map">
+        <span class="decor-plant p1">🌿</span>
+        <span class="decor-plant p2">🪴</span>
+
+        <div class="office-layout">
+
+          <!-- CEO 办公室 -->
+          <div class="room room-ceo" data-zone="👑 CEO 办公室">
+            <div class="desks">
+              <div class="desk working" data-id="00_CEO">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">👑</div>
+                <div class="agent-name">CEO · 桃子</div>
+                <div class="agent-role">战略调度</div>
+                <div class="desk-decor">📊 ☕</div>
+              </div>
+              <div class="desk" data-id="00_快速CEO">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">⚡</div>
+                <div class="agent-name">快速 CEO</div>
+                <div class="agent-role">闪电 2 分钟</div>
+                <div class="desk-decor">⏱</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 总监办公区 -->
+          <div class="room room-directors" data-zone="👩‍💼 总监审查区">
+            <div class="desks">
+              <div class="desk working" data-id="11_产品总监">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">👩‍💼</div>
+                <div class="agent-name">产品总监</div>
+                <div class="agent-role">审 PM 产出</div>
+              </div>
+              <div class="desk working" data-id="12_技术总监">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">👨‍💻</div>
+                <div class="agent-name">技术总监</div>
+                <div class="agent-role">审 6 技术岗</div>
+              </div>
+              <div class="desk" data-id="13_设计总监">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🎨</div>
+                <div class="agent-name">设计总监</div>
+                <div class="agent-role">审 2 设计岗</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PM 办公区 -->
+          <div class="room room-pm" data-zone="🧑‍🎤 产品经理室">
+            <div class="desks">
+              <div class="desk working" data-id="01_PM">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🧑‍🎤</div>
+                <div class="agent-name">PM</div>
+                <div class="agent-role">PRD · 画像 · 流程</div>
+                <div class="desk-decor">📝</div>
+              </div>
+              <div class="desk" data-id="07_数据运营">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">📊</div>
+                <div class="agent-name">数据运营</div>
+                <div class="agent-role">指标 · 埋点</div>
+                <div class="desk-decor">📈</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 设计团队 -->
+          <div class="room room-design" data-zone="🎨 设计部">
+            <div class="desks">
+              <div class="desk working" data-id="02_设计师">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🎨</div>
+                <div class="agent-name">设计师</div>
+                <div class="agent-role">UI 规范 · Token</div>
+              </div>
+              <div class="desk" data-id="08_Figma设计师">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🎭</div>
+                <div class="agent-name">Figma 设计师</div>
+                <div class="agent-role">原型 · 切图</div>
+              </div>
+              <div class="desk" data-id="09_前端开发">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🖥</div>
+                <div class="agent-name">前端开发</div>
+                <div class="agent-role">Next.js 代码</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 技术团队 -->
+          <div class="room room-tech" data-zone="💻 技术中心">
+            <div class="desks">
+              <div class="desk working" data-id="03_算法工程师">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🧠</div>
+                <div class="agent-name">算法</div>
+                <div class="agent-role">模型 · RAG</div>
+              </div>
+              <div class="desk working" data-id="04_AI训练师">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🎯</div>
+                <div class="agent-name">AI 训练师</div>
+                <div class="agent-role">评测 · Prompt</div>
+              </div>
+              <div class="desk" data-id="05_后端工程师">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">⚙️</div>
+                <div class="agent-name">后端</div>
+                <div class="agent-role">API · DB</div>
+              </div>
+              <div class="desk" data-id="06_前端工程师">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">💻</div>
+                <div class="agent-name">前端</div>
+                <div class="agent-role">技术栈 · 组件</div>
+              </div>
+              <div class="desk" data-id="10_后端开发">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🔧</div>
+                <div class="agent-name">后端开发</div>
+                <div class="agent-role">Flask 骨架</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 数据分析独立小间 -->
+          <div class="room room-data" data-zone="📊 数据站">
+            <div class="desks">
+              <div class="desk meeting" data-id="data_board">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">📈</div>
+                <div class="agent-name">看板</div>
+                <div class="agent-role">WQ-7 实时</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 业务团队 -->
+          <div class="room room-biz" data-zone="🤝 业务部">
+            <div class="desks">
+              <div class="desk" data-id="14_运营负责人">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🌱</div>
+                <div class="agent-name">运营</div>
+                <div class="agent-role">冷启动 · 增长</div>
+              </div>
+              <div class="desk" data-id="15_客户成功">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🤝</div>
+                <div class="agent-name">客户成功</div>
+                <div class="agent-role">续约 · NPS</div>
+              </div>
+              <div class="desk" data-id="16_商务法务">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">⚖️</div>
+                <div class="agent-name">商务法务</div>
+                <div class="agent-role">合同 · 合规</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 测试 -->
+          <div class="room room-test" data-zone="🧪 测试部">
+            <div class="desks">
+              <div class="desk" data-id="28_测试工程师">
+                <span class="agent-status-dot"></span>
+                <div class="agent-emoji">🧪</div>
+                <div class="agent-name">测试工程师</div>
+                <div class="agent-role">四维测试 · 28 checklist</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 行业专家室 -->
+          <div class="room room-expert" data-zone="🎓 行业专家室（按项目召唤）">
+            <div class="desks">
+              <div class="desk away" data-id="17_医疗专家"><span class="agent-status-dot"></span><div class="agent-emoji">🏥</div><div class="agent-name">医疗</div></div>
+              <div class="desk away" data-id="18_金融专家"><span class="agent-status-dot"></span><div class="agent-emoji">💰</div><div class="agent-name">金融</div></div>
+              <div class="desk away" data-id="19_教育专家"><span class="agent-status-dot"></span><div class="agent-emoji">🎓</div><div class="agent-name">教育</div></div>
+              <div class="desk away" data-id="20_短视频专家"><span class="agent-status-dot"></span><div class="agent-emoji">🎬</div><div class="agent-name">短视频</div></div>
+              <div class="desk away" data-id="21_短剧专家"><span class="agent-status-dot"></span><div class="agent-emoji">🎭</div><div class="agent-name">短剧</div></div>
+              <div class="desk away" data-id="22_电商专家"><span class="agent-status-dot"></span><div class="agent-emoji">🛍</div><div class="agent-name">电商</div></div>
+              <div class="desk away" data-id="23_制造专家"><span class="agent-status-dot"></span><div class="agent-emoji">🏭</div><div class="agent-name">制造</div></div>
+              <div class="desk away" data-id="24_汽车专家"><span class="agent-status-dot"></span><div class="agent-emoji">🚗</div><div class="agent-name">汽车</div></div>
+              <div class="desk away" data-id="25_政企专家"><span class="agent-status-dot"></span><div class="agent-emoji">🏛</div><div class="agent-name">政企</div></div>
+              <div class="desk away" data-id="26_家装专家"><span class="agent-status-dot"></span><div class="agent-emoji">🏡</div><div class="agent-name">家装</div></div>
+              <div class="desk away" data-id="27_内容专家"><span class="agent-status-dot"></span><div class="agent-emoji">📰</div><div class="agent-name">内容</div></div>
+              <div class="desk away" data-id="29_情感陪伴专家"><span class="agent-status-dot"></span><div class="agent-emoji">💝</div><div class="agent-name">情感陪伴</div></div>
+              <div class="desk away" data-id="30_游戏专家"><span class="agent-status-dot"></span><div class="agent-emoji">🎮</div><div class="agent-name">游戏</div></div>
+              <div class="desk away" data-id="31_企业SaaS专家"><span class="agent-status-dot"></span><div class="agent-emoji">🏢</div><div class="agent-name">企业 SaaS</div></div>
+              <div class="desk away" data-id="32_跨境电商专家"><span class="agent-status-dot"></span><div class="agent-emoji">🌏</div><div class="agent-name">跨境电商</div></div>
+              <div class="desk away" data-id="33_宠物专家"><span class="agent-status-dot"></span><div class="agent-emoji">🐶</div><div class="agent-name">宠物</div></div>
+              <div class="desk away" data-id="34_占卜专家"><span class="agent-status-dot"></span><div class="agent-emoji">🔮</div><div class="agent-name">占卜</div></div>
+              <div class="desk away" data-id="35_农业专家"><span class="agent-status-dot"></span><div class="agent-emoji">🌾</div><div class="agent-name">农业</div></div>
+              <div class="desk away" data-id="36_新能源专家"><span class="agent-status-dot"></span><div class="agent-emoji">🔋</div><div class="agent-name">新能源</div></div>
+              <div class="desk away" data-id="37_数字化项目专家"><span class="agent-status-dot"></span><div class="agent-emoji">📡</div><div class="agent-name">数字化</div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 底部状态栏 · Agent Town 同款 -->
+      <div class="bottom-status-bar">
+        <div class="bsi online"><span class="led"></span>Online</div>
+        <div class="bsi model">🔮 Doubao-1.5-pro-32k</div>
+        <div class="bsi ctx-bar">CTX <div class="ctx-progress"><div class="ctx-fill" id="ctxFill"></div></div><span id="ctxPct">32%</span></div>
+        <div class="bsi chat">💬 <span class="chat-num" id="chatNum">3</span> 活跃会话</div>
+        <div class="bsi brand">AGENT TOWN · 桃子公司</div>
+      </div>
+
+      <div style="text-align:center; color:var(--ink-faint); font-size:12px; margin-top:14px;">
+        🟢 空闲 · 🟠 工作中 · 🟡 开会 · ⚪ 待命 · 点任意工位弹菜单（分配任务 / 新会话 / 历史 / 人格 / 停止）
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 右键菜单（点击工位弹出） -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-menu-header">
+    <div class="cm-name" id="cmName">CEO · 桃子</div>
+    <div class="cm-role" id="cmRole">战略调度</div>
+  </div>
+  <div class="ctx-menu-item" data-action="assign">
+    <span class="cm-icon">📋</span>分配任务
+  </div>
+  <div class="ctx-menu-item" data-action="new">
+    <span class="cm-icon">🆕</span>新会话
+  </div>
+  <div class="ctx-menu-item" data-action="history">
+    <span class="cm-icon">📜</span>会话历史
+  </div>
+  <div class="ctx-menu-sep"></div>
+  <div class="ctx-menu-item" data-action="persona">
+    <span class="cm-icon">👤</span>查看人格 / 铁律
+  </div>
+  <div class="ctx-menu-item" data-action="stop">
+    <span class="cm-icon">⏹</span>停止任务
+  </div>
+  <div class="ctx-menu-sep"></div>
+  <div class="ctx-menu-item" data-action="cancel">
+    <span class="cm-icon">✕</span>关闭
+  </div>
+</div>
+
+<!-- 员工详情浮层 -->
+<div class="agent-modal" id="agentModal">
+  <div class="agent-card" id="agentCard">
+    <button class="agent-card-close" onclick="closeAgent()">×</button>
+    <div class="agent-card-header">
+      <div class="agent-card-avatar" id="acAvatar">👑</div>
+      <div class="agent-card-title">
+        <h2 id="acName">CEO · 桃子</h2>
+        <div class="subtitle" id="acRole">战略拍板 · 员工调度</div>
+        <span class="dept" id="acDept">决策层</span>
+      </div>
+    </div>
+    <div class="agent-section">
+      <h3>📍 定位</h3>
+      <p id="acDef"></p>
+    </div>
+    <div class="agent-section rules">
+      <h3>⚡ 铁律</h3>
+      <ul id="acRules"></ul>
+    </div>
+    <div class="agent-section">
+      <h3>🛠 能做</h3>
+      <ul id="acCan"></ul>
+    </div>
+    <div class="agent-section banned">
+      <h3>🚫 禁区</h3>
+      <ul id="acBan"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// 员工数据库
+const AGENTS = {
+  "00_CEO": {
+    avatar: "👑",
+    name: "CEO · 桃子",
+    role: "战略拍板 · 员工调度 · 整合报告",
+    dept: "决策层",
+    def: "接需求 · 做六步分析 · 拍板方向 · 分派员工 · 整合 3 决策 + 3 风险 + 1 Next Step。她对业务 + 技术 + 商业都有理解 · 不装懂也不拍脑袋。",
+    rules: ["温柔硬核 · 不装专家", "数据说话 · 不拍脑袋", "老板至上 · 3 项权力绝对尊重", "绝不说 PPT 词（赋能 / 闭环 / 抓手）", "绝不暴露内部沉淀路径"],
+    can: ["接需求 · 解析触发词", "六步分析（画像 / 定位 / 北极星 / 数据 / 竞品 / 壁垒）", "方向决策表 · 5 维打分", "任务派发令 · 调度 19 员工 + 20 专家", "冲突仲裁 · 4 类（时间 / 技术 / 指标 / 合规）"],
+    ban: ["不写具体代码（技术岗干）", "不做具体设计（设计岗干）", "不做纯数据分析（数据岗干）"]
+  },
+  "00_快速CEO": {
+    avatar: "⚡", name: "快速 CEO", role: "闪电档位专用 · 2 分钟出 brief", dept: "决策层",
+    def: "档位 A 闪电场景下 · CEO 的压缩版 · 六步分析各 1-2 句 · 召 1-2 员工并发 · 60 秒出 Brief + Demo 框架。",
+    rules: ["2 分钟出全套 · 不拖", "压缩版六步 · 不漏", "选最关键 1-2 员工 · 不召所有", "立刻给老板 · 不审查"],
+    can: ["40-60 秒闪电分析", "Brief 框架 + Demo 雏形", "快速召员工"],
+    ban: ["不走 3 总监审查（档 B 才走）", "不产全套 VELA"]
+  },
+  "11_产品总监": {
+    avatar: "👩‍💼", name: "产品总监", role: "审 PM + 数据产出 · BLOCKING 清单", dept: "总监层",
+    def: "审查 PM 产出的 Brief / PRD / 画像 / 流程 / 指标 5 份文档 · 按 7 条 BLOCKING 清单逐条检查 · 打回或通过 · 不怕说打回。",
+    rules: ["BLOCKING 清单一条不漏", "画像必须到具体人 · 标签化打回", "北极星不能是 DAU / MAU 虚指标", "反指标必须有"],
+    can: ["审 5 份 PM 产出", "冲突仲裁 · 跟技术 / 设计对齐", "签字 / 打回"],
+    ban: ["不写 PRD（PM 干）", "不越过 PM 直接改"]
+  },
+  "12_技术总监": {
+    avatar: "👨‍💻", name: "技术总监", role: "审 6 技术岗 · 成本 + 降级 + 合规", dept: "总监层",
+    def: "审查算法 / 后端 / 前端 / AI 训练师 / 前端开发 / 后端开发 的产出 · 重点看技术可行性 + 合规（禁 GPT / Claude）+ 成本控制。",
+    rules: ["境外模型绝不通过（合规死线）", "成本必须算到月", "降级链路必须有", "POC 验证未过不能上"],
+    can: ["审 6 技术产出", "模型选型最终拍板", "成本 / 降级 / POC 审批"],
+    ban: ["不写代码（执行员工干）"]
+  },
+  "13_设计总监": {
+    avatar: "🎨", name: "设计总监", role: "审 2 设计岗 · 视觉一致性", dept: "总监层",
+    def: "审查设计师 + Figma 设计师的产出 · 重点看三方一致性（Figma ↔ Token ↔ 代码）· UI Skill 选型合理度 · 3 Wow 细节参数。",
+    rules: ["三方一致性一致性不达标打回", "UI Skill 选错（如金融用 Pinterest）打回", "Wow 细节必须具体参数 · '好看的动画'打回"],
+    can: ["审 2 设计产出", "UI Skill 复核", "视觉一致性三方对齐"],
+    ban: ["不做具体 Figma（Figma 设计师干）"]
+  },
+  "01_PM": {
+    avatar: "🧑‍🎤", name: "PM · 产品经理", role: "PRD 15 板块 · 画像 · 流程 · 指标", dept: "执行层",
+    def: "产品经理 · 桃子公司的灵魂岗之一。按 VELA 11_PRD 模板严格产出 · 15 板块（VELA 9 + 桃子自加 6）· 画像必具体到一个人 · 不是标签。",
+    rules: ["画像必具体人（林小雨 28 岁 4A）", "北极星不选 DAU / MAU", "PRD 必含反指标 + 交互逻辑表 + 边界异常矩阵", "Gherkin 验收必真写"],
+    can: ["Brief + PRD + 画像 + 旅程 + 流程图"],
+    ban: ["不做具体代码", "不做具体设计", "不做模型技术选型（算法干）"]
+  },
+  "02_设计师": {
+    avatar: "🎨", name: "设计师", role: "UI 规范 · Design Token · UI Skill 选型", dept: "设计部",
+    def: "定产品视觉调性 · 色板 3+2+1 · 字体中英对配 · Design Token 三层 · 60 UI Skill 里选 1-2 个（主 + 辅）· 3 Wow 细节具体参数。",
+    rules: ["色板每色 6 档分级", "字重只用 400/500/600/700", "UI Skill 行业匹配（金融不用 Pinterest）"],
+    can: ["视觉调性定义", "Design Token 三层", "Wow 细节参数"],
+    ban: ["不画 Figma 原型（Figma 设计师干）", "不写前端代码"]
+  },
+  "03_算法工程师": {
+    avatar: "🧠", name: "算法工程师", role: "技术方案 · 模型选型 · RAG 架构", dept: "技术中心",
+    def: "出 AI 技术方案（架构图 + AI vs 传统拆解 + 长期记忆 3 层 + 反穿帮工程 + 内容安全 3 层 + 成本估算）+ 模型选型（5 维决策）。",
+    rules: ["境外模型 GPT/Claude/Gemini 绝对禁用", "Qwen 7B 禁做对话主链", "每份产出必包含成本估算", "降级链路必写"],
+    can: ["架构图 + AI 选型 + RAG 架构", "POC 验证方案"],
+    ban: ["不做评测集（AI 训练师干）", "不写 API 代码（后端干）"]
+  },
+  "04_AI训练师": {
+    avatar: "🎯", name: "AI 训练师", role: "评测集 · Prompt 工程 · Badcase 飞轮", dept: "技术中心",
+    def: "按 10 SOP 工作：评测集 500×5×3 分布 + Prompt 6 层设计 + LLM-as-Judge 评测 + Badcase 周度飞轮 + LoRA/DPO 调优。",
+    rules: ["合规类评测 100% · 不到线不上", "穿帮率 < 0.5% 硬门槛", "反引导话术库必建", "月度 Prompt 迭代"],
+    can: ["评测集设计 + 12 Prompt 模板", "LLM-as-Judge + 人工精标", "Badcase 分析 + 模型迭代"],
+    ban: ["不做架构（算法干）", "不做埋点（数据运营干）"]
+  },
+  "05_后端工程师": {
+    avatar: "⚙️", name: "后端工程师", role: "API · DB · 架构设计", dept: "技术中心",
+    def: "30+ RESTful API 接口 + SSE 流式 + PG/Redis/Milvus/ClickHouse 4 存储分工 + 限流 + 幂等 + 降级链路。",
+    rules: ["API 响应 P95 < 500ms", "幂等强制（X-Request-Id）", "敏感数据加密 AES-256 + SM4"],
+    can: ["API 设计 + DB schema + 降级实现"],
+    ban: ["不选模型（算法干）", "不写前端"]
+  },
+  "06_前端工程师": {
+    avatar: "💻", name: "前端工程师", role: "技术栈 · 组件库", dept: "技术中心",
+    def: "Next.js 14 + TypeScript + Tailwind + shadcn/ui + Framer Motion 技术栈铁律 · 消费 Design Token · 对接 SSE 流式。",
+    rules: ["技术栈铁律不可改", "必须读 tokens.json · 不手写色值", "Framer Motion 参数严格（见设计 Wow 规范）"],
+    can: ["技术栈选型 · 组件清单"],
+    ban: ["不画设计（设计师干）"]
+  },
+  "07_数据运营": {
+    avatar: "📊", name: "数据运营", role: "指标 · 埋点 · 看板", dept: "产品部",
+    def: "按北极星拆 AARRR 3 维 + 核心 25+ 事件埋点 + 3 大看板（北极星 / AI 质量 / 合规）+ 周月报。",
+    rules: ["北极星必须反映核心价值", "反指标必须有", "数据合规（个保法）", "周度对数防口径不一"],
+    can: ["指标体系 + 埋点清单 + Grafana 看板"],
+    ban: ["不做产品决策（PM 干）"]
+  },
+  "08_Figma设计师": {
+    avatar: "🎭", name: "Figma 设计师", role: "原型 · 切图 · manifest", dept: "设计部",
+    def: "按设计师规范出 8+ 页 Figma 原型 · Auto Layout + Variants + Properties · 导出 tokens.json + manifest.json + 切图 ZIP。",
+    rules: ["必用 Auto Layout 不用 Group", "必用 Variants 不是独立组件", "Dev Mode 必启用", "manifest.json 必出"],
+    can: ["Figma 原型 + tokens + 切图"],
+    ban: ["不定色板（设计师定）"]
+  },
+  "09_前端开发": {
+    avatar: "🖥", name: "前端开发", role: "按 Figma 出 Next.js 代码", dept: "设计部",
+    def: "按 manifest.json + tokens.json 严格实现 · 单文件 HTML 可跑 · 生产版 Next.js 14。消费 Token 不硬编码。",
+    rules: ["不手写色值 · 必引 Token", "单文件 Demo 必可跑（浏览器双击）", "Framer Motion 参数严守"],
+    can: ["Demo 实现 · 生产代码"],
+    ban: ["不改设计（设计师 / Figma 干）"]
+  },
+  "10_后端开发": {
+    avatar: "🔧", name: "后端开发", role: "Flask / FastAPI Mock + 生产", dept: "技术中心",
+    def: "按 API 文档出 Mock（Flask · 可跑）+ 生产 FastAPI。心理危机等硬拦截 · Mock 也必须实现（不是占位）。",
+    rules: ["心理危机 Mock 也必实现", "单文件可 python 启", "API 契约严格一致"],
+    can: ["Mock · 生产代码"],
+    ban: ["不设计 API（后端工程师干）"]
+  },
+  "14_运营负责人": {
+    avatar: "🌱", name: "运营负责人", role: "冷启动 · 增长 · 活动 · 社群", dept: "业务部",
+    def: "从 0 到 1000 种子用户 · 日常拉新留存 · 月度活动节奏 · 社群分层维护。GEO / KOL / 投放 / SEM 多渠道组合。",
+    rules: ["广告法禁词（最 / 第一 / 独家）绝对不用", "多渠道组合 · 不单一", "LTV/CAC > 3 才算赚钱"],
+    can: ["冷启动方案 + 增长矩阵 + 活动 SOP"],
+    ban: ["不改产品（PM 干）"]
+  },
+  "15_客户成功": {
+    avatar: "🤝", name: "客户成功 CSM", role: "实施 · 续约 · NPS · QBR", dept: "业务部",
+    def: "B 端续约守门人 · C 端 NPS 闭环 · G 端项目交付。6 健康指标 + 月度 Check-in + 季度 QBR。",
+    rules: ["NRR > 100% 硬目标", "NPS 跌 5pp 红灯", "不凭感觉预测续约"],
+    can: ["实施 SOP + QBR + 续约方案"],
+    ban: ["不谈单（商务干）", "不改产品"]
+  },
+  "16_商务法务": {
+    avatar: "⚖️", name: "商务法务", role: "合同 · 合规 · G 端投标", dept: "业务部",
+    def: "BD + 合同审 + 合规流程 + G 端投标 4 合 1。B 端 14 条款合同 / G 端 8 项资质 / C 端 4 大合规。",
+    rules: ["G 端接 GPT 100% 禁（合规死线）", "合规 > ¥50 万必律所审", "所有沟通群里 / 邮件 · 严禁私聊"],
+    can: ["合同 · 合规清单 · 投标材料"],
+    ban: ["不改产品 · 不做技术"]
+  },
+  "28_测试工程师": {
+    avatar: "🧪", name: "测试工程师", role: "四维测试 + 上线 28 项 Checklist", dept: "测试部",
+    def: "上线前最后一道门。功能 / 性能 / 安全 / AI 四维测试 · Bug 分级 P0/P1/P2/P3 · P0 零容忍 · 上线 Checklist 28 项一条不漏。",
+    rules: ["P0 Bug 零容忍 · 打回重做", "回归测试强制", "Checklist 28 项缺一不上"],
+    can: ["测试用例 + 压测 + 渗透 + 评测"],
+    ban: ["不改代码（开发干）"]
+  },
+  data_board: {
+    avatar: "📈", name: "数据看板", role: "WQ-7 实时 + AI 质量 + 合规", dept: "数据站",
+    def: "3 大看板实时展示：北极星 WQ-7 / AI 质量（穿帮率 / 幻觉率 / 首 token）/ 合规（心理危机 / 涉黄涉政拦截）。老板 / 运营 / 法务 各自看自己的。",
+    rules: ["每日对数 · 神策 vs 后端 vs CRM", "差 > 5% 查因"],
+    can: ["Grafana + Superset 看板"],
+    ban: []
+  }
+};
+
+// 20 专家简写数据
+const EXPERT_TEMPLATE = {
+  dept: "行业专家层",
+  rules: ["重决策 · 长周期 · 信任难建（通用家装类）", "合规第一 · 境外模型禁用", "具体铁律按行业变化"],
+  ban: ["不做产品决策（PM 干）", "不做技术实现（开发干）"]
+};
+
+const EXPERTS = {
+  "17_医疗专家": { avatar: "🏥", name: "医疗专家", role: "HIPAA 合规 · 诊疗辅助", def: "医疗行业 · 严格 HIPAA / 个人信息保护 / 医疗广告法。AI 不能替代医生。" },
+  "18_金融专家": { avatar: "💰", name: "金融专家", role: "等保 + 反洗钱 + 征信合规", def: "银行 / 保险 / 消费金融。等保三级 · 反洗钱黑名单 · 信贷审核链路追溯。" },
+  "19_教育专家": { avatar: "🎓", name: "教育专家", role: "未保 + 启发式原则 + 成人陪练", def: "K12 / 成人考证 / 高等教育。未保强 · 不能代做作业 · 启发式引导。" },
+  "20_短视频专家": { avatar: "🎬", name: "短视频专家", role: "算法推荐备案 + 内容审核", def: "抖音 / 视频号 / 快手。算法推荐备案 + 内容三审 · 未成年防沉迷。" },
+  "21_短剧专家": { avatar: "🎭", name: "短剧专家", role: "内容合规 + 付费心理 + 爽点设计", def: "红果 / 抖音短剧 / 快手短剧。卡点爽点 · 付费墙设计 · 版权合规。" },
+  "22_电商专家": { avatar: "🛍", name: "电商专家", role: "物流 · SKU · 退换 · 直播电商", def: "淘宝 / 京东 / 拼多多。SKU 管理 · 退换逻辑 · 直播电商合规。" },
+  "23_制造专家": { avatar: "🏭", name: "制造专家", role: "MES + 工业互联网 + 质检", def: "汽车 / 电子 / 装备制造。MES + ERP + SCADA + AI 质检。" },
+  "24_汽车专家": { avatar: "🚗", name: "汽车专家", role: "智驾 + 座舱 + 车联网", def: "智能驾驶 + 智能座舱 + 车联网。L0-L5 分级 + 功能安全 ISO 26262。" },
+  "25_政企专家": { avatar: "🏛", name: "政企专家", role: "等保三级 + 信创 + 国密", def: "G 端 / 国企。等保三级 / 信创目录 / 国密算法 · 境外模型 100% 禁。" },
+  "26_家装专家": { avatar: "🏡", name: "家装专家", role: "效果图 + 报价 + 装修资质", def: "贝壳 / 土巴兔 / 好好住。AI 效果图 5 分钟 vs 传统 3 天 · 施工仍需真人签字。" },
+  "27_内容专家": { avatar: "📰", name: "内容专家", role: "UGC + SEO/GEO + 知识付费", def: "公众号 / 小红书 / 知乎 / 抖音图文。算法分发 + 内容审核 + GEO 优化。" },
+  "29_情感陪伴专家": { avatar: "💝", name: "情感陪伴专家", role: "人设 + 长期记忆 + 心理危机", def: "星野 / Char.AI / MiniMax Talkie。人设破一次 3 天流失 · 心理危机必响应 · 涉黄零容忍。" },
+  "30_游戏专家": { avatar: "🎮", name: "游戏专家", role: "数值 + 付费设计 + 防沉迷", def: "MMO / 卡牌 / 休闲游戏。数值策划 + 付费心理 + 未保防沉迷。" },
+  "31_企业SaaS专家": { avatar: "🏢", name: "企业 SaaS 专家", role: "MRR + NRR + 多租户 + 定价", def: "CRM / ERP / HR SaaS。MRR / NRR / Churn 三核心 · 多租户 · 阶梯定价。" },
+  "32_跨境电商专家": { avatar: "🌏", name: "跨境电商专家", role: "多地合规 + 物流 + 多语言", def: "Shopee / Lazada / TikTok Shop。GDPR / CCPA 多地合规 · 物流 + 多语言本地化。" },
+  "33_宠物专家": { avatar: "🐶", name: "宠物专家", role: "宠物医疗 + 食品 + 用品 + 社交", def: "宠物医疗 + 食品 + 用品 + 社交 + SaaS 全链条。情感消费属性强。" },
+  "34_占卜专家": { avatar: "🔮", name: "占卜专家", role: "合规边界 + 内容审核 + 付费设计", def: "塔罗 / 星座 / 命理。合规边界极敏感 · 不能承诺 · 不能引导焦虑 · 付费话术严审。" },
+  "35_农业专家": { avatar: "🌾", name: "农业专家", role: "农业 SaaS + 物联网 + 农产品电商", def: "种植 / 养殖 / 农产品电商 / 农业物联网。政策敏感（农业补贴 / 土地流转）。" },
+  "36_新能源专家": { avatar: "🔋", name: "新能源专家", role: "光伏 + 储能 + 电动车 + 虚拟电厂", def: "光伏 / 储能 / 电动车 / 虚拟电厂。政策导向强 · 补贴变化快。" },
+  "37_数字化项目专家": { avatar: "📡", name: "数字化项目专家", role: "G 端政府数字化 · 智慧城市", def: "智慧城市 / 数字政府 / 政务云。等保四级 + 信创必选 + 涉密资质。" }
+};
+
+// ============ 初始化 · 把 emoji 包进圆头像 ============
+document.querySelectorAll('.desk').forEach(desk => {
+  const em = desk.querySelector('.agent-emoji');
+  if (em && !em.parentElement.classList.contains('agent-avatar-wrap')) {
+    const wrap = document.createElement('div');
+    wrap.className = 'agent-avatar-wrap';
+    em.parentNode.insertBefore(wrap, em);
+    wrap.appendChild(em);
+  }
+});
+
+// ============ 给专家工位补短能力标（从 EXPERTS 数据里截取前 2 段） ============
+function expertShortRole(role) {
+  if (!role) return '';
+  // 按 · / + 切 · 取前 2 段 · 短小精干
+  const parts = role.split(/[·+]/).map(s => s.trim()).filter(Boolean);
+  return parts.slice(0, 2).join(' · ');
+}
+document.querySelectorAll('.room-expert .desk').forEach(desk => {
+  const id = desk.dataset.id;
+  const data = EXPERTS[id];
+  if (!data) return;
+  // tooltip · 浏览器原生
+  desk.title = `${data.name}\n${data.role}\n\n${data.def}`;
+  // 确保 role 插在 name 之后（不追加到末尾 · 避免被 flex 挤出）
+  let roleEl = desk.querySelector('.agent-role');
+  if (!roleEl) {
+    roleEl = document.createElement('div');
+    roleEl.className = 'agent-role';
+    const nameEl = desk.querySelector('.agent-name');
+    if (nameEl && nameEl.parentNode === desk) {
+      nameEl.insertAdjacentElement('afterend', roleEl);
+    } else {
+      desk.appendChild(roleEl);
+    }
+  }
+  roleEl.textContent = expertShortRole(data.role);
+});
+
+// ============ 普通员工 desk 也加 tooltip ============
+document.querySelectorAll('.desk').forEach(desk => {
+  if (desk.closest('.room-expert')) return; // 专家已单独处理
+  const id = desk.dataset.id;
+  const data = AGENTS[id];
+  if (!data) return;
+  desk.title = `${data.name}\n${data.role}\n\n${data.def || ''}`;
+});
+
+// ============ 右键菜单 ============
+const ctxMenu = document.getElementById('ctxMenu');
+let ctxActiveId = null;
+
+function showCtxMenu(desk, x, y) {
+  const id = desk.dataset.id;
+  const data = AGENTS[id] || EXPERTS[id];
+  if (!data) return;
+  ctxActiveId = id;
+
+  document.getElementById('cmName').textContent = data.name || id;
+  document.getElementById('cmRole').textContent = data.role || '';
+
+  // 先显示以便测尺寸
+  ctxMenu.classList.add('show');
+  const rect = ctxMenu.getBoundingClientRect();
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = x + 4, top = y + 4;
+  if (left + rect.width  > vw - 8) left = x - rect.width  - 4;
+  if (top  + rect.height > vh - 8) top  = y - rect.height - 4;
+  if (left < 8) left = 8;
+  if (top  < 8) top  = 8;
+  ctxMenu.style.left = left + 'px';
+  ctxMenu.style.top  = top  + 'px';
+}
+
+function hideCtxMenu() {
+  ctxMenu.classList.remove('show');
+  ctxActiveId = null;
+}
+
+// 工位点击 → 弹菜单
+document.querySelectorAll('.desk').forEach(desk => {
+  desk.addEventListener('click', e => {
+    e.stopPropagation();
+    showCtxMenu(desk, e.clientX, e.clientY);
+  });
+  // 右键也弹
+  desk.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    showCtxMenu(desk, e.clientX, e.clientY);
+  });
+});
+
+// 菜单项点击
+document.querySelectorAll('.ctx-menu-item').forEach(item => {
+  item.addEventListener('click', e => {
+    e.stopPropagation();
+    const action = item.dataset.action;
+    const id = ctxActiveId;
+    hideCtxMenu();
+    if (!id) return;
+    const data = AGENTS[id] || EXPERTS[id];
+    const name = (data && data.name) || id;
+    switch (action) {
+      case 'assign':
+        alert(`📋 分配任务给「${name}」\n\n（MVP 占位 · 未来接入 Claude Agent SDK · 可从面板直接下发任务）`);
+        break;
+      case 'new':
+        alert(`🆕 开启跟「${name}」的新会话\n\n（MVP 占位 · 未来接 Claude Code 终端）`);
+        break;
+      case 'history':
+        alert(`📜 查看「${name}」的会话历史\n\n（MVP 占位 · 未来从 Obsidian 项目归档读取）`);
+        break;
+      case 'persona':
+        showAgent(id);
+        break;
+      case 'stop':
+        alert(`⏹ 停止「${name}」当前任务\n\n（MVP 占位）`);
+        break;
+      case 'cancel':
+      default:
+        break;
+    }
+  });
+});
+
+// 点菜单外关闭
+document.addEventListener('click', e => {
+  if (!ctxMenu.contains(e.target)) hideCtxMenu();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') hideCtxMenu();
+});
+window.addEventListener('scroll', hideCtxMenu, true);
+window.addEventListener('resize', hideCtxMenu);
+
+// ============ 底部状态栏动态 ============
+setInterval(() => {
+  // 活跃会话数（working 状态的桌子数）
+  const working = document.querySelectorAll('.desk.working').length;
+  document.getElementById('chatNum').textContent = working;
+  // 上下文百分比（模拟 20-75% 波动）
+  const pct = Math.floor(28 + Math.sin(Date.now() / 8000) * 18 + Math.random() * 4);
+  document.getElementById('ctxFill').style.width = pct + '%';
+  document.getElementById('ctxPct').textContent = pct + '%';
+}, 2400);
+
+// ============ 员工人格详情（从右键菜单"查看人格"进入） ============
+function showAgent(id) {
+  const data = AGENTS[id] || EXPERTS[id];
+  if (!data) return;
+
+  const meta = EXPERTS[id] ? Object.assign({}, EXPERT_TEMPLATE, data) : data;
+
+  document.getElementById('acAvatar').textContent = meta.avatar;
+  document.getElementById('acName').textContent = meta.name;
+  document.getElementById('acRole').textContent = meta.role;
+  document.getElementById('acDept').textContent = meta.dept;
+  document.getElementById('acDef').textContent = meta.def;
+
+  const rules = (meta.rules || []).map(r => `<li>${r}</li>`).join('');
+  document.getElementById('acRules').innerHTML = rules;
+
+  const can = (meta.can || ["（行业专家通用能力 · 按项目召唤时注入）"]).map(c => `<li>${c}</li>`).join('');
+  document.getElementById('acCan').innerHTML = can;
+
+  const ban = (meta.ban || []).map(b => `<li>${b}</li>`).join('');
+  document.getElementById('acBan').innerHTML = ban;
+
+  document.getElementById('agentModal').classList.add('show');
+}
+
+function closeAgent() {
+  document.getElementById('agentModal').classList.remove('show');
+}
+
+// ESC 关闭
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAgent();
+});
+
+// 点背景关闭
+document.getElementById('agentModal').addEventListener('click', e => {
+  if (e.target.id === 'agentModal') closeAgent();
+});
+
+// 随机动画状态切换（让工位"活起来"）
+setInterval(() => {
+  document.querySelectorAll('.desk:not(.away)').forEach(d => {
+    if (Math.random() < 0.08) {
+      const states = ['working', 'thinking', ''];
+      const currentClass = ['working', 'thinking'].find(c => d.classList.contains(c));
+      if (currentClass) d.classList.remove(currentClass);
+      const next = states[Math.floor(Math.random() * states.length)];
+      if (next) d.classList.add(next);
+    }
+  });
+}, 3000);
+</script>
+
+<script src="js/launcher.js"></script>
+</body>
+</html>
