@@ -1,0 +1,21 @@
+# 桃子公司 Cloudflare Pages 配置
+# Pages Functions 自动识别 functions/ 目录
+# R2/KV 绑定需要在 Cloudflare Dashboard 中配置，或通过 wrangler pages deploy 指定
+
+name = "peach-website"
+compatibility_date = "2024-12-01"
+
+# ── Pages 专用配置 ──
+# R2 和 KV 绑定通过 Cloudflare Dashboard → Pages → Settings → Functions → Bindings 配置
+#
+# 需要配置的绑定：
+# 1. R2 Bucket: 变量名 R2, Bucket 名 peach-assets
+# 2. KV Namespace: 变量名 KV, 需先创建 namespace
+# 3. 环境变量: DEEPSEEK_API_KEY = ark-xxx (加密), ARK_ENDPOINT_ID, MAX_TOKENS
+#
+# 本地开发用 wrangler pages dev：
+# npx wrangler pages dev . --r2=R2 --kv=KV
+
+[vars]
+ARK_ENDPOINT_ID = "ep-20260612133014-tpthh"
+MAX_TOKENS = "8192"
