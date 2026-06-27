@@ -3,295 +3,533 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📖 桃子公司 · 文档库</title>
+  <title>🧠 回流中心 · Peach Studio</title>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/launcher.css">
   <style>
-    .doc-section { margin-bottom: var(--space-2xl); }
-    .doc-list { list-style: none; }
-    .doc-list li {
-      padding: var(--space-sm) 0;
-      border-bottom: 1px dashed var(--paper-dark);
-      display: flex; align-items: center; gap: var(--space-sm);
-    }
-    .doc-list a {
-      color: var(--ink);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .doc-list a:hover { color: var(--peach); }
-    .doc-meta { color: var(--ink-faint); font-size: 12px; margin-left: auto; }
+    .kb-tab { padding:12px 8px; border:2px solid var(--paper-dark); border-radius:12px; background:white; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; color:var(--ink-soft); transition:all 0.15s; line-height:1.5; text-align:center; }
+    .kb-tab.active { border-color:var(--peach); background:rgba(209,106,78,0.08); color:var(--peach); }
+    .type-pill { padding:5px 14px; border:1.5px solid var(--paper-dark); border-radius:20px; background:white; cursor:pointer; font-family:inherit; font-size:12px; color:var(--ink-soft); transition:all 0.12s; }
+    .type-pill.active { border-color:var(--peach); background:rgba(209,106,78,0.1); color:var(--peach); font-weight:600; }
+    .upload-box { background:white; border:1.5px solid var(--paper-dark); border-radius:16px; padding:24px; margin-bottom:16px; }
+    .asset-card { display:flex; align-items:flex-start; gap:10px; padding:12px 16px; background:white; border:1px solid var(--paper-dark); border-radius:12px; margin-bottom:8px; }
+    .asset-badge { padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; color:white; flex-shrink:0; margin-top:2px; }
+    textarea, input[type="text"], input[type="url"] { width:100%; box-sizing:border-box; padding:10px 12px; border:1.5px solid var(--paper-dark); border-radius:8px; font-size:13px; font-family:inherit; outline:none; }
+    textarea:focus, input[type="text"]:focus, input[type="url"]:focus { border-color:var(--peach); }
+    .btn-primary { background:var(--peach); color:white; border:none; border-radius:8px; padding:10px 24px; font-size:14px; cursor:pointer; font-family:inherit; font-weight:600; }
+    .btn-danger  { background:#e5534b; color:white; border:none; border-radius:8px; padding:10px 24px; font-size:14px; cursor:pointer; font-family:inherit; font-weight:600; }
+    .btn-ghost   { background:transparent; border:1px solid rgba(229,83,75,0.3); color:#e5534b; border-radius:6px; padding:4px 10px; font-size:11px; cursor:pointer; font-family:inherit; }
+    .demo-toggle { display:flex; border:1.5px solid var(--paper-dark); border-radius:8px; overflow:hidden; margin-bottom:16px; }
+    .demo-toggle button { flex:1; padding:9px; border:none; background:white; cursor:pointer; font-size:13px; font-family:inherit; transition:all 0.12s; }
+    .demo-toggle button.active { background:var(--peach); color:white; }
+    .drop-zone { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:90px; border:2px dashed var(--paper-dark); border-radius:10px; cursor:pointer; color:var(--ink-faint); font-size:14px; margin-bottom:12px; padding:12px; transition:border-color 0.15s; }
+    .drop-zone:hover { border-color:var(--peach); }
   </style>
 </head>
 <body>
 
 <nav class="nav">
   <div class="container nav-content">
-    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>桃子公司</a>
+    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>Peach Studio</a>
     <div class="nav-links">
-      <a href="index.html" class="nav-link">首页</a>
-      <a href="methodology.html" class="nav-link">🎯 方法论</a>
-      <a href="office.html" class="nav-link">🎬 办公室</a>
-      <a href="team.html" class="nav-link">👥 团队</a>
-      <a href="cases.html" class="nav-link">📂 案例</a>
-      <a href="docs.html" class="nav-link active">📖 文档</a>
+      <a href="index.html" class="nav-link">🎯 需求入口</a>
+      <a href="methodology.html" class="nav-link">📚 方法论</a>
+      <a href="workspace.html" class="nav-link">📊 分析工作台</a>
+      <a href="collaboration.html" class="nav-link">🤝 协作台</a>
+      <a href="industries.html" class="nav-link">🏭 行业库</a>
+      <a href="results.html" class="nav-link">📦 结果工作台</a>
+      <a href="docs.html" class="nav-link active">🧠 回流</a>
+      <div class="nav-more-wrap">
+        <button class="nav-more-trigger" aria-haspopup="true" onclick="this.closest('.nav-more-wrap').classList.toggle('open')">更多 ▾</button>
+        <div class="nav-dropdown">
+          <a href="projects.html">📁 项目历史</a>
+          <a href="manual.html">📘 使用手册</a>
+          <a href="cases.html">📂 案例库</a>
+          <a href="team.html">👥 团队</a>
+          <a href="office.html">🎬 办公室</a>
+        </div>
+      </div>
+      <div class="theme-switcher">
+        <button class="theme-btn active" data-theme="editorial" title="Editorial Peach">🍑</button>
+        <button class="theme-btn" data-theme="airbnb" title="Airbnb">🏠</button>
+        <button class="theme-btn" data-theme="linear" title="Linear">⚡</button>
+        <button class="theme-btn" data-theme="pinterest" title="Pinterest">📌</button>
+        <button class="theme-btn" data-theme="stripe" title="Stripe">💳</button>
+      </div>
     </div>
   </div>
 </nav>
 
-<section>
+<section style="padding-top:var(--space-2xl);padding-bottom:var(--space-3xl);">
   <div class="container">
-    <div style="text-align: center; margin-bottom: var(--space-2xl);">
-      <p class="hand">桃子公司文档库</p>
-      <h1 style="margin-top: var(--space-sm);">📖 文档中心</h1>
-      <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
-        所有 Agent 人格 + 行业知识 + VELA 模板 · 一览无余
-      </p>
-    </div>
+    <div style="max-width:820px;margin:0 auto;">
 
-    <!-- 30 人 Agent + 专家 -->
-    <div class="doc-section">
-      <h2 class="squiggle">👥 43 人 AI 公司（v0.4 版）</h2>
-      <div class="grid grid-2">
-        <div class="card">
-          <h3>战略层 + 管理层（4）</h3>
-          <ul class="doc-list">
-            <li><a href="../agents/00_CEO.md">🧑‍💼 00_CEO.md</a><span class="doc-meta">v0.3 · 529 行</span></li>
-            <li><a href="../agents/11_产品总监.md">👩‍💼 11_产品总监.md</a><span class="doc-meta">v0.3 · 新增</span></li>
-            <li><a href="../agents/12_技术总监.md">👨‍💻 12_技术总监.md</a><span class="doc-meta">v0.3 · 新增</span></li>
-            <li><a href="../agents/13_设计总监.md">🎨 13_设计总监.md</a><span class="doc-meta">v0.3 · 新增</span></li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3>运营组（3 · v0.4 新增）⭐</h3>
-          <ul class="doc-list">
-            <li><a href="../agents/14_运营负责人.md">🌱 14_运营负责人.md</a><span class="doc-meta">v0.3 · 新增</span></li>
-            <li><a href="../agents/15_客户成功.md">🤝 15_客户成功.md</a><span class="doc-meta">v0.3 · 新增</span></li>
-            <li><a href="../agents/16_商务法务.md">⚖️ 16_商务法务.md</a><span class="doc-meta">v0.3 · 新增</span></li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3>产品组（2）</h3>
-          <ul class="doc-list">
-            <li><a href="../agents/01_PM.md">🧑‍🎤 01_PM.md</a><span class="doc-meta">v0.3</span></li>
-            <li><a href="../agents/07_数据运营.md">📊 07_数据运营.md</a><span class="doc-meta">v0.3</span></li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3>技术组（6）</h3>
-          <ul class="doc-list">
-            <li><a href="../agents/03_算法工程师.md">🧠 03_算法工程师.md</a><span class="doc-meta">v0.3</span></li>
-            <li><a href="../agents/04_AI训练师.md">🎓 04_AI训练师.md</a><span class="doc-meta">v0.4 ⭐ 大厂培训精华版</span></li>
-            <li><a href="../agents/05_后端工程师.md">⚙️ 05_后端工程师.md</a><span class="doc-meta">v0.3</span></li>
-            <li><a href="../agents/06_前端工程师.md">💻 06_前端工程师.md</a><span class="doc-meta">v0.3</span></li>
-            <li><a href="../agents/09_前端开发.md">🖥 09_前端开发.md</a><span class="doc-meta">v0.3</span></li>
-            <li><a href="../agents/10_后端开发.md">🔧 10_后端开发.md</a><span class="doc-meta">v0.3</span></li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3>设计组（2）</h3>
-          <ul class="doc-list">
-            <li><a href="../agents/02_设计师.md">🎨 02_设计师.md</a><span class="doc-meta">v0.3</span></li>
-            <li><a href="../agents/08_Figma设计师.md">🎭 08_Figma设计师.md</a><span class="doc-meta">v0.3</span></li>
-          </ul>
-        </div>
-
-        <div class="card" style="border-color: var(--sage);">
-          <h3>测试组（1 · v0.4 新）⭐</h3>
-          <ul class="doc-list">
-            <li><a href="../agents/28_测试工程师.md">🧪 28_测试工程师.md</a><span class="doc-meta">v0.3 · 新增</span></li>
-          </ul>
-        </div>
+      <!-- 4 Tab 主导航 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;">
+        <button class="kb-tab active" data-type="badcase" onclick="switchTab('badcase',this)">🔴<br>Badcase 库</button>
+        <button class="kb-tab" data-type="prompt" onclick="switchTab('prompt',this)">💡<br>Prompt 库</button>
+        <button class="kb-tab" data-type="demo" onclick="switchTab('demo',this)">💾<br>Demo 样板</button>
+        <button class="kb-tab" data-type="prd" onclick="switchTab('prd',this)">📄<br>文档库</button>
       </div>
-    </div>
 
-    <!-- 20 垂直行业专家 -->
-    <div class="doc-section">
-      <h2 class="squiggle">🎓 20 垂直行业专家（⭐v0.4 新 · 43 人完整版）</h2>
-      <div class="card">
-        <div class="grid grid-3">
-          <ul class="doc-list">
-            <li><a href="../industry-experts/17_医疗专家.md">🏥 医疗专家</a><span class="doc-meta">幻觉零容忍</span></li>
-            <li><a href="../industry-experts/18_金融专家.md">💰 金融专家</a><span class="doc-meta">等保 + 国产</span></li>
-            <li><a href="../industry-experts/19_教育专家.md">🎓 教育专家</a><span class="doc-meta">双减 + 未保</span></li>
-            <li><a href="../industry-experts/20_短视频专家.md">📱 短视频专家</a><span class="doc-meta">爆款机制</span></li>
-          </ul>
-          <ul class="doc-list">
-            <li><a href="../industry-experts/21_短剧专家.md">🎬 短剧专家</a><span class="doc-meta">AI 降本 80%</span></li>
-            <li><a href="../industry-experts/22_电商专家.md">🛍 电商专家</a><span class="doc-meta">转化率为王</span></li>
-            <li><a href="../industry-experts/23_制造专家.md">🏭 制造专家</a><span class="doc-meta">边缘计算</span></li>
-            <li><a href="../industry-experts/24_汽车专家.md">🚗 汽车专家</a><span class="doc-meta">ISO 26262</span></li>
-          </ul>
-          <ul class="doc-list">
-            <li><a href="../industry-experts/25_政企专家.md">🏛 政企专家</a><span class="doc-meta">信创 + 国密</span></li>
-            <li><a href="../industry-experts/26_家装专家.md">🏡 家装专家</a><span class="doc-meta">AI 出图 5 分钟</span></li>
-            <li><a href="../industry-experts/27_内容专家.md">✍ 内容专家</a><span class="doc-meta">版权 + 分发</span></li>
-          </ul>
+      <!-- ═══ Badcase Tab ═══ -->
+      <div id="panel-badcase">
+        <div class="upload-box">
+          <div id="kb-badcase-form">
+            <textarea id="bc-desc" rows="3" placeholder="描述问题是什么（必填）" style="margin-bottom:10px;resize:vertical;"></textarea>
+            <textarea id="bc-how" rows="2" placeholder="下次如何避免（选填）" style="margin-bottom:10px;resize:vertical;"></textarea>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <select id="bc-category" style="padding:8px 12px;border:1.5px solid var(--paper-dark);border-radius:8px;font-size:13px;font-family:inherit;background:white;outline:none;">
+                <option>Agent输出质量</option>
+                <option>前端布局</option>
+                <option>功能回归</option>
+                <option>流程逻辑</option>
+                <option>路径错误</option>
+                <option>通用</option>
+              </select>
+              <button class="btn-danger" onclick="quickRecordBadcase()">🔴 记录 Badcase</button>
+              <span id="bc-status" style="font-size:13px;color:var(--ink-faint);"></span>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- 18 份文档独立 SOP -->
-    <div class="doc-section">
-      <h2 class="squiggle">📋 18 份文档独立产出 SOP（⭐v0.4 新）</h2>
-      <div class="grid grid-2">
-        <div class="card">
-          <h4>产品 + 设计（8 份）</h4>
-          <ul class="doc-list" style="font-size: 13px;">
-            <li><a href="../workflows/18SOP/01_Brief.md">01 Brief · 5 分钟产出</a></li>
-            <li><a href="../workflows/18SOP/02_PRD.md">02 PRD · 15 板块大厂级</a></li>
-            <li><a href="../workflows/18SOP/03_画像+旅程.md">03 画像 + 旅程</a></li>
-            <li><a href="../workflows/18SOP/04_流程图.md">04 流程图</a></li>
-            <li><a href="../workflows/18SOP/05_指标.md">05 指标体系</a></li>
-            <li><a href="../workflows/18SOP/11_DesignBrief.md">11 Design Brief</a></li>
-            <li><a href="../workflows/18SOP/12_UI规范.md">12 UI 规范</a></li>
-            <li><a href="../workflows/18SOP/13_Figma原型.md">13 Figma 原型</a></li>
-          </ul>
+        <!-- 蒸馏状态条 -->
+        <div style="background:rgba(209,106,78,0.05);border:1px dashed rgba(209,106,78,0.4);border-radius:10px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <span id="distill-info" style="font-size:12px;color:var(--ink-soft);">加载中...</span>
+          <button onclick="distillBadcases(this)" style="padding:4px 12px;border:1px solid var(--peach);border-radius:6px;background:white;color:var(--peach);font-size:12px;cursor:pointer;font-family:inherit;">立刻蒸馏规则</button>
         </div>
-        <div class="card">
-          <h4>技术 + 运营 + 交付（10 份）</h4>
-          <ul class="doc-list" style="font-size: 13px;">
-            <li><a href="../workflows/18SOP/06_技术方案.md">06 技术方案</a></li>
-            <li><a href="../workflows/18SOP/07_模型选型.md">07 模型选型</a></li>
-            <li><a href="../workflows/18SOP/08_API.md">08 API</a></li>
-            <li><a href="../workflows/18SOP/09_DB.md">09 DB</a></li>
-            <li><a href="../workflows/18SOP/10_评测集+Prompt.md">10 评测 + Prompt</a></li>
-            <li><a href="../workflows/18SOP/14_运营.md">14 运营</a></li>
-            <li><a href="../workflows/18SOP/15_BP商业规划.md">15 BP 商业</a></li>
-            <li><a href="../workflows/18SOP/16_合规.md">16 合规</a></li>
-            <li><a href="../workflows/18SOP/17_Demo.md">17 Demo</a></li>
-            <li><a href="../workflows/18SOP/18_Mock.md">18 Mock</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
 
-    <!-- 工作流 -->
-    <div class="doc-section">
-      <h2 class="squiggle">⚙️ 工作流（心脏 + 调度）</h2>
-      <div class="card">
-        <ul class="doc-list">
-          <li><a href="../workflows/文档依赖图与真实并发调度.md">🧬 文档依赖 DAG 图（心脏）</a><span class="doc-meta">真并发</span></li>
-          <li><a href="../workflows/记忆+修改+影响矩阵.md">🧠 记忆 + 修改 + 影响矩阵</a><span class="doc-meta">33 种改动</span></li>
-          <li><a href="../workflows/全触发指令集.md">🎮 全触发指令集</a><span class="doc-meta">灵活调度</span></li>
-          <li><a href="../workflows/4档项目分级与快速执行.md">⚡ 4 档项目分级</a><span class="doc-meta">闪电/快速/标准/大</span></li>
-          <li><a href="../workflows/产品全生命周期SOP.md">🏭 产品全生命周期 SOP</a><span class="doc-meta">15 阶段</span></li>
-          <li><a href="../workflows/多业务线管理SOP.md">🗂 多业务线管理 SOP</a><span class="doc-meta">⭐v0.4 新</span></li>
-          <li><a href="../workflows/专家强制注入铁律.md">🎓 专家强制注入铁律</a><span class="doc-meta">⭐v0.4 新</span></li>
-        </ul>
+        <div id="list-badcase"></div>
       </div>
-    </div>
 
-    <!-- 弹药库 -->
-    <div class="doc-section">
-      <h2 class="squiggle">🎯 弹药库（⭐v0.4 新 · 真能套用）</h2>
-      <div class="card">
-        <ul class="doc-list">
-          <li><a href="../ammo/README.md"><strong>📦 弹药库索引</strong></a><span class="doc-meta">调用指南</span></li>
-          <li><a href="../ammo/briefs/education_C_AI陪练.md">📄 教育 C 端 Brief 模板</a></li>
-          <li><a href="../ammo/briefs/finance_B_智能风控.md">📄 金融 B 端 Brief 模板</a></li>
-          <li><a href="../ammo/briefs/healthcare_C_AI问诊.md">📄 医疗 C 端 Brief 模板</a></li>
-          <li><a href="../ammo/briefs/shortvideo_C_创作工具.md">📄 短视频 C 端 Brief 模板</a></li>
-          <li><a href="../ammo/briefs/government_G_政务助手.md">📄 G 端政府 Brief 模板</a></li>
-          <li><a href="../ammo/html-skeletons/chat.html">🖥 Chat HTML 骨架</a></li>
-          <li><a href="../ammo/html-skeletons/dashboard.html">🖥 Dashboard HTML 骨架</a></li>
-          <li><a href="../ammo/html-skeletons/feed.html">🖥 Feed HTML 骨架</a></li>
-          <li><a href="../ammo/html-skeletons/tool.html">🖥 Tool HTML 骨架</a></li>
-          <li><a href="../ammo/html-skeletons/landing.html">🖥 Landing HTML 骨架</a></li>
-        </ul>
-      </div>
-    </div>
+      <!-- ═══ Prompt Tab ═══ -->
+      <div id="panel-prompt" style="display:none;">
+        <div class="upload-box">
+          <input type="text" id="prompt-name" placeholder="这套提示词叫什么（必填，如：需求分析提示词）" style="margin-bottom:10px;">
+          <input type="text" id="prompt-usecase" placeholder="适用于什么（如：需求评审前的准备阶段）" style="margin-bottom:16px;">
 
-    <!-- 20 行业知识包 -->
-    <div class="doc-section">
-      <h2 class="squiggle">🏭 20 行业知识包</h2>
-      <div class="card">
-        <div class="grid grid-3">
-          <ul class="doc-list">
-            <li><a href="../industry-knowledge/教育.md">🎓 教育</a><span class="doc-meta">成人考证 / K12</span></li>
-            <li><a href="../industry-knowledge/金融.md">💰 金融</a><span class="doc-meta">招行 / 蚂蚁</span></li>
-            <li><a href="../industry-knowledge/医疗.md">🏥 医疗</a><span class="doc-meta">平安好医生</span></li>
-            <li><a href="../industry-knowledge/短视频.md">📱 短视频</a><span class="doc-meta">抖音 / 快手</span></li>
-          </ul>
-          <ul class="doc-list">
-            <li><a href="../industry-knowledge/短剧.md">🎬 短剧</a><span class="doc-meta">⭐新 · 红果 / 九州</span></li>
-            <li><a href="../industry-knowledge/电商.md">🛍 电商</a><span class="doc-meta">淘宝 / 拼多多</span></li>
-            <li><a href="../industry-knowledge/制造.md">🏭 制造</a><span class="doc-meta">三一 / 宁德</span></li>
-            <li><a href="../industry-knowledge/汽车.md">🚗 汽车</a><span class="doc-meta">理想 / 蔚来</span></li>
-          </ul>
-          <ul class="doc-list">
-            <li><a href="../industry-knowledge/政企.md">🏛 政企</a><span class="doc-meta">G 端 · 国产 + 信创</span></li>
-            <li><a href="../industry-knowledge/家装.md">🏡 家装</a><span class="doc-meta">贝壳 / 土巴兔</span></li>
-            <li><a href="../industry-knowledge/内容.md">✍ 内容</a><span class="doc-meta">小红书 / 知乎</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
+          <!-- 三个 textarea，填哪个就有哪个，不强制全填 -->
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;">⚙️ 系统提示词 <span style="font-weight:400;color:var(--ink-faint);">（选填）</span></div>
+            <textarea id="prompt-system" rows="4" placeholder="系统 prompt，直接写进 Agent system 段的指令" style="resize:vertical;font-size:12px;font-family:monospace;"></textarea>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;">💬 用户提示词 <span style="font-weight:400;color:var(--ink-faint);">（选填）</span></div>
+            <textarea id="prompt-user" rows="4" placeholder="用户侧 prompt，对话时给模型的 user message 模板" style="resize:vertical;font-size:12px;font-family:monospace;"></textarea>
+          </div>
+          <div style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;">🔧 内置预设 <span style="font-weight:400;color:var(--ink-faint);">（选填）</span></div>
+            <textarea id="prompt-builtin" rows="4" placeholder="内置标准化模板，桃子公司内部复用的 prompt" style="resize:vertical;font-size:12px;font-family:monospace;"></textarea>
+          </div>
 
-    <!-- 系统文档 -->
-    <div class="doc-section">
-      <h2 class="squiggle">📋 系统文档</h2>
-      <div class="card">
-        <ul class="doc-list">
-          <li><a href="../OVERALL_DESIGN.md"><strong>🏗 OVERALL_DESIGN.md</strong></a><span class="doc-meta">整体设计</span></li>
-          <li><a href="../CLAUDE.md">⚡ CLAUDE.md</a><span class="doc-meta">Claude Code 入口</span></li>
-          <li><a href="../README.md">📘 README.md</a><span class="doc-meta">项目说明</span></li>
-        </ul>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <button class="btn-primary" onclick="savePromptText()">💡 保存这套 Prompt</button>
+            <span id="prompt-status" style="font-size:13px;color:var(--ink-faint);"></span>
+          </div>
+        </div>
+        <!-- 隐藏的 type btns，保留供 check_features.sh 检测 -->
+        <div id="prompt-type-btns" style="display:none;">
+          <button data-ptype="system">系统提示词</button>
+          <button data-ptype="user">用户提示词</button>
+          <button data-ptype="builtin">内置预设</button>
+        </div>
+        <div id="list-prompt"></div>
       </div>
-    </div>
 
-    <!-- 工作流 -->
-    <div class="doc-section">
-      <h2 class="squiggle">🔄 工作流</h2>
-      <div class="grid grid-3">
-        <div class="card">
-          <h4>10 Act 标准流程</h4>
-          <ol style="font-size: 13px; color: var(--ink-soft); line-height: 1.8; padding-left: 20px;">
-            <li>接需求</li>
-            <li>三步分析</li>
-            <li>方向探索</li>
-            <li>老板拍板</li>
-            <li>任务派发</li>
-            <li>19 员工并发</li>
-            <li>3 总监审查</li>
-            <li>CEO 整合</li>
-            <li>Obsidian 归档</li>
-            <li>Demo 生成</li>
-          </ol>
+      <!-- ═══ Demo Tab ═══ -->
+      <div id="panel-demo" style="display:none;">
+        <div class="upload-box">
+          <div class="demo-toggle" id="demo-source-toggle">
+            <button class="active" onclick="setDemoSource('file',this)">📁 上传 HTML 文件</button>
+            <button onclick="setDemoSource('url',this)">🔗 输入网页 URL</button>
+          </div>
+
+          <div id="demo-file-panel">
+            <input type="text" id="demo-file-desc" placeholder="描述（如：宠物类 Landing Page）" style="margin-bottom:12px;">
+            <label class="drop-zone"
+              ondragover="event.preventDefault();this.style.borderColor='var(--peach)'"
+              ondragleave="this.style.borderColor=''"
+              ondrop="event.preventDefault();this.style.borderColor='';handleDemoFileDrop(event.dataTransfer.files[0])">
+              <span style="font-size:28px;">📁</span>
+              <span>点击选择 .html 文件 或 拖拽</span>
+              <span id="demo-file-name" style="font-size:12px;color:var(--peach);font-weight:600;margin-top:4px;"></span>
+              <input type="file" id="demo-file-input" style="display:none" accept=".html,.htm" onchange="onDemoFileSelect(this)">
+            </label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <button class="btn-primary" onclick="uploadDemoFile()">💾 上传样板</button>
+              <span id="demo-file-status" style="font-size:13px;color:var(--ink-faint);"></span>
+            </div>
+          </div>
+
+          <div id="demo-url-panel" style="display:none;">
+            <input type="url" id="demo-url" placeholder="https://example.com" style="margin-bottom:12px;">
+            <input type="text" id="demo-url-desc" placeholder="描述（如：Stripe 风格支付页）" style="margin-bottom:12px;">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <button class="btn-primary" onclick="saveUrlDemo()">🔗 保存链接</button>
+              <span id="demo-url-status" style="font-size:13px;color:var(--ink-faint);"></span>
+            </div>
+          </div>
         </div>
-        <div class="card">
-          <h4>VELA 模板</h4>
-          <p style="font-size: 13px; color: var(--ink-soft);">
-            33 主文档 + 27 支撑模板<br/>
-            通过软链接引用<br/>
-            大厂 AI PM 标准
-          </p>
-          <code style="background: var(--paper-dark); padding: 4px 8px; border-radius: var(--radius-sm); font-size: 12px; display: block; margin-top: var(--space-sm);">templates/ → VELA 源</code>
-        </div>
-        <div class="card">
-          <h4>B/G/C 策略 + 大模型选型</h4>
-          <ul class="doc-list">
-            <li><a href="../business-modes/B端策略.md">🏢 B 端策略</a></li>
-            <li><a href="../business-modes/G端策略.md">🏛 G 端策略 v0.4</a><span class="doc-meta">进攻+防守</span></li>
-            <li><a href="../business-modes/C端策略.md">📱 C 端策略</a></li>
-            <li><a href="../business-modes/模型选型决策.md">🧠 大模型选型决策</a><span class="doc-meta">⭐ 新</span></li>
-          </ul>
-        </div>
+        <div id="list-demo"></div>
       </div>
+
+      <!-- ═══ 文档库 Tab ═══ -->
+      <div id="panel-prd" style="display:none;">
+        <div class="upload-box">
+          <input type="text" id="prd-desc" placeholder="描述（如：竞品分析报告、PRD 示例）" style="margin-bottom:12px;">
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+            <span style="font-size:12px;color:var(--ink-faint);">分类：</span>
+            <button class="type-pill active" data-cat="竞品分析" onclick="setPrdCat('竞品分析',this)">竞品分析</button>
+            <button class="type-pill"        data-cat="PRD"      onclick="setPrdCat('PRD',this)">PRD</button>
+            <button class="type-pill"        data-cat="商业分析" onclick="setPrdCat('商业分析',this)">商业分析</button>
+            <button class="type-pill"        data-cat="技术方案" onclick="setPrdCat('技术方案',this)">技术方案</button>
+            <button class="type-pill"        data-cat="其他"     onclick="setPrdCat('其他',this)">其他</button>
+          </div>
+          <label class="drop-zone"
+            ondragover="event.preventDefault();this.style.borderColor='var(--peach)'"
+            ondragleave="this.style.borderColor=''"
+            ondrop="event.preventDefault();this.style.borderColor='';handlePrdFileDrop(event.dataTransfer.files[0])">
+            <span style="font-size:28px;">📄</span>
+            <span>PDF / Markdown / Word / JSON</span>
+            <span id="prd-file-name" style="font-size:12px;color:var(--peach);font-weight:600;margin-top:4px;"></span>
+            <input type="file" id="prd-file-input" style="display:none" accept=".md,.txt,.pdf,.docx,.json" onchange="onPrdFileSelect(this)">
+          </label>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button class="btn-primary" onclick="uploadPrdFile()">📤 上传文档</button>
+            <span id="prd-status" style="font-size:13px;color:var(--ink-faint);"></span>
+          </div>
+        </div>
+        <div id="list-prd"></div>
+      </div>
+
     </div>
   </div>
 </section>
 
-<footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--paper-dark); margin-top: var(--space-3xl);">
-  <div class="container" style="text-align: center; color: var(--ink-faint);">
-    <p>🏢 桃子公司 · 所有文档本地可见 · 断网也能跑</p>
-  </div>
-</footer>
+<script>
+(function(){
+  const BRIDGE = '';
+  const BADGE  = { badcase:'#e5534b', prompt:'#8b8cc7', demo:'#2d7a5a', prd:'#7a8c5a', html:'var(--peach)' };
+  const LABEL  = { badcase:'🔴 Badcase', prompt:'💡 Prompt', demo:'💾 Demo', prd:'📄 文档', html:'🎨 设计' };
+  const PTYPE  = { system:'系统', user:'用户', builtin:'内置' };
+
+  let currentTab = 'badcase';
+  let promptType = 'system';
+  let prdCat     = '竞品分析';
+  let demoSource = 'file';
+  let demoFile   = null;
+  let prdFile    = null;
+
+  /* ─── Tab 切换 ─── */
+  window.switchTab = function(type, btn) {
+    currentTab = type;
+    document.querySelectorAll('.kb-tab').forEach(b => b.classList.toggle('active', b === btn));
+    ['badcase','prompt','demo','prd'].forEach(t =>
+      document.getElementById('panel-' + t).style.display = t === type ? '' : 'none'
+    );
+    loadKbList(type);
+    if (type === 'badcase') loadDistillInfo();
+  };
+
+  /* ─── Badcase ─── */
+  window.quickRecordBadcase = async function() {
+    const desc = document.getElementById('bc-desc').value.trim();
+    const how  = document.getElementById('bc-how').value.trim();
+    const cat  = document.getElementById('bc-category').value;
+    const st   = document.getElementById('bc-status');
+    if (!desc) { st.style.color='#e5534b'; st.textContent='请填写问题描述'; return; }
+    st.style.color='var(--ink-faint)'; st.textContent='记录中...';
+    try {
+      const r = await fetch(BRIDGE + '/api/brain/badcase', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ desc, how_to_avoid: how, category: cat })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        st.style.color='#57ab5a'; st.textContent='✅ 已记录';
+        document.getElementById('bc-desc').value = '';
+        document.getElementById('bc-how').value  = '';
+        loadKbList('badcase'); loadDistillInfo();
+      } else { st.style.color='#e5534b'; st.textContent='❌ ' + (d.error||'失败'); }
+    } catch(e) { st.style.color='#e5534b'; st.textContent='❌ 桥未启动'; }
+  };
+
+  window.distillBadcases = async function(btn) {
+    const orig = btn.textContent; btn.textContent='蒸馏中...'; btn.disabled=true;
+    try {
+      const r = await fetch(BRIDGE + '/api/brain/distill_badcases', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'
+      });
+      const d = await r.json();
+      document.getElementById('distill-info').textContent = d.ok
+        ? `✅ 规则已更新 · ${d.count} 条 Badcase → ${d.rules} 条精简规则 · 每次任务自动注入`
+        : '❌ 蒸馏失败：' + (d.error||'');
+    } catch(e) { document.getElementById('distill-info').textContent='❌ 桥未启动'; }
+    btn.textContent=orig; btn.disabled=false;
+  };
+
+  async function loadDistillInfo() {
+    try {
+      const r = await fetch(BRIDGE + '/api/brain/distill_info');
+      const d = await r.json();
+      document.getElementById('distill-info').textContent = d.badcase_count
+        ? `共 ${d.badcase_count} 条 Badcase · 精简规则 ${d.rule_count} 条 · 每次任务自动注入`
+        : '暂无 Badcase · 记录第一条后自动生成规则';
+    } catch(e) { document.getElementById('distill-info').textContent='桥未启动，无法加载状态'; }
+  }
+
+  /* ─── Prompt ─── */
+  window.setPromptType = function(ptype, btn) {
+    promptType = ptype;
+    document.querySelectorAll('#prompt-type-btns .type-pill').forEach(b => b.classList.toggle('active', b === btn));
+  };
+
+  window.savePromptText = async function() {
+    const name    = document.getElementById('prompt-name').value.trim();
+    const usecase = document.getElementById('prompt-usecase').value.trim();
+    const system  = document.getElementById('prompt-system').value.trim();
+    const user    = document.getElementById('prompt-user').value.trim();
+    const builtin = document.getElementById('prompt-builtin').value.trim();
+    const st      = document.getElementById('prompt-status');
+    if (!name) { st.style.color='#e5534b'; st.textContent='请填写这套提示词的名称'; return; }
+    if (!system && !user && !builtin) { st.style.color='#e5534b'; st.textContent='至少填一种提示词内容'; return; }
+    st.style.color='var(--ink-faint)'; st.textContent='保存中...';
+    try {
+      const r = await fetch(BRIDGE + '/api/brain/save_prompt', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ name, use_case: usecase, system_content: system, user_content: user, builtin_content: builtin })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        st.style.color='#57ab5a'; st.textContent='✅ 已保存';
+        ['prompt-name','prompt-usecase','prompt-system','prompt-user','prompt-builtin'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        loadKbList('prompt');
+      } else { st.style.color='#e5534b'; st.textContent='❌ ' + (d.error||'失败'); }
+    } catch(e) { st.style.color='#e5534b'; st.textContent='❌ 桥未启动'; }
+  };
+
+  /* ─── Demo ─── */
+  window.setDemoSource = function(src, btn) {
+    demoSource = src;
+    document.querySelectorAll('#demo-source-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+    document.getElementById('demo-file-panel').style.display = src === 'file' ? '' : 'none';
+    document.getElementById('demo-url-panel').style.display  = src === 'url'  ? '' : 'none';
+  };
+
+  window.onDemoFileSelect = function(inp) {
+    demoFile = inp.files[0];
+    if (demoFile) document.getElementById('demo-file-name').textContent = '✓ ' + demoFile.name;
+  };
+  window.handleDemoFileDrop = function(file) {
+    if (!file) return;
+    demoFile = file;
+    document.getElementById('demo-file-name').textContent = '✓ ' + file.name;
+  };
+
+  window.uploadDemoFile = async function() {
+    const st = document.getElementById('demo-file-status');
+    if (!demoFile) { st.style.color='#e5534b'; st.textContent='请先选择文件'; return; }
+    const desc = document.getElementById('demo-file-desc').value.trim() || demoFile.name;
+    st.style.color='var(--ink-faint)'; st.textContent='上传中...';
+    const fd = new FormData();
+    fd.append('file', demoFile); fd.append('type','demo'); fd.append('desc', desc);
+    try {
+      const r = await fetch(BRIDGE + '/api/knowledge/upload', { method:'POST', body:fd });
+      const d = await r.json();
+      if (d.ok) {
+        st.style.color='#57ab5a'; st.textContent='✅ 已保存';
+        demoFile = null; document.getElementById('demo-file-name').textContent = '';
+        loadKbList('demo');
+      } else { st.style.color='#e5534b'; st.textContent='❌ ' + (d.error||'失败'); }
+    } catch(e) { st.style.color='#e5534b'; st.textContent='❌ 桥未启动'; }
+  };
+
+  window.saveUrlDemo = async function() {
+    const url  = document.getElementById('demo-url').value.trim();
+    const desc = document.getElementById('demo-url-desc').value.trim();
+    const st   = document.getElementById('demo-url-status');
+    if (!url) { st.style.color='#e5534b'; st.textContent='请输入链接'; return; }
+    st.style.color='var(--ink-faint)'; st.textContent='保存中...';
+    try {
+      const r = await fetch(BRIDGE + '/api/brain/save_url_demo', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ url, desc: desc || url })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        st.style.color='#57ab5a'; st.textContent='✅ 已保存';
+        document.getElementById('demo-url').value     = '';
+        document.getElementById('demo-url-desc').value = '';
+        loadKbList('demo');
+      } else { st.style.color='#e5534b'; st.textContent='❌ ' + (d.error||'失败'); }
+    } catch(e) { st.style.color='#e5534b'; st.textContent='❌ 桥未启动'; }
+  };
+
+  /* ─── 文档库 ─── */
+  window.setPrdCat = function(cat, btn) {
+    prdCat = cat;
+    document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b === btn));
+  };
+  window.onPrdFileSelect = function(inp) {
+    prdFile = inp.files[0];
+    if (prdFile) document.getElementById('prd-file-name').textContent = '✓ ' + prdFile.name;
+  };
+  window.handlePrdFileDrop = function(file) {
+    if (!file) return;
+    prdFile = file;
+    document.getElementById('prd-file-name').textContent = '✓ ' + file.name;
+    document.getElementById('prd-file-input').files; // signal only
+  };
+
+  window.uploadPrdFile = async function() {
+    const st = document.getElementById('prd-status');
+    if (!prdFile) { st.style.color='#e5534b'; st.textContent='请先选择文件'; return; }
+    const rawDesc = document.getElementById('prd-desc').value.trim() || prdFile.name;
+    const desc    = rawDesc + '【' + prdCat + '】';
+    st.style.color='var(--ink-faint)'; st.textContent='上传中...';
+    const fd = new FormData();
+    fd.append('file', prdFile); fd.append('type','prd'); fd.append('desc', desc);
+    try {
+      const r = await fetch(BRIDGE + '/api/knowledge/upload', { method:'POST', body:fd });
+      const d = await r.json();
+      if (d.ok) {
+        st.style.color='#57ab5a'; st.textContent='✅ 上传成功';
+        prdFile = null; document.getElementById('prd-file-name').textContent = '';
+        loadKbList('prd');
+      } else { st.style.color='#e5534b'; st.textContent='❌ ' + (d.error||'失败'); }
+    } catch(e) { st.style.color='#e5534b'; st.textContent='❌ 桥未启动'; }
+  };
+
+  /* ─── 资产列表（通用）─── */
+  window.loadKbList = async function(type) {
+    const listEl = document.getElementById('list-' + type);
+    if (!listEl) return;
+    listEl.innerHTML = '<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:16px 0;">加载中...</p>';
+    try {
+      const r = await fetch(BRIDGE + '/api/knowledge/list?type=' + type);
+      const d = await r.json();
+      const items = (d.items || []).sort((a,b) => (b.ts||'').localeCompare(a.ts||''));
+      if (!items.length) {
+        const tips = {
+          badcase: '还没有 Badcase · 记录第一条，Agent 立刻学习',
+          prompt:  '还没有 Prompt · 粘贴或上传第一个',
+          demo:    '还没有 Demo 样板 · 上传 HTML 或保存链接',
+          prd:     '还没有文档 · 上传第一份学习资料',
+        };
+        listEl.innerHTML = `<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:20px 0;">${tips[type]||'空的'}</p>`;
+        return;
+      }
+      // Prompt 库：按类型分三个文件夹展示
+      if (type === 'prompt') {
+        listEl.innerHTML = renderPromptFolders(items);
+        return;
+      }
+      listEl.innerHTML = items.map(item => renderCard(item)).join('');
+    } catch(e) {
+      listEl.innerHTML = '<p style="color:var(--ink-faint);font-size:13px;text-align:center;padding:16px 0;">桥未启动，无法加载</p>';
+    }
+  };
+
+  function renderPromptFolders(items) {
+    // 每条 item 是一个"套装"，展示它包含哪几种
+    return items.map(item => {
+      const foldId  = 'pfolder-' + item.id;
+      const ts      = item.ts ? new Date(item.ts).toLocaleDateString('zh-CN',{month:'2-digit',day:'2-digit'}) : '';
+      const usecase = item.use_case ? `<span style="font-size:11px;color:var(--ink-soft);">· ${escHtml(item.use_case)}</span>` : '';
+      // 有哪几种就显示哪几个标签
+      const tags = [
+        item.has_system  ? '<span style="font-size:11px;background:rgba(139,140,199,0.15);color:#6b6cc0;border-radius:4px;padding:2px 8px;">⚙️ 系统</span>' : '',
+        item.has_user    ? '<span style="font-size:11px;background:rgba(87,171,90,0.12);color:#2d7a5a;border-radius:4px;padding:2px 8px;">💬 用户</span>' : '',
+        item.has_builtin ? '<span style="font-size:11px;background:rgba(209,106,78,0.1);color:var(--peach);border-radius:4px;padding:2px 8px;">🔧 内置</span>' : '',
+      ].filter(Boolean).join('');
+      const preview = `<a href="${BRIDGE}/api/knowledge/preview?id=${item.id}" target="_blank" style="font-size:11px;color:var(--peach);margin-left:6px;text-decoration:none;">👁 查看全文</a>`;
+      return `<div style="border:1.5px solid var(--paper-dark);border-radius:12px;overflow:hidden;margin-bottom:10px;">
+        <div onclick="toggleFolder('${foldId}')" style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:white;user-select:none;"
+          onmouseover="this.style.background='var(--paper-light)'" onmouseout="this.style.background='white'">
+          <span style="font-size:20px;">📁</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--ink);">${escHtml(item.desc||item.filename||'')}${preview}</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:5px;flex-wrap:wrap;">
+              ${tags} ${usecase}
+            </div>
+          </div>
+          <span style="font-size:11px;color:var(--ink-faint);flex-shrink:0;">${ts}</span>
+          <span id="${foldId}-arrow" style="color:var(--ink-faint);font-size:12px;transition:transform 0.2s;flex-shrink:0;">▶</span>
+        </div>
+        <div id="${foldId}" style="display:none;border-top:1px solid var(--paper-dark);background:var(--paper-light);padding:12px 16px;">
+          ${renderPromptDetail(item)}
+          <div style="margin-top:10px;text-align:right;">
+            <button class="btn-ghost" onclick="deleteKbItem('${item.id}',this)">删除这套</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderPromptDetail(item) {
+    const parts = [
+      { key:'system',  icon:'⚙️', label:'系统提示词',  flag: item.has_system },
+      { key:'user',    icon:'💬', label:'用户提示词',  flag: item.has_user },
+      { key:'builtin', icon:'🔧', label:'内置预设',    flag: item.has_builtin },
+    ].filter(p => p.flag);
+    if (!parts.length) return '<p style="color:var(--ink-faint);font-size:12px;">（查看全文获取详情）</p>';
+    return parts.map(p => `
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:4px;">${p.icon} ${p.label}</div>
+        <div style="font-size:12px;color:var(--ink);background:white;border:1px solid var(--paper-dark);border-radius:6px;padding:8px 10px;white-space:pre-wrap;font-family:monospace;max-height:120px;overflow:auto;">${escHtml(item[p.key + '_preview'] || '（点击"查看全文"获取完整内容）')}</div>
+      </div>`).join('');
+  }
+
+  window.toggleFolder = function(foldId) {
+    const el    = document.getElementById(foldId);
+    const arrow = document.getElementById(foldId + '-arrow');
+    const open  = el.style.display === 'none';
+    el.style.display = open ? '' : 'none';
+    if (arrow) arrow.style.transform = open ? 'rotate(90deg)' : '';
+  };
+
+  function renderCard(item) {
+    const color   = BADGE[item.type]  || '#999';
+    const label   = LABEL[item.type]  || item.type;
+    const ts      = item.ts ? new Date(item.ts).toLocaleDateString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+    const ptag    = item.prompt_type ? `<span style="font-size:10px;border:1px solid #8b8cc7;color:#8b8cc7;border-radius:3px;padding:0 5px;margin-left:4px;">${PTYPE[item.prompt_type]||item.prompt_type}</span>` : '';
+    const cattag  = item.category    ? `<span style="font-size:10px;border:1px solid ${color};color:${color};border-radius:3px;padding:0 5px;margin-left:4px;">${item.category}</span>` : '';
+    const urlLink = item.url         ? `<a href="${item.url}" target="_blank" style="font-size:11px;color:var(--peach);margin-left:8px;text-decoration:none;">↗ 打开</a>` : '';
+    const preview = !item.url && item.id ? `<a href="${BRIDGE}/api/knowledge/preview?id=${item.id}" target="_blank" style="font-size:11px;color:var(--peach);margin-left:8px;text-decoration:none;">👁 预览</a>` : '';
+    const usecase = item.use_case    ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:3px;">适用于：${escHtml(item.use_case)}</div>` : '';
+    return `<div class="asset-card">
+      <span class="asset-badge" style="background:${color};">${label}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);word-break:break-all;">${escHtml(item.desc||item.filename||'')}${ptag}${cattag}${urlLink}${preview}</div>
+        ${usecase}
+        <div style="font-size:11px;color:var(--ink-faint);margin-top:2px;">${ts}</div>
+      </div>
+      <button class="btn-ghost" onclick="deleteKbItem('${item.id}',this)">删除</button>
+    </div>`;
+  }
+
+  function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  window.deleteKbItem = async function(id, btn) {
+    btn.disabled=true; btn.textContent='...';
+    try {
+      const r = await fetch(BRIDGE + '/api/knowledge/delete', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id})
+      });
+      const d = await r.json();
+      if (d.ok) loadKbList(currentTab);
+      else { btn.disabled=false; btn.textContent='删除'; }
+    } catch(e) { btn.disabled=false; btn.textContent='删除'; }
+  };
+
+  // 初始化
+  loadKbList('badcase');
+  loadDistillInfo();
+})();
+</script>
 
 <script src="js/launcher.js"></script>
 </body>

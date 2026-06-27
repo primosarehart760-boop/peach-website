@@ -3,24 +3,443 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🏢 桃子公司 · AI 时代的一人公司范本</title>
+  <title>🏢 Peach Studio · AI 产品经理分身系统</title>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/launcher.css">
+  <style>
+    /* ========== Tab 1 · 需求入口 专用样式（2026-04-23 v1.0） ========== */
+
+    /* 导航下拉 */
+    .nav-links { flex-wrap: wrap; }
+    .nav-more-wrap { position: relative; }
+    .nav-more-trigger {
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: 14px;
+      color: var(--ink-soft); padding: 0;
+    }
+    .nav-more-trigger:hover { color: var(--peach); }
+    .nav-dropdown {
+      position: absolute; top: calc(100% + 4px); right: 0;
+      background: white; border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-md); padding: 6px 0; min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      opacity: 0; pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 9999;
+    }
+    .nav-more-wrap:hover .nav-dropdown,
+    .nav-more-wrap:focus-within .nav-dropdown,
+    .nav-more-wrap.open .nav-dropdown {
+      opacity: 1; pointer-events: auto; transform: translateY(0);
+    }
+    .nav-dropdown a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; color: var(--ink-soft);
+      text-decoration: none; font-size: 14px;
+    }
+    .nav-dropdown a:hover { background: var(--paper); color: var(--peach); }
+
+    /* 阶段选择器 */
+    #phaseSelector { display:none; margin: 0 0 14px; }
+    .phase-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+    .phase-card {
+      border: 1.5px solid #d8d0c6;
+      border-radius: 12px; padding: 10px 14px 10px 38px;
+      cursor: pointer; transition: all 0.18s ease; position: relative;
+      background: #faf8f5; opacity: 0.72;
+    }
+    .phase-card::before {
+      content: ''; position: absolute; left: 12px; top: 12px;
+      width: 16px; height: 16px; border-radius: 4px;
+      border: 1.5px solid #c8c0b6; background: #f0ebe4;
+      transition: all 0.18s;
+    }
+    .phase-card .phase-name { color: var(--ink-soft); }
+    .phase-card.selected {
+      border-color: var(--peach); background: white; opacity: 1;
+      box-shadow: 0 2px 8px rgba(209,106,78,0.12);
+    }
+    .phase-card.selected .phase-name { color: var(--ink); }
+    .phase-card.selected::before {
+      background: var(--peach); border-color: var(--peach);
+      content: '✓'; color: white; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .phase-card.disabled { opacity: 0.28; cursor: not-allowed; }
+    .phase-card.disabled::before { background: #eee; border-color: #ddd; }
+    .phase-card:not(.disabled):hover { border-color: var(--peach); opacity: 0.9; }
+    .phase-card:not(.disabled):active { transform: scale(0.96); }
+    @keyframes phaseTogglePop { 0%{transform:scale(1)} 40%{transform:scale(0.95)} 100%{transform:scale(1)} }
+    .phase-card.toggling { animation: phaseTogglePop 0.22s ease; }
+    .phase-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+    .phase-docs { font-size: 11px; color: var(--ink-faint); line-height: 1.5; }
+    .phase-count { font-size: 11px; color: var(--peach); font-weight: 600; margin-top: 4px; }
+    .phase-quick-btns { display:flex; gap:6px; }
+    .phase-quick-btn {
+      font-size: 11px; padding: 3px 10px; border-radius: 99px; cursor: pointer;
+      border: 1px solid var(--paper-dark); background: white; color: var(--ink-soft);
+      font-family: var(--font-body); transition: all 0.12s;
+    }
+    .phase-quick-btn:hover { border-color: var(--peach); color: var(--peach); }
+    #phaseSummaryBar {
+      margin-top: 10px; padding: 8px 14px; border-radius: 9px;
+      background: var(--paper-light); border: 1px solid var(--paper-dark);
+      font-size: 12px; color: var(--ink-soft); display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    @media (max-width:640px) { .phase-grid { grid-template-columns:1fr; } }
+
+    /* 模式切换器 */
+    .mode-switcher {
+      display: inline-flex;
+      background: var(--paper-light);
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 14px; padding: 4px;
+      margin-bottom: var(--space-lg);
+      gap: 4px;
+    }
+    .mode-btn {
+      display: flex; flex-direction: column; align-items: flex-start;
+      padding: 10px 20px;
+      background: transparent; border: none; border-radius: 10px;
+      cursor: pointer; transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+      text-align: left; min-width: 180px;
+    }
+    .mode-btn .mode-label {
+      font-family: var(--font-serif); font-size: 16px;
+      color: var(--ink-soft); font-weight: 600;
+    }
+    .mode-btn .mode-spec {
+      font-size: 11px; color: var(--ink-faint);
+      margin-top: 2px; line-height: 1.3;
+    }
+    .mode-btn.active {
+      background: white;
+      box-shadow: 0 2px 8px rgba(209,106,78,0.15);
+    }
+    .mode-btn.active .mode-label { color: var(--peach); }
+    .mode-btn.active .mode-spec { color: var(--ink-soft); }
+    .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.5); }
+
+    /* 行业 chip · 20 个 · 单选 */
+    .industry-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: var(--space-xl);
+    }
+    .industry-chip {
+      padding: 8px 10px; font-size: 12px;
+      background: var(--paper-light);
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+      font-family: var(--font-sans);
+      color: var(--ink-soft);
+      text-align: center;
+    }
+    .industry-chip:hover {
+      border-color: var(--peach);
+      color: var(--peach);
+      transform: translateY(-1px);
+    }
+    .industry-chip.selected {
+      background: var(--peach);
+      color: white;
+      border-color: var(--peach);
+      box-shadow: 0 2px 8px rgba(209,106,78,0.3);
+    }
+
+    /* 输入框聚焦抖动 */
+    @keyframes inputShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .input-shake { animation: inputShake 0.4s; }
+
+    /* 依据感声明 */
+    .evidence-bar {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px;
+      margin-top: var(--space-md);
+      padding: 10px 16px;
+      background: rgba(154,168,137,0.08);
+      border: 1px dashed rgba(154,168,137,0.3);
+      border-radius: 10px;
+      font-size: 12px; color: var(--ink-faint);
+    }
+    .evidence-bar .ev-item { display: inline-flex; align-items: center; gap: 4px; }
+    .evidence-bar .ev-num { color: var(--peach); font-weight: 600; font-family: var(--font-serif); }
+
+    /* PM × AI 训练师协作交汇图 */
+    .collab-box {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-md);
+      align-items: stretch;
+      max-width: 1060px;
+      margin: 0 auto;
+    }
+    .collab-cross {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 0 var(--space-sm);
+    }
+    .collab-cross-dot {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--peach); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; margin-bottom: 12px;
+    }
+    .collab-cross-label {
+      writing-mode: vertical-rl; text-orientation: upright;
+      font-family: var(--font-hand); color: var(--peach);
+      font-size: 14px; letter-spacing: 4px;
+    }
+
+    /* 9 层流水线预告 */
+    .pipeline-preview {
+      max-width: 980px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+    }
+    .pipeline-node {
+      padding: var(--space-lg) var(--space-md);
+      background: var(--paper-light);
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .pipeline-node:hover {
+      transform: translateY(-3px);
+      border-color: var(--peach);
+    }
+    .pipeline-node .pn-emoji { font-size: 28px; line-height: 1; }
+    .pipeline-node .pn-label {
+      font-size: 13px; color: var(--ink-soft);
+      margin-top: 6px; font-weight: 500;
+    }
+    .pipeline-node.highlight-sage { border-color: var(--sage); background: #f0faf2; }
+    .pipeline-node.highlight-peach { border-color: var(--peach); background: #fff5ef; }
+
+    /* 20 行业预告 · 无公司名 · 场景描述 */
+    .industry-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-md);
+    }
+    .industry-preview-card {
+      padding: var(--space-lg);
+      background: var(--paper-light);
+      border: 1px solid var(--paper-dark);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    .industry-preview-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--peach);
+      box-shadow: 0 8px 20px rgba(209,106,78,0.1);
+    }
+    .industry-preview-card h4 {
+      color: var(--peach);
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+    .industry-preview-card .ip-scene {
+      color: var(--ink-faint);
+      font-size: 12px;
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+    .industry-preview-card .ip-kpi {
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+    .industry-preview-card .ip-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 10px;
+      background: rgba(154,168,137,0.15);
+      color: var(--sage-dark);
+      border-radius: 4px;
+      margin-top: 6px;
+    }
+
+    /* 5 大资产层 */
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+    }
+    .asset-card {
+      padding: var(--space-lg);
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .asset-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--peach);
+    }
+    .asset-card .ac-num {
+      font-family: var(--font-serif);
+      font-size: 42px;
+      color: var(--peach);
+      line-height: 1;
+      font-style: italic;
+    }
+    .asset-card .ac-name {
+      margin-top: 8px;
+      font-family: var(--font-serif);
+      font-size: 16px;
+      color: var(--ink);
+    }
+    .asset-card .ac-desc {
+      font-size: 12px;
+      color: var(--ink-faint);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    /* 响应式 */
+    @media (max-width: 900px) {
+      .industry-grid { grid-template-columns: repeat(5, 1fr); }
+      .mode-btn { min-width: 140px; padding: 8px 14px; }
+      .collab-box { grid-template-columns: 1fr; }
+      .collab-cross { flex-direction: row; padding: var(--space-sm) 0; }
+      .collab-cross-label { writing-mode: horizontal-tb; }
+      .pipeline-preview { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .industry-grid { grid-template-columns: repeat(4, 1fr); }
+      .mode-switcher { flex-direction: column; }
+      .mode-btn { min-width: auto; width: 100%; }
+      .pipeline-preview { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ========== 引导浮层 · 5 步追问（2026-04-29） ========== */
+    #guide-btn-inline:hover {
+      border-color: var(--peach) !important;
+      background: rgba(209,106,78,0.06) !important;
+      transform: scale(1.08);
+      box-shadow: 0 2px 8px rgba(209,106,78,0.18);
+    }
+    .guide-overlay {
+      position: fixed; inset: 0;
+      background: rgba(40, 30, 25, 0.45);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      z-index: 9999; display: none;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .guide-overlay.active { display: flex; animation: guideFade 0.22s ease; }
+    @keyframes guideFade { from { opacity: 0; } to { opacity: 1; } }
+    .guide-modal {
+      background: var(--paper);
+      border-radius: 22px;
+      width: 100%; max-width: 640px; max-height: 90vh;
+      padding: 32px 36px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+      position: relative; overflow-y: auto;
+      animation: guideSlide 0.28s ease;
+    }
+    @keyframes guideSlide {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .guide-close {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none; cursor: pointer;
+      font-size: 22px; color: var(--ink-faint);
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.18s, color 0.18s;
+    }
+    .guide-close:hover { background: var(--paper-dark); color: var(--ink); }
+    .guide-progress { display: flex; gap: 6px; margin-bottom: 20px; }
+    .guide-progress .dot {
+      flex: 1; height: 4px; border-radius: 2px;
+      background: var(--paper-dark); transition: background 0.3s, opacity 0.3s;
+    }
+    .guide-progress .dot.done { background: var(--peach); }
+    .guide-progress .dot.current { background: var(--peach); opacity: 0.55; }
+    .guide-step-label {
+      font-family: var(--font-hand); color: var(--peach);
+      font-size: 16px; margin-bottom: 4px;
+    }
+    .guide-question {
+      font-family: var(--font-serif); font-size: 26px; line-height: 1.35;
+      color: var(--ink); margin-bottom: 8px; font-weight: 600;
+    }
+    .guide-hint {
+      color: var(--ink-soft); font-size: 13px;
+      margin-bottom: 16px; line-height: 1.6;
+    }
+    .guide-hint strong { color: var(--ink); }
+    .guide-textarea {
+      width: 100%; min-height: 110px;
+      padding: 14px 16px; border-radius: 12px;
+      border: 1.5px solid var(--paper-dark);
+      background: white; font-family: var(--font-sans);
+      font-size: 15px; line-height: 1.55;
+      resize: vertical; outline: none; box-sizing: border-box;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .guide-textarea:focus {
+      border-color: var(--peach);
+      box-shadow: 0 0 0 3px rgba(209,106,78,0.12);
+    }
+    .guide-actions {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 18px; gap: 12px; flex-wrap: wrap;
+    }
+    .guide-actions .left, .guide-actions .right { display: flex; gap: 8px; }
+    .guide-btn {
+      padding: 10px 18px; border-radius: 10px;
+      font-family: inherit; font-size: 14px; cursor: pointer;
+      border: none; transition: all 0.18s;
+    }
+    .guide-btn-ghost { background: none; color: var(--ink-soft); }
+    .guide-btn-ghost:hover { color: var(--ink); background: var(--paper-dark); }
+    .guide-btn-primary { background: var(--peach); color: white; }
+    .guide-btn-primary:hover { background: var(--peach-dark); }
+    .guide-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; background: var(--peach); }
+  </style>
 </head>
 <body>
 
 <!-- 导航 -->
 <nav class="nav">
   <div class="container nav-content">
-    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>桃子公司</a>
+    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>Peach Studio</a>
     <div class="nav-links">
-      <a href="index.html" class="nav-link active">首页</a>
-      <a href="methodology.html" class="nav-link">🎯 方法论</a>
-      <a href="office.html" class="nav-link">🎬 办公室</a>
-      <a href="team.html" class="nav-link">👥 团队</a>
-      <a href="cases.html" class="nav-link">📂 案例</a>
-      <a href="docs.html" class="nav-link">📖 文档</a>
+      <a href="index.html" class="nav-link active">🎯 需求入口</a>
+      <a href="methodology.html" class="nav-link">📚 方法论</a>
+      <a href="workspace.html" class="nav-link">📊 分析工作台</a>
+      <a href="collaboration.html" class="nav-link">🤝 协作台</a>
+      <a href="industries.html" class="nav-link">🏭 行业库</a>
+      <a href="results.html" class="nav-link">📦 结果工作台</a>
+      <a href="docs.html" class="nav-link">🧠 回流</a>
+      <div class="nav-more-wrap">
+        <button class="nav-more-trigger" aria-haspopup="true" onclick="this.closest('.nav-more-wrap').classList.toggle('open')">更多 ▾</button>
+        <div class="nav-dropdown">
+          <a href="projects.html">📁 项目历史</a>
+          <a href="manual.html">📘 使用手册</a>
+          <a href="cases.html">📂 案例库</a>
+          <a href="team.html">👥 团队</a>
+          <a href="office.html">🎬 办公室</a>
+        </div>
+      </div>
       <div class="theme-switcher">
         <button class="theme-btn active" data-theme="editorial" title="Editorial Peach">🍑</button>
         <button class="theme-btn" data-theme="airbnb" title="Airbnb">🏠</button>
@@ -32,74 +451,598 @@
   </div>
 </nav>
 
-<!-- Hero · AI 输入框主入口 -->
-<section style="padding-top: var(--space-4xl); padding-bottom: var(--space-2xl);">
+<!-- Hero · 需求入口主场 -->
+<section style="padding-top: var(--space-3xl); padding-bottom: var(--space-2xl);">
   <div class="container">
-    <div style="text-align: center; max-width: 860px; margin: 0 auto;">
-      <p class="hand animate-in stagger-1" style="margin-bottom: var(--space-sm); color: var(--peach);">一个人即一家 AI 产品公司</p>
-      <h1 class="animate-in stagger-2" style="margin-bottom: var(--space-md); font-size: clamp(48px, 7vw, 88px); line-height: 1.05;">
-        🏢 <span style="font-style: italic;">桃子公司</span>
+    <div style="text-align: center; max-width: 920px; margin: 0 auto;">
+      <h1 class="animate-in stagger-2" style="margin-bottom: var(--space-xl); font-size: clamp(48px, 7vw, 88px); line-height: 1.05;">
+        🏢 <span style="font-style: italic;">Peach Studio</span>
       </h1>
-      <p class="animate-in stagger-3" style="font-size: 18px; color: var(--ink-soft); margin-bottom: var(--space-2xl); line-height: 1.6;">
-        告诉它你要做什么产品 · 19 位员工立即开工 · 75 秒出大厂级方案
-      </p>
 
-      <!-- AI 大输入框 -->
-      <form id="peach-launcher" class="animate-in stagger-4" onsubmit="return launchCompany(event)" style="position: relative; margin-bottom: var(--space-lg);">
-        <div style="position: relative; background: white; border: 2px solid var(--paper-dark); border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); transition: border-color 0.2s, box-shadow 0.2s;"
-             onmouseover="this.style.borderColor='var(--peach)'"
-             onmouseout="this.style.borderColor='var(--paper-dark)'">
-          <textarea id="peach-input" rows="2" placeholder="例：招商银行 · 智能信贷审核      或      字节跳动 · 短视频 AI 选题推荐"
-                    style="width: 100%; padding: 20px 140px 20px 24px; border: none; background: transparent; font-family: var(--font-serif); font-size: 20px; line-height: 1.5; resize: none; outline: none; color: var(--ink); border-radius: 18px;"></textarea>
-          <button type="submit" class="btn btn-primary" style="position: absolute; right: 12px; bottom: 12px; padding: 10px 22px; font-size: 15px;">
-            ✨ 启动公司
+      <!-- 大输入框 · 第一步 -->
+      <form id="peach-launcher" class="animate-in stagger-3" onsubmit="return launchCompany(event)" style="position: relative; margin-bottom: 16px;">
+        <input type="hidden" id="selected-industry" value="">
+        <input type="hidden" id="selected-mode" value="lightning">
+        <input type="hidden" id="selected-demo-tier" value="fast">
+        <input type="hidden" id="generate-demo" value="true">
+        <input type="hidden" id="ref-urls-value" value="">
+        <input type="hidden" id="known-competitors-value" value="">
+        <div id="input-wrap" style="position: relative; background: white; border: 2px solid var(--paper-dark); border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); transition: border-color 0.2s, box-shadow 0.2s;">
+          <textarea id="peach-input" rows="2" maxlength="500"
+                    placeholder="例：某金融机构 · 智能信贷审核   |   某教育平台 · AI 口语陪练   |   某医疗 SaaS · 诊疗辅助助手"
+                    style="width: 100%; padding: 20px 170px 20px 24px; border: none; background: transparent; font-family: var(--font-serif); font-size: 20px; line-height: 1.5; resize: none; outline: none; color: var(--ink); border-radius: 18px;"></textarea>
+          <div id="char-count" style="position: absolute; left: 24px; bottom: 10px; font-size: 11px; color: var(--ink-faint);">0 / 500</div>
+          <button id="guide-btn-inline" type="button" onclick="openGuide()" title="没思路？让我用 5 个问题引导你"
+                  style="position: absolute; right: 260px; bottom: 12px; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--paper-dark); background: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.18s; padding: 0; z-index: 5;">
+            💡
+          </button>
+          <button id="launch-btn" type="submit" class="btn btn-primary" style="position: absolute; right: 12px; bottom: 12px; padding: 10px 22px; font-size: 15px;">
+            ✨ 启动 · 2 分钟出方案
           </button>
         </div>
       </form>
 
-      <!-- 行业快选 chips -->
-      <div class="animate-in stagger-4" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-xl);">
-        <button class="industry-chip" data-chip="金融">💰 金融</button>
-        <button class="industry-chip" data-chip="教育">🎓 教育</button>
-        <button class="industry-chip" data-chip="医疗">🏥 医疗</button>
-        <button class="industry-chip" data-chip="短剧">🎬 短剧</button>
-        <button class="industry-chip" data-chip="电商">🛍 电商</button>
-        <button class="industry-chip" data-chip="短视频">📱 短视频</button>
-        <button class="industry-chip" data-chip="制造">🏭 制造</button>
-        <button class="industry-chip" data-chip="汽车">🚗 汽车</button>
-        <button class="industry-chip" data-chip="政企">🏛 政企</button>
-        <button class="industry-chip" data-chip="家装">🏡 家装</button>
-        <button class="industry-chip" data-chip="情感陪伴">💝 情感陪伴</button>
-        <button class="industry-chip" data-chip="游戏">🎮 游戏</button>
-        <button class="industry-chip" data-chip="SaaS">🏢 SaaS</button>
+      <!-- 模式切换器 · 第二步 -->
+      <div class="animate-in stagger-3" style="display: flex; justify-content: center; margin-bottom: 14px;">
+        <div class="mode-switcher" role="tablist" aria-label="生产模式">
+          <button class="mode-btn active" data-mode="lightning" role="tab" aria-selected="true">
+            <span class="mode-label">⚡ 闪电档</span>
+            <span class="mode-spec">2 分钟 · 3 份固定文档 + 1 demo</span>
+          </button>
+          <button class="mode-btn" data-mode="standard" role="tab" aria-selected="false">
+            <span class="mode-label">📦 标准档</span>
+            <span class="mode-spec">按阶段选择 · 最多 20 份 VELA 精品文档 + Demo</span>
+          </button>
+        </div>
       </div>
 
-      <p class="hand" style="color: var(--ink-faint); font-size: 15px;">
-        也可以 <a href="office.html" style="color: var(--peach); border-bottom: 1px dashed var(--peach);">先进办公室看看</a> · 或 <a href="methodology.html" style="color: var(--peach); border-bottom: 1px dashed var(--peach);">翻方法论矩阵</a>
+      <!-- 闪电档产出预览（闪电档专属）· 第三步 -->
+      <div id="lightningPreview" class="animate-in stagger-3" style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="font-size:12px;color:var(--ink-faint);font-weight:500;">⚡ 2 分钟固定产出</span>
+          <span style="flex:1;height:1px;background:var(--paper-dark);"></span>
+          <span style="font-size:11px;color:var(--peach);">面试闪电档专属</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          <div style="background:white;border:1.5px solid var(--paper-dark);border-top:3px solid var(--peach);border-radius:10px;padding:12px 10px;">
+            <div style="font-size:18px;margin-bottom:5px;">📋</div>
+            <div style="font-size:12px;font-weight:600;color:var(--ink);">Product Brief</div>
+            <div style="font-size:11px;color:var(--ink-faint);margin-top:3px;line-height:1.5;">市场切入点 · 核心用户 · 竞品差距 · AI 用法 · 人机协同本质</div>
+          </div>
+          <div style="background:white;border:1.5px solid var(--paper-dark);border-top:3px solid var(--sage);border-radius:10px;padding:12px 10px;">
+            <div style="font-size:18px;margin-bottom:5px;">🎨</div>
+            <div style="font-size:12px;font-weight:600;color:var(--ink);">Design-Tech Brief</div>
+            <div style="font-size:11px;color:var(--ink-faint);margin-top:3px;line-height:1.5;">行业视觉色板 · 字体层级 · 技术栈建议 · 模型选型红线</div>
+          </div>
+          <div style="background:white;border:1.5px solid var(--paper-dark);border-top:3px solid #c9a878;border-radius:10px;padding:12px 10px;">
+            <div style="font-size:18px;margin-bottom:5px;">🚀</div>
+            <div style="font-size:12px;font-weight:600;color:var(--ink);">HTML Demo</div>
+            <div style="font-size:11px;color:var(--ink-faint);margin-top:3px;line-height:1.5;">单文件可交互 · 行业视觉定制 · 核心功能可点 · 0 死按钮</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-faint);padding:6px 10px;background:rgba(154,168,137,0.08);border-radius:7px;border:1px dashed rgba(154,168,137,0.3);">
+          <span style="color:var(--sage-dark);">✓</span> 3 文档由快速 CEO 并发触发 · 面试官 2 分钟内看到完整方案轮廓
+        </div>
+      </div>
+
+      <!-- 阶段选择器（标准档专属）· 第三步 -->
+      <div id="phaseSelector" class="animate-in stagger-3" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-size:13px; color:var(--ink-soft); font-weight:500;">选择要生成的阶段</span>
+          <div class="phase-quick-btns">
+            <button type="button" class="phase-quick-btn" onclick="selectPhasePreset('predev')">定义阶段 P1-P3</button>
+            <button type="button" class="phase-quick-btn" onclick="selectPhasePreset('all')">全选 P1-P6</button>
+            <button type="button" class="phase-quick-btn" onclick="selectPhasePreset('none')">清空</button>
+          </div>
+        </div>
+        <div class="phase-grid">
+          <div class="phase-card selected" data-phase="p1" onclick="togglePhase('p1')">
+            <div class="phase-name">P1 · 市场洞察与立项</div>
+            <div class="phase-docs">市场报告 · 竞品深度 · BP · 立项 · SWOT · 竞品汇总 · 壁垒方向 · MRD · BRD</div>
+            <div class="phase-count">9 份文档</div>
+          </div>
+          <div class="phase-card selected" data-phase="p2" onclick="togglePhase('p2')">
+            <div class="phase-name">P2 · 用户研究与洞察</div>
+            <div class="phase-docs">用户调研 · 用户画像 · 问卷设计 · 用户访谈 · 用户旅程地图</div>
+            <div class="phase-count">5 份文档</div>
+          </div>
+          <div class="phase-card selected" data-phase="p3" onclick="togglePhase('p3')">
+            <div class="phase-name">P3 · 产品规划与定义</div>
+            <div class="phase-docs">PRD · 路线图 · 功能清单 · IA · 业务流程 · 数据指标 · Demo</div>
+            <div class="phase-count">6 PM + 1 训练师 = 7 份</div>
+          </div>
+          <div class="phase-card selected" data-phase="p4" onclick="togglePhase('p4')">
+            <div class="phase-name">P4 · 设计与体验</div>
+            <div class="phase-docs">交互原型 · UI设计规范 · 设计走查 · AI选型需求</div>
+            <div class="phase-count">4 份文档</div>
+          </div>
+          <div class="phase-card selected" data-phase="p5" onclick="togglePhase('p5')">
+            <div class="phase-name">P5 · 技术开发与测试</div>
+            <div class="phase-docs">技术报告 · 模型选型 · API · 数据库 · 埋点 · 测试 · AI评测 · 降级策略 · 内容安全 · 算法备案…</div>
+            <div class="phase-count">12 VELA + 4 训练师 SOP = 16 份</div>
+          </div>
+          <div class="phase-card selected" data-phase="p6" onclick="togglePhase('p6')">
+            <div class="phase-name">P6 · 上线运营与迭代</div>
+            <div class="phase-docs">使用手册 · 上线Checklist · 商业化定价 · 运营策略 · ASO · 项目复盘 · 数据分析 · 归档清单 · 变更日志…</div>
+            <div class="phase-count">9 VELA + 5 训练师 SOP = 14 份</div>
+          </div>
+        </div>
+        <div id="phaseSummaryBar">
+          <span id="phaseDocCount">已选 <strong>55 份文档</strong></span>
+          <span id="phaseTimeEst" style="color:var(--ink-faint);">预计 10-15 分钟</span>
+        </div>
+      </div>
+
+      <!-- Demo 生成选项 -->
+      <div id="demoOptionSection" class="animate-in stagger-3" style="margin-top:10px;margin-bottom:8px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <!-- 第一行：开关 -->
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
+          <div id="demo-toggle-track" onclick="toggleDemoOption()" style="width:38px;height:22px;border-radius:99px;background:var(--peach);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div id="demo-toggle-knob" style="width:16px;height:16px;border-radius:50%;background:white;position:absolute;top:3px;left:19px;transition:left 0.18s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+          </div>
+          <span id="demo-toggle-label" style="font-size:13px;color:var(--ink-soft);font-weight:500;">同时生成 Demo</span>
+        </label>
+        <!-- 第二行：档位选择（开关打开时显示） -->
+        <div id="demo-tier-row" style="display:flex;align-items:center;gap:10px;">
+          <div style="display:inline-flex;align-items:center;background:#f0ebe2;border-radius:99px;padding:3px;gap:2px;">
+            <button type="button" id="demo-fast-btn" class="demo-tier-btn active"
+              onclick="setDemoTier('fast')"
+              style="border:none;background:white;border-radius:99px;padding:5px 16px;font-size:12px;cursor:pointer;font-family:var(--font-body);color:var(--peach);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:all 0.15s;">
+              ⚡ 快速Demo
+            </button>
+            <button type="button" id="demo-premium-btn" class="demo-tier-btn"
+              onclick="setDemoTier('premium')"
+              style="border:none;background:transparent;border-radius:99px;padding:5px 16px;font-size:12px;cursor:pointer;font-family:var(--font-body);color:var(--ink-faint);font-weight:500;transition:all 0.15s;">
+              ✨ 精品Demo
+            </button>
+          </div>
+          <span id="demo-tier-hint" style="font-size:11px;color:var(--ink-faint);">骨架+假数据 · 2分钟出</span>
+        </div>
+      </div>
+
+      <!-- 桥连接状态 -->
+      <div id="bridge-status-bar" style="display:flex;align-items:center;gap:8px;margin-bottom: var(--space-lg);padding:8px 14px;border-radius:10px;font-size:13px;background:#f8f5f0;border:1px solid var(--paper-dark);">
+        <span id="bridge-dot" style="width:10px;height:10px;border-radius:50%;background:#ccc;flex-shrink:0;"></span>
+        <span id="bridge-msg" style="color:var(--ink-soft);">正在检测桥连接...</span>
+      </div>
+
+      <!-- JD 解析入口 -->
+      <div style="text-align:center; margin-bottom: var(--space-md);">
+        <button type="button" onclick="toggleJdPanel()" id="jd-toggle-btn"
+          style="background:none; border:1.5px dashed var(--paper-dark); border-radius:10px; padding:8px 20px; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:all 0.18s; font-family:var(--font-body);"
+          onmouseover="this.style.borderColor='var(--peach)';this.style.color='var(--peach)'"
+          onmouseout="this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-soft)'">
+          📋 有JD？粘贴或传图 · 自动解析填入 ▾
+        </button>
+      </div>
+
+      <!-- JD 解析面板 -->
+      <div id="jd-panel" style="display:none; background:white; border:1.5px solid var(--paper-dark); border-radius:14px; padding:20px; margin-bottom:var(--space-md); text-align:left;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+          <!-- 文字粘贴 -->
+          <div>
+            <div style="font-size:12px; color:var(--ink-faint); margin-bottom:6px;">粘贴JD文字</div>
+            <textarea id="jd-text-input" rows="6" placeholder="把JD完整复制粘贴进来..."
+              style="width:100%; padding:10px 12px; border:1px solid var(--paper-dark); border-radius:8px; font-size:13px; line-height:1.6; resize:vertical; font-family:var(--font-body); outline:none; box-sizing:border-box;"></textarea>
+          </div>
+          <!-- 图片上传 -->
+          <div>
+            <div style="font-size:12px; color:var(--ink-faint); margin-bottom:6px;">或传JD截图</div>
+            <div id="jd-drop-zone"
+              style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:120px; border:2px dashed var(--paper-dark); border-radius:8px; cursor:pointer; gap:8px; color:var(--ink-faint); font-size:13px; transition:all 0.18s; padding:12px; box-sizing:border-box;"
+              ondragover="event.preventDefault();this.style.borderColor='var(--peach)';this.style.color='var(--peach)'"
+              ondragleave="this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-faint)'"
+              ondrop="event.preventDefault();this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-faint)';_addJdFiles(Array.from(event.dataTransfer.files))"
+              onclick="document.getElementById('jd-file-input').click()">
+              <span style="font-size:28px;">📸</span>
+              <span>点击选图 / 拖拽（可多张）</span>
+              <div id="jd-file-list" style="width:100%; margin-top:4px;"></div>
+              <input type="file" id="jd-file-input" accept="image/*" multiple style="display:none"
+                onchange="_addJdFiles(Array.from(this.files));this.value=''">
+            </div>
+          </div>
+        </div>
+        <!-- 解析按钮 + 状态 -->
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <button type="button" onclick="parseJd()"
+            style="background:var(--peach); color:white; border:none; border-radius:8px; padding:9px 22px; font-size:14px; cursor:pointer; font-family:var(--font-body);">
+            🔍 解析JD
+          </button>
+          <span id="jd-status" style="font-size:13px; color:var(--ink-faint);"></span>
+        </div>
+        <!-- 解析结果预览 -->
+        <div id="jd-result" style="display:none; margin-top:14px; padding:12px 14px; background:linear-gradient(135deg,#f0fff8,#e8f7f0); border:1px solid #4caf82; border-radius:8px; font-size:13px; line-height:1.8;">
+        </div>
+      </div>
+
+      <!-- 参考设计网站入口 -->
+      <div style="text-align:center; margin-bottom: var(--space-md);">
+        <button type="button" onclick="toggleRefPanel()" id="ref-toggle-btn"
+          style="background:none; border:1.5px dashed var(--paper-dark); border-radius:10px; padding:8px 20px; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:all 0.18s; font-family:var(--font-body);"
+          onmouseover="this.style.borderColor='var(--peach)';this.style.color='var(--peach)'"
+          onmouseout="this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-soft)'">
+          📐 参考哪个网站的设计？（精品Demo必填）▾
+        </button>
+      </div>
+
+      <!-- 参考设计网站面板 -->
+      <div id="ref-panel" style="display:none; background:white; border:1.5px solid var(--paper-dark); border-radius:14px; padding:20px; margin-bottom:var(--space-md); text-align:left;">
+        <div style="font-size:13px; color:var(--ink-faint); margin-bottom:10px;">粘贴你想参考的网站 URL · Demo 会学习其设计风格和交互逻辑</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <input type="text" id="ref-url-input" placeholder="https://example.com"
+            style="flex:1;padding:9px 12px;border:1.5px solid var(--paper-dark);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;box-sizing:border-box;"
+            onfocus="this.style.borderColor='var(--peach)'"
+            onblur="this.style.borderColor='var(--paper-dark)'"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addRefUrl();}">
+          <button type="button" onclick="addRefUrl()"
+            style="background:var(--peach);color:white;border:none;border-radius:8px;padding:9px 18px;font-size:13px;cursor:pointer;font-family:var(--font-body);flex-shrink:0;">
+            + 添加
+          </button>
+        </div>
+        <div id="ref-url-chips" style="display:flex;flex-wrap:wrap;gap:6px;min-height:24px;"></div>
+        <div style="margin-top:10px;font-size:11px;color:var(--ink-faint);">
+          💡 例：dribbble.com · linear.app · vercel.com · notion.so · stripe.com
+        </div>
+        <!-- 从 Demo 样板库快速选 -->
+        <div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--paper-dark);">
+          <div style="font-size:11px;color:var(--ink-faint);margin-bottom:8px;">💾 从你的 Demo 样板库快速选（点一下直接加入）</div>
+          <div id="demo-sample-picker" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+      </div>
+
+      <!-- 已知信息预填（选填） -->
+      <div style="text-align:center; margin-bottom: var(--space-md);">
+        <button type="button" onclick="togglePresetPanel()" id="preset-toggle-btn"
+          style="background:none; border:1.5px dashed var(--paper-dark); border-radius:10px; padding:8px 20px; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:all 0.18s; font-family:var(--font-body);"
+          onmouseover="this.style.borderColor='var(--peach)';this.style.color='var(--peach)'"
+          onmouseout="this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-soft)'">
+          📋 我已知道的信息（竞品/用户/数据）· 选填 ▾
+        </button>
+      </div>
+      <div id="preset-panel" style="display:none; background:white; border:1.5px solid var(--paper-dark); border-radius:14px; padding:20px; margin-bottom:var(--space-md); text-align:left;">
+        <div style="font-size:12px; color:var(--ink-faint); margin-bottom:14px;">填了就用你的真实信息 · 不填 Claude 自动调研</div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:6px;">竞品（你已知道的，逗号隔开）</label>
+          <input type="text" id="known-competitors-input" placeholder="例：宠医+、波奇宠物、小宠医生"
+            style="width:100%;padding:9px 12px;border:1.5px solid var(--paper-dark);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;box-sizing:border-box;"
+            onfocus="this.style.borderColor='var(--peach)'"
+            onblur="this.style.borderColor='var(--paper-dark)';document.getElementById('known-competitors-value').value=this.value.trim();"
+            oninput="document.getElementById('known-competitors-value').value=this.value.trim();">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:6px;">目标用户（你已有的认知）</label>
+          <input type="text" id="known-users-input" placeholder="例：25-35岁一线城市养猫铲屎官，关注健康"
+            style="width:100%;padding:9px 12px;border:1.5px solid var(--paper-dark);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;box-sizing:border-box;"
+            onfocus="this.style.borderColor='var(--peach)'"
+            onblur="this.style.borderColor='var(--paper-dark)'">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--ink-soft);font-weight:600;display:block;margin-bottom:6px;">其他已知信息（数据/痛点/限制）</label>
+          <textarea id="known-extra-input" rows="2" placeholder="例：现有用户2000人，DAU 150，主要投诉是问诊等待时间长"
+            style="width:100%;padding:9px 12px;border:1.5px solid var(--paper-dark);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;resize:vertical;box-sizing:border-box;"
+            onfocus="this.style.borderColor='var(--peach)'"
+            onblur="this.style.borderColor='var(--paper-dark)'"></textarea>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--ink-faint);">💡 这些信息会直接传给各阶段 Agent，覆盖 AI 推断，让产出更准确</div>
+      </div>
+
+      <!-- 思路文档上传（.md）· 选填 -->
+      <div style="text-align:center; margin-bottom: var(--space-md);">
+        <button type="button" onclick="toggleBriefPanel()" id="brief-toggle-btn"
+          style="background:none; border:1.5px dashed var(--paper-dark); border-radius:10px; padding:8px 20px; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:all 0.18s; font-family:var(--font-body);"
+          onmouseover="this.style.borderColor='var(--peach)';this.style.color='var(--peach)'"
+          onmouseout="this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-soft)'">
+          📄 上传我的思路文档（.md）· 注入全 Agent ▾
+        </button>
+      </div>
+      <div id="brief-panel" style="display:none; background:white; border:1.5px solid var(--paper-dark); border-radius:14px; padding:20px; margin-bottom:var(--space-md); text-align:left;">
+        <div style="font-size:12px; color:var(--ink-faint); margin-bottom:14px;">上传你已写好的 .md 思路文档 · 内容将以最高优先级注入所有 Agent · 覆盖 AI 推断</div>
+        <label id="brief-upload-label" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px dashed var(--paper-dark);border-radius:10px;cursor:pointer;transition:border-color 0.18s;"
+          onmouseover="this.style.borderColor='var(--peach)'"
+          onmouseout="this.style.borderColor='var(--paper-dark)'">
+          <span style="font-size:20px;">📎</span>
+          <span id="brief-file-name" style="font-size:13px;color:var(--ink-soft);">点击选择 .md 文件（可多选）…</span>
+          <input type="file" id="brief-file-input" accept=".md,.txt" multiple style="display:none;" onchange="readBriefFile(this)">
+        </label>
+        <div id="brief-preview" style="display:none;margin-top:12px;padding:10px 12px;background:#f9f6f1;border-radius:8px;font-size:12px;color:var(--ink-soft);line-height:1.7;max-height:120px;overflow:auto;white-space:pre-wrap;font-family:monospace;"></div>
+        <div id="brief-clear-row" style="display:none;margin-top:8px;text-align:right;">
+          <button type="button" onclick="clearBrief()" style="font-size:12px;color:var(--ink-faint);background:none;border:none;cursor:pointer;text-decoration:underline;">清除</button>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--ink-faint);">💡 适合你已有产品思路、用户访谈摘要、竞品分析草稿等文档 · 所有 Agent 工作前都会先读这份文档</div>
+      </div>
+      <input type="hidden" id="user-brief-value" value="">
+
+      <!-- HTML 初稿上传 · 选填 -->
+      <div style="text-align:center; margin-bottom: var(--space-md);">
+        <button type="button" onclick="toggleDraftPanel()" id="draft-toggle-btn"
+          style="background:none; border:1.5px dashed var(--paper-dark); border-radius:10px; padding:8px 20px; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:all 0.18s; font-family:var(--font-body);"
+          onmouseover="this.style.borderColor='var(--peach)';this.style.color='var(--peach)'"
+          onmouseout="this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-soft)'">
+          💻 上传前端初稿（.html）· AI 以此为基础继续完善 ▾
+        </button>
+      </div>
+      <div id="draft-panel" style="display:none; background:white; border:1.5px solid var(--paper-dark); border-radius:14px; padding:20px; margin-bottom:var(--space-md); text-align:left;">
+        <div style="font-size:12px; color:var(--ink-faint); margin-bottom:14px;">上传你的 HTML 初稿 · AI 不会推倒重来 · 而是在你的基础上完善细节、补充交互、对接后端</div>
+        <label id="draft-upload-label" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px dashed var(--paper-dark);border-radius:10px;cursor:pointer;transition:border-color 0.18s;"
+          onmouseover="this.style.borderColor='var(--peach)'"
+          onmouseout="this.style.borderColor='var(--paper-dark)'">
+          <span style="font-size:20px;">📄</span>
+          <span id="draft-file-name" style="font-size:13px;color:var(--ink-soft);">点击选择 .html 文件…</span>
+          <input type="file" id="draft-file-input" accept=".html,.htm" style="display:none;" onchange="readDraftFile(this)">
+        </label>
+        <div id="draft-preview" style="display:none;margin-top:12px;padding:10px 12px;background:#f9f6f1;border-radius:8px;font-size:12px;color:var(--ink-soft);line-height:1.7;max-height:140px;overflow:auto;white-space:pre-wrap;font-family:monospace;"></div>
+        <div id="draft-clear-row" style="display:none;margin-top:8px;text-align:right;">
+          <button type="button" onclick="clearDraft()" style="font-size:12px;color:var(--ink-faint);background:none;border:none;cursor:pointer;text-decoration:underline;">清除</button>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--ink-faint);">💡 适合你已有粗稿/模板/竞品还原稿 · AI 会保留你的结构，补充样式、动效和后端接口对接</div>
+      </div>
+      <input type="hidden" id="html-draft-value" value="">
+
+      <!-- 素材库（图片/视频）· 选填 -->
+      <div style="text-align:center; margin-bottom: var(--space-md);">
+        <button type="button" onclick="toggleMediaPanel()" id="media-toggle-btn"
+          style="background:none; border:1.5px dashed var(--paper-dark); border-radius:10px; padding:8px 20px; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:all 0.18s; font-family:var(--font-body);"
+          onmouseover="this.style.borderColor='var(--peach)';this.style.color='var(--peach)'"
+          onmouseout="this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-soft)'">
+          🖼 素材库（图片/视频）· 告诉 Demo 首页用哪张 ▾
+        </button>
+      </div>
+      <div id="media-panel" style="display:none; background:white; border:1.5px solid var(--paper-dark); border-radius:14px; padding:20px; margin-bottom:var(--space-md); text-align:left;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <button type="button" onclick="openMediaFolder()"
+            style="background:var(--peach);color:white;border:none;border-radius:8px;padding:7px 16px;font-size:13px;cursor:pointer;font-family:var(--font-body);flex-shrink:0;">
+            📂 在 Finder 打开素材库
+          </button>
+          <button type="button" onclick="_loadMediaList()"
+            style="background:none;border:1.5px solid var(--paper-dark);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:var(--font-body);color:var(--ink-soft);flex-shrink:0;">
+            🔄 刷新列表
+          </button>
+          <span style="font-size:12px;color:var(--ink-faint);">把图片/视频拖进文件夹后点刷新</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-faint);margin-bottom:14px;"><b>勾选</b>本项目要用的素材 · 没勾选的不会传给 Agent · 也可直接拖拽到下方上传</div>
+
+        <!-- 拖拽上传区 -->
+        <div id="media-drop-zone"
+          style="border:2px dashed var(--paper-dark);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all 0.18s;margin-bottom:14px;"
+          onclick="document.getElementById('media-file-input').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--peach)';this.style.background='#fef9f7';"
+          ondragleave="this.style.borderColor='var(--paper-dark)';this.style.background='';"
+          ondrop="handleMediaDrop(event)">
+          <div style="font-size:24px;margin-bottom:6px;">📁</div>
+          <div style="font-size:13px;color:var(--ink-soft);">拖拽图片/视频到这里，或点击选择</div>
+          <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">支持 PNG · JPG · WebP · SVG · MP4 · WebM</div>
+          <input type="file" id="media-file-input" multiple accept=".png,.jpg,.jpeg,.webp,.svg,.gif,.mp4,.webm,.mov" style="display:none;" onchange="uploadMediaFiles(this.files)">
+        </div>
+
+        <!-- 已有素材列表（从 /api/media-list 加载 + 新上传追加）-->
+        <div id="media-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <div id="media-empty" style="font-size:12px;color:var(--ink-faint);text-align:center;padding:10px 0;">素材库是空的 · 先把文件放进 Finder 文件夹，或拖拽上传</div>
+
+        <div style="margin-top:10px;font-size:11px;color:var(--ink-faint);">
+          💡 标注示例：<b>首页背景图</b>、<b>产品演示视频</b>、<b>第二页插图左</b>、<b>导航Logo</b><br>
+          Demo Agent 会按你写的用途把素材嵌入正确位置
+        </div>
+      </div>
+
+      <!-- 竞品链接（可选）· 填了自动深度拆解，注入竞品 Agent -->
+      <div style="margin-bottom: var(--space-md);">
+        <button type="button" onclick="toggleCompetitorPanel()" id="competitor-toggle-btn"
+          style="background:none; border:1.5px dashed var(--paper-dark); border-radius:10px; padding:8px 20px; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:all 0.18s; font-family:var(--font-body);"
+          onmouseover="this.style.borderColor='var(--peach)';this.style.color='var(--peach)'"
+          onmouseout="this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-soft)'">
+          🔍 竞品链接 · 自动深度拆解注入竞品分析 ▾
+        </button>
+        <div id="competitor-panel" style="display:none; background:white; border:1.5px solid var(--paper-dark); border-radius:14px; padding:20px; margin-top:10px; text-align:left;">
+          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;line-height:1.7;">
+            填入竞品官网 URL，启动时自动做三层拆解（公司背景 + 商业模式 + 技术架构）<br>
+            结果保存到项目目录，竞品分析 Agent 自动读取，不用你重复说明
+          </div>
+          <div id="competitor-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="url" id="competitor-url-input" placeholder="https://竞品官网..."
+              style="flex:1;padding:8px 12px;border:1.5px solid var(--paper-dark);border-radius:8px;font-size:13px;font-family:var(--font-body);outline:none;"
+              onfocus="this.style.borderColor='var(--peach)'" onblur="this.style.borderColor='var(--paper-dark)'"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();addCompetitorUrl()}">
+            <button type="button" onclick="addCompetitorUrl()"
+              style="padding:8px 16px;background:var(--peach);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--font-body);">
+              + 添加
+            </button>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--ink-faint);">
+            💡 可填多个竞品 · 启动后在 results.html 看拆解进度
+          </div>
+        </div>
+      </div>
+
+      <!-- 行业选择 · 可选 -->
+      <div class="animate-in stagger-4" style="margin-bottom: var(--space-md);">
+        <p style="font-size: 13px; color: var(--ink-faint); margin-bottom: 10px;">
+          行业（可选）· <span id="industry-hint" style="color: var(--ink-faint); font-family: var(--font-hand); font-size: 15px;">不选也能启动，Claude 自动判断</span>
+        </p>
+        <div class="industry-grid">
+          <button type="button" class="industry-chip" data-chip="通用/平台" style="border-style:dashed;">🌐 通用/平台</button>
+          <button type="button" class="industry-chip" data-chip="医疗">🏥 医疗</button>
+          <button type="button" class="industry-chip" data-chip="金融">💰 金融</button>
+          <button type="button" class="industry-chip" data-chip="教育">🎓 教育</button>
+          <button type="button" class="industry-chip" data-chip="短视频">🎬 短视频</button>
+          <button type="button" class="industry-chip" data-chip="短剧">🎭 短剧</button>
+          <button type="button" class="industry-chip" data-chip="电商">🛍 电商</button>
+          <button type="button" class="industry-chip" data-chip="制造">🏭 制造</button>
+          <button type="button" class="industry-chip" data-chip="汽车">🚗 汽车</button>
+          <button type="button" class="industry-chip" data-chip="政企">🏛 政企</button>
+          <button type="button" class="industry-chip" data-chip="家装">🏡 家装</button>
+          <button type="button" class="industry-chip" data-chip="内容">📰 内容</button>
+          <button type="button" class="industry-chip" data-chip="情感陪伴">💝 情感陪伴</button>
+          <button type="button" class="industry-chip" data-chip="游戏">🎮 游戏</button>
+          <button type="button" class="industry-chip" data-chip="企业SaaS">🏢 企业 SaaS</button>
+          <button type="button" class="industry-chip" data-chip="跨境电商">🌏 跨境电商</button>
+          <button type="button" class="industry-chip" data-chip="宠物">🐶 宠物</button>
+          <button type="button" class="industry-chip" data-chip="占卜">🔮 占卜</button>
+          <button type="button" class="industry-chip" data-chip="农业">🌾 农业</button>
+          <button type="button" class="industry-chip" data-chip="新能源">🔋 新能源</button>
+          <button type="button" class="industry-chip" data-chip="数字化">📡 数字化</button>
+        </div>
+      </div>
+
+      <!-- 依据感声明 -->
+      <div class="evidence-bar animate-in stagger-5">
+        <span style="color: var(--ink-soft); font-weight: 500;">产出基于：</span>
+        <span class="ev-item"><span class="ev-num">72</span> 份完整资产（33 VELA + 2 闪电 Brief + 27 支撑 + 10 SOP）</span>
+        <span class="ev-item"><span class="ev-num">64</span> 份 AI PM 知识库</span>
+        <span class="ev-item"><span class="ev-num">6</span> 位训练师真实笔记</span>
+        <span class="ev-item"><span class="ev-num">20</span> 个行业专家</span>
+        <span class="ev-item"><span class="ev-num">5+</span> 真实项目样板</span>
+      </div>
+
+      <p class="hand" style="color: var(--ink-faint); font-size: 15px; margin-top: var(--space-lg);">
+        也可以 <a href="methodology.html" style="color: var(--peach); border-bottom: 1px dashed var(--peach);">先看方法论</a> · 或 <a href="docs.html" style="color: var(--peach); border-bottom: 1px dashed var(--peach);">翻资产层</a>
       </p>
     </div>
   </div>
 </section>
 
-<!-- 三重身份 -->
+<!-- 📂 运营看板（4层Dashboard · localStorage持久化） -->
+<section id="history-section" style="display:none; padding: 48px 0 0;">
+  <!-- 🔴 火情拦截横幅（有卡住任务时显示） -->
+  <div id="fire-banner" style="display:none; background:#fff0eb; border-top:3px solid #e57373; border-bottom:1px solid #ffcdd2; padding:12px 24px; margin-bottom:0;">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:20px;">🔴</span>
+        <span id="fire-banner-text" style="font-size:14px; font-weight:600; color:#c62828;">有任务卡住 · 建议先处理</span>
+      </div>
+      <button onclick="document.getElementById('fire-banner').style.display='none'"
+        style="background:transparent;border:1px solid #e57373;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;color:#c62828;">
+        忽略
+      </button>
+    </div>
+  </div>
+  <div class="container" style="padding-top: 24px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+      <h2 style="font-family:'Instrument Serif',serif; font-size:26px; color:var(--ink); font-weight:400;">
+        📊 运营看板
+      </h2>
+      <button onclick="clearHistory()" style="background:transparent;border:1px solid var(--paper-dark);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;color:var(--ink-faint);">
+        清空
+      </button>
+    </div>
+    <!-- 4层卡片区 -->
+    <div id="history-layer-red"   style="display:none; margin-bottom:20px;"></div>
+    <div id="history-layer-yellow" style="display:none; margin-bottom:20px;"></div>
+    <div id="history-layer-green" style="display:none; margin-bottom:20px;"></div>
+    <div id="history-layer-blue"  style="display:none; margin-bottom:20px;"></div>
+  </div>
+</section>
+
+<!-- 🧬 桃子元定性 · 三可宪法（v1.1 · 2026-04-23 注入） -->
+<section style="background: linear-gradient(180deg, var(--paper-light), var(--paper)); padding: var(--space-2xl) 0;">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: var(--space-xl);">
+      <p class="hand" style="color: var(--peach);">Vol. 1 · Issue 1 · 2026-04-23</p>
+      <h2 class="section-title squiggle" style="margin-top: var(--space-sm);">🧬 桃子元定性 · 三可宪法</h2>
+      <p class="section-subtitle" style="font-style: italic; max-width: 760px; margin: var(--space-sm) auto 0;">
+        "Peach Studio是一个<strong style="color: var(--peach);">可调度、可审查、可迭代</strong>的 AI 产品公司系统 · <br>
+        而不是一个简单的内容生成工具"
+      </p>
+      <p style="font-size: 13px; color: var(--ink-faint); margin-top: var(--space-xs);">— 老板 2026-04-23 钉死</p>
+    </div>
+
+    <div class="grid grid-3" style="margin-bottom: var(--space-2xl);">
+      <div class="card animate-in stagger-1" style="border-left: 4px solid var(--peach); transform: rotate(-0.8deg);">
+        <div style="font-size: 36px; margin-bottom: var(--space-sm);">🔀</div>
+        <h3>可调度 Orchestrable</h3>
+        <p class="hand" style="margin: var(--space-xs) 0; color: var(--peach);">42 员工 · 自动调度</p>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 13px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ 老板扔一句话 · CEO 自动识档</li>
+          <li>→ 并发 / 串行 / 条件分支 有规则</li>
+          <li>→ 42 员工 + 5 审查员 = worker pool</li>
+          <li>→ 任务队列 · 不是黑盒</li>
+        </ul>
+      </div>
+      <div class="card animate-in stagger-2" style="border-left: 4px solid var(--sage); transform: rotate(0.4deg);">
+        <div style="font-size: 36px; margin-bottom: var(--space-sm);">🛡</div>
+        <h3>可审查 Auditable</h3>
+        <p class="hand" style="margin: var(--space-xs) 0; color: var(--sage-deep);">8 层审批 · 全程回溯</p>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 13px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ L1 员工自检 → L8 CEO 终审</li>
+          <li>→ 每层硬把关 · 不过不放行</li>
+          <li>→ AUDIT_REPORT 每任务可查</li>
+          <li>→ 谁审什么 · 为啥不过 · 一目了然</li>
+        </ul>
+      </div>
+      <div class="card animate-in stagger-3" style="border-left: 4px solid var(--warm-tan); transform: rotate(-0.6deg);">
+        <div style="font-size: 36px; margin-bottom: var(--space-sm);">🔁</div>
+        <h3>可迭代 Iterable</h3>
+        <p class="hand" style="margin: var(--space-xs) 0; color: var(--warm-tan);">每跑一次 · 更聪明</p>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 13px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ 失败案例 Anti-Pattern 库</li>
+          <li>→ 成功模式 Prior Art 库</li>
+          <li>→ 版本化 prompt + 评测集</li>
+          <li>→ 回流 Obsidian · 持续进化</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: var(--space-xl);">
+      <h3 class="squiggle" style="margin-bottom: var(--space-md);">🎭 3 核心信条</h3>
+      <div class="grid grid-3" style="text-align: left;">
+        <div style="padding: var(--space-md); background: white; border-radius: 12px; border: 1.5px solid var(--paper-dark);">
+          <p style="font-family: var(--font-hand); color: var(--peach); font-size: 14px; margin-bottom: 6px;">信条 1</p>
+          <strong>Demo 是文档的可视化 · 不是为 Demo 做 Demo</strong>
+          <p style="font-size: 12px; color: var(--ink-faint); margin-top: 6px;">PRD 每个功能 Demo 能点 · Demo 每个按钮追溯 PRD</p>
+        </div>
+        <div style="padding: var(--space-md); background: white; border-radius: 12px; border: 1.5px solid var(--paper-dark);">
+          <p style="font-family: var(--font-hand); color: var(--sage-deep); font-size: 14px; margin-bottom: 6px;">信条 2</p>
+          <strong>员工 = 老板不同侧面 + 7 师父肉身</strong>
+          <p style="font-size: 12px; color: var(--ink-faint); margin-top: 6px;">桃子是老板方法论的外化载体 · 不是通用工具</p>
+        </div>
+        <div style="padding: var(--space-md); background: white; border-radius: 12px; border: 1.5px solid var(--paper-dark);">
+          <p style="font-family: var(--font-hand); color: var(--warm-tan); font-size: 14px; margin-bottom: 6px;">信条 3</p>
+          <strong>她是老板 · 下发任务 · 员工领活</strong>
+          <p style="font-size: 12px; color: var(--ink-faint); margin-top: 6px;">视觉严守 Editorial · 不学 SaaS 感</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center;">
+      <h3 class="squiggle" style="margin-bottom: var(--space-md);">🔒 v1.1 十铁律</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 900px; margin: 0 auto;">
+        <span class="industry-chip" style="cursor: default;">1 · AI 边界护城河 N34</span>
+        <span class="industry-chip" style="cursor: default;">2 · CEO Gate 强制检查</span>
+        <span class="industry-chip" style="cursor: default;">3 · 8 层审批链</span>
+        <span class="industry-chip" style="cursor: default;">4 · 范围 × 用途双档位</span>
+        <span class="industry-chip" style="cursor: default;">5 · 目录固定 · 内容动态</span>
+        <span class="industry-chip" style="cursor: default;">6 · Demo 文档一致</span>
+        <span class="industry-chip" style="cursor: default;">7 · 方法论外化</span>
+        <span class="industry-chip" style="cursor: default;">8 · 视觉严守 Editorial</span>
+        <span class="industry-chip" style="cursor: default;">9 · Self-Check 第 9 段</span>
+        <span class="industry-chip" style="cursor: default;">10 · 并发调度</span>
+      </div>
+      <p style="font-size: 12px; color: var(--ink-faint); margin-top: var(--space-md); font-style: italic;">
+        违反任一条 · 该设计无效 · 重做
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 四角色 · 三重身份 + QA -->
 <section style="background: linear-gradient(180deg, var(--paper), var(--paper-light));">
   <div class="container">
     <div style="text-align: center; margin-bottom: var(--space-2xl);">
       <p class="hand">真正的 AI 产品公司</p>
-      <h2 class="section-title" style="margin-top: var(--space-sm);">三重身份 · 一套骨架</h2>
-      <p class="section-subtitle">不是"做 AI 的一个人"· 是一家真公司的完整运作</p>
+      <h2 class="section-title" style="margin-top: var(--space-sm);">三重身份 · + QA 把关</h2>
+      <p class="section-subtitle">不是 "做 AI 的一个人" · 是一家真公司的完整生产线</p>
     </div>
 
-    <div class="grid grid-3">
+    <div class="grid grid-4">
       <div class="card animate-in stagger-1" style="border-top: 4px solid var(--peach);">
         <div style="font-size: 40px; margin-bottom: var(--space-md);">🧑‍🎤</div>
         <h3>AI 产品经理</h3>
         <p class="hand" style="margin: var(--space-sm) 0;">懂业务 · 懂用户 · 懂方法</p>
-        <ul style="list-style: none; color: var(--ink-soft); font-size: 14px; line-height: 1.8; margin-top: var(--space-sm);">
-          <li>→ 六步分析铁律（画像到具体人）</li>
-          <li>→ VELA 33 大厂级模板</li>
-          <li>→ PRD 15 板块（超越 VELA 9）</li>
-          <li>→ 3 总监审查 · BLOCKING 清单</li>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 13px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ 六步分析 · 画像到具体人</li>
+          <li>→ VELA 34 份大厂模板</li>
+          <li>→ PRD 15 板块 · 9+6 扩展</li>
+          <li>→ 交互 5 态 + 边界 6 类 + 反指标</li>
         </ul>
       </div>
 
@@ -107,11 +1050,11 @@
         <div style="font-size: 40px; margin-bottom: var(--space-md);">🎯</div>
         <h3>AI 训练师</h3>
         <p class="hand" style="margin: var(--space-sm) 0;">懂模型 · 懂评测 · 懂调优</p>
-        <ul style="list-style: none; color: var(--ink-soft); font-size: 14px; line-height: 1.8; margin-top: var(--space-sm);">
-          <li>→ 模型选型 5 维矩阵（禁境外）</li>
-          <li>→ 评测集 500 × 5 × 3 分布</li>
-          <li>→ Prompt 工程 6 层设计</li>
-          <li>→ 数据飞轮 + 降级策略</li>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 13px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ 三层选型 · 模态 能力 形态</li>
+          <li>→ RAG 四门决策</li>
+          <li>→ 评测集 500 × 5 × 3 + Judge</li>
+          <li>→ Badcase 飞轮 + 降级链路</li>
         </ul>
       </div>
 
@@ -119,270 +1062,373 @@
         <div style="font-size: 40px; margin-bottom: var(--space-md);">🎨</div>
         <h3>UI 设计专家</h3>
         <p class="hand" style="margin: var(--space-sm) 0;">懂审美 · 懂工具 · 懂落地</p>
-        <ul style="list-style: none; color: var(--ink-soft); font-size: 14px; line-height: 1.8; margin-top: var(--space-sm);">
-          <li>→ 60+ design-* Skill（Airbnb / Linear / Stripe）</li>
-          <li>→ 两阶段设计法（规范先行 · 代码后行）</li>
-          <li>→ Design Token 三层体系</li>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 13px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ 60+ design-* 品牌 Skill</li>
+          <li>→ 两阶段 · 规范先 · 代码后</li>
+          <li>→ Design Token 三层</li>
           <li>→ 5 主题实时切换</li>
+        </ul>
+      </div>
+
+      <div class="card animate-in stagger-4" style="border-top: 4px solid #8b94a6;">
+        <div style="font-size: 40px; margin-bottom: var(--space-md);">🧪</div>
+        <h3>QA 一致性审</h3>
+        <p class="hand" style="margin: var(--space-sm) 0;">跨线审 · 不糊弄</p>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 13px; line-height: 1.8; margin-top: var(--space-sm);">
+          <li>→ PRD 与技术方案对齐吗</li>
+          <li>→ Demo 与文档一致吗</li>
+          <li>→ AI 风险覆盖了吗</li>
+          <li>→ 依据不足 → 拒绝生成</li>
         </ul>
       </div>
     </div>
 
     <div style="text-align: center; margin-top: var(--space-2xl);">
-      <a href="methodology.html" class="btn btn-primary">🎯 深入看三重方法论</a>
+      <a href="methodology.html" class="btn btn-primary">🎯 深入看方法论</a>
     </div>
   </div>
 </section>
 
-<!-- 2 档 SOP -->
+<!-- 2 档硬指标 SOP -->
 <section>
   <div class="container">
     <div style="text-align: center; margin-bottom: var(--space-2xl);">
       <p class="hand">两种调用方式 · 一套骨架</p>
-      <h2 class="section-title" style="margin-top: var(--space-sm);">2 档 SOP · 按场景选</h2>
+      <h2 class="section-title" style="margin-top: var(--space-sm);">2 档硬指标 SOP</h2>
+      <p class="section-subtitle">北极星不是 DAU · 是 "限定时间内稳定出符合大厂标准的方案初稿"</p>
     </div>
 
     <div class="grid grid-2">
       <div class="card" style="border: 2px solid var(--peach); position: relative; padding: var(--space-2xl);">
-        <div style="position: absolute; top: -12px; left: 24px; background: var(--paper); padding: 2px 12px; font-family: var(--font-hand); color: var(--peach); font-size: 18px;">档位 A · 闪电展示</div>
+        <div style="position: absolute; top: -12px; left: 24px; background: var(--paper); padding: 2px 12px; font-family: var(--font-hand); color: var(--peach); font-size: 18px;">档位 A · 闪电档</div>
         <div style="font-size: 36px; margin-bottom: var(--space-md);">⚡</div>
-        <h3>快速展示场景 · 2 分钟</h3>
+        <h3>快速展示场景</h3>
         <div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: var(--space-md) 0; font-size: 14px;">
-          <span style="color: var(--ink-faint);">时间</span><span><strong>2 分钟</strong></span>
-          <span style="color: var(--ink-faint);">文档</span><span>2-3 份（项目定）</span>
-          <span style="color: var(--ink-faint);">产出</span><span>定位 + 功能 + 技术 + Demo</span>
-          <span style="color: var(--ink-faint);">目的</span><span>60 秒看到能力</span>
+          <span style="color: var(--ink-faint);">时间硬闸门</span><span><strong style="color: var(--peach);">2 分钟内</strong></span>
+          <span style="color: var(--ink-faint);">文档数</span><span><strong>7 份固定 + Demo</strong></span>
+          <span style="color: var(--ink-faint);">7 份固定</span><span>① PRD · ② UI规格 · ③ DESIGN · ④ 流程图 · ⑤ 竞品分析 · ⑥ 技术方案 · ⑦ 模型选型</span>
+          <span style="color: var(--ink-faint);">Demo</span><span>1 个可讲可展示</span>
+          <span style="color: var(--ink-faint);">调度</span><span>CEO + <strong>6 Agent 并行</strong> + CKO 蒸馏</span>
         </div>
-        <p style="font-size: 13px; color: var(--ink-faint); line-height: 1.7;">
-          CEO + 1-2 员工 + 1 专家 · 并发 30 秒产出 · CEO 整合 + Demo 生成。
+        <p style="font-size: 13px; color: var(--ink-faint); line-height: 1.7; border-top: 1px dashed var(--paper-dark); padding-top: var(--space-sm); margin-top: var(--space-sm);">
+          超时 = 失败 · 缺件 = 触发 "拒绝生成" · 让老板补资料。
         </p>
       </div>
 
       <div class="card" style="border: 2px solid var(--sage); position: relative; padding: var(--space-2xl);">
-        <div style="position: absolute; top: -12px; left: 24px; background: var(--paper); padding: 2px 12px; font-family: var(--font-hand); color: var(--sage-dark); font-size: 18px;">档位 B · 标准全套</div>
-        <div style="font-size: 36px; margin-bottom: var(--space-md);">🏢</div>
-        <h3>真做产品 / 工作场景</h3>
+        <div style="position: absolute; top: -12px; left: 24px; background: var(--paper); padding: 2px 12px; font-family: var(--font-hand); color: var(--sage-dark); font-size: 18px;">档位 B · 标准档</div>
+        <div style="font-size: 36px; margin-bottom: var(--space-md);">📦</div>
+        <h3>真做产品场景</h3>
         <div style="display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: var(--space-md) 0; font-size: 14px;">
-          <span style="color: var(--ink-faint);">时间</span><span><strong>灵活</strong></span>
-          <span style="color: var(--ink-faint);">文档</span><span>灵活（1 到 33 全套）</span>
-          <span style="color: var(--ink-faint);">标准</span><span>严格 VELA 33 模板</span>
-          <span style="color: var(--ink-faint);">Demo</span><span>大厂设计标准 · 可改</span>
+          <span style="color: var(--ink-faint);">时间硬闸门</span><span><strong style="color: var(--sage-dark);">分析 2 分 + 生成 8-15 分钟</strong></span>
+          <span style="color: var(--ink-faint);">文档数</span><span><strong>16 份 · VELA 精品标准</strong></span>
+          <span style="color: var(--ink-faint);">16 份清单</span><span>市场报告 · SWOT · 用户研究 · 用户画像 · 旅程图 · 立项报告 · BRD · MRD · PRD · UI规格 · DESIGN · 流程图 · 路线图 · 功能清单 · 数据指标 · 竞品分析 · 技术方案 · 模型选型 · AI合规 · 商业化</span>
+          <span style="color: var(--ink-faint);">调度</span><span>CEO + <strong>11 Agent 并行</strong> + CKO 蒸馏</span>
+          <span style="color: var(--ink-faint);">Demo</span><span>大厂设计标准 · 和 16 份文档强一致</span>
         </div>
-        <p style="font-size: 13px; color: var(--ink-faint); line-height: 1.7;">
-          CEO + 任意员工 + 任意专家 · 3 总监审查 BLOCKING · CEO 整合 3+3+1。
+        <p style="font-size: 13px; color: var(--ink-faint); line-height: 1.7; border-top: 1px dashed var(--paper-dark); padding-top: var(--space-sm); margin-top: var(--space-sm);">
+          可追溯 · 可迭代 · 有依据 · 每段标 "基于 VELA XX / 训练师 XX 笔记"。
         </p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 核心价值 -->
+<!-- PM × AI 训练师协作预告 · 核心差异 -->
+<section style="background: linear-gradient(180deg, var(--paper-light), var(--paper));">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: var(--space-2xl);">
+      <p class="hand" style="color: var(--peach);">Peach Studio最深的差异</p>
+      <h2 class="section-title" style="margin-top: var(--space-sm);">PM 文档 × AI 训练师文档<br><span style="font-family: var(--font-hand); color: var(--peach); font-size: 0.65em; font-style: italic;">怎么结合 · 怎么协作</span></h2>
+      <p class="section-subtitle">大多数 AI 产品作品只有 PM 产出 · Peach Studio把两套文档绑在一起生产</p>
+    </div>
+
+    <div class="collab-box">
+      <div class="card" style="border-top: 4px solid var(--peach); background: white;">
+        <p class="hand" style="color: var(--peach);">PM 侧</p>
+        <h4 style="margin: 4px 0 var(--space-sm); font-family: var(--font-serif);">定义要解决什么问题</h4>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 13px; line-height: 1.9;">
+          <li>📋 Brief · 一句话定位 + 画像 + 北极星</li>
+          <li>📋 PRD Lite · 功能 + 主流程 + 5 态交互</li>
+          <li>📋 Full PRD · 15 板块 + 边界 6 类 + 反指标</li>
+          <li>📋 画像 + 旅程 · 场景还原法</li>
+          <li>📋 指标体系 · AARRR + 反指标</li>
+        </ul>
+      </div>
+
+      <div class="collab-cross">
+        <div class="collab-cross-dot">×</div>
+        <div class="collab-cross-label">实时协作</div>
+      </div>
+
+      <div class="card" style="border-top: 4px solid var(--sage); background: white;">
+        <p class="hand" style="color: var(--sage-dark);">AI 训练师侧</p>
+        <h4 style="margin: 4px 0 var(--space-sm); font-family: var(--font-serif);">定义 AI 怎么可靠解决</h4>
+        <ul style="list-style: none; color: var(--ink-soft); font-size: 13px; line-height: 1.9;">
+          <li>🤖 模型选型 · 三层决策 + RAG 四门</li>
+          <li>🤖 Prompt 策略 · 13 段式 + Few-shot</li>
+          <li>🤖 评测集 · 500 × 5 × 3 + LLM-as-Judge</li>
+          <li>🤖 Badcase 飞轮 · 周度回流 + 归档</li>
+          <li>🤖 降级链路 · 主/备/规则 三层</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="max-width: 1060px; margin: var(--space-xl) auto 0; padding: var(--space-lg); background: white; border: 1.5px dashed var(--peach); border-radius: 14px;">
+      <h4 style="text-align: center; margin-bottom: var(--space-md); font-family: var(--font-serif); color: var(--peach);">🔀 3 个协作交汇点</h4>
+      <div class="grid grid-3" style="gap: var(--space-md);">
+        <div style="text-align: center;">
+          <div style="font-size: 24px; margin-bottom: 6px;">①</div>
+          <p style="font-size: 13px; color: var(--ink-soft); line-height: 1.6;">PRD 功能 → 训练师判<br><strong>这个功能要不要 AI</strong></p>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 24px; margin-bottom: 6px;">②</div>
+          <p style="font-size: 13px; color: var(--ink-soft); line-height: 1.6;">AI 方案 → 反要求 PRD 加<br><strong>反指标 · 边界异常 · 验收</strong></p>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 24px; margin-bottom: 6px;">③</div>
+          <p style="font-size: 13px; color: var(--ink-soft); line-height: 1.6;">行业专家 → 给两边灌<br><strong>合规红线 · 行业 KPI</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: var(--space-xl);">
+      <a href="collaboration.html" class="btn btn-primary" style="font-size: 16px;">🤝 进入 PM × AI 训练师协作台</a>
+    </div>
+  </div>
+</section>
+
+<!-- 9 层流水线预告 -->
 <section>
   <div class="container">
-    <h2 class="squiggle section-title">你会看到什么</h2>
-    <p class="section-subtitle">3 分钟完整体验一人公司怎么运转</p>
-    <div class="grid grid-3">
-      <div class="card animate-in stagger-1">
-        <div style="font-size: 48px; margin-bottom: var(--space-md);">🎬</div>
-        <h3>办公室仿真</h3>
-        <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
-          19 位数字员工在剪纸风办公室工作 · 2 分钟流水线动画 · 可倍速 · 看到项目怎么从需求到交付
-        </p>
-        <a href="office.html" style="color: var(--peach); margin-top: var(--space-md); display: inline-block;">进去看看 →</a>
-      </div>
-      <div class="card animate-in stagger-2">
-        <div style="font-size: 48px; margin-bottom: var(--space-md);">👥</div>
-        <h3>员工名片墙</h3>
-        <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
-          CEO + 3 总监 + 10 执行员工 · 每人独立人格 · 独特职责 · 点开看完整文档
-        </p>
-        <a href="team.html" style="color: var(--peach); margin-top: var(--space-md); display: inline-block;">认识他们 →</a>
-      </div>
-      <div class="card animate-in stagger-3">
-        <div style="font-size: 48px; margin-bottom: var(--space-md);">📂</div>
-        <h3>真实案例库</h3>
-        <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
-          AI 一人公司项目 · 覆盖金融 / 教育 / 电商 · 每个都有 Brief + PRD + Demo
-        </p>
-        <a href="cases.html" style="color: var(--peach); margin-top: var(--space-md); display: inline-block;">看案例 →</a>
-      </div>
+    <div style="text-align: center; margin-bottom: var(--space-2xl);">
+      <p class="hand">从需求到交付</p>
+      <h2 class="section-title" style="margin-top: var(--space-sm);">9 层生产流水线</h2>
+      <p class="section-subtitle">42 人调度池 · 7 主链关键节点 · 3 总监专业审 · QA 一致性审 · 回流沉淀</p>
+    </div>
+
+    <div class="pipeline-preview">
+      <div class="pipeline-node"><div class="pn-emoji">🎯</div><div class="pn-label">① 需求入口</div></div>
+      <div class="pipeline-node"><div class="pn-emoji">👑</div><div class="pn-label">② CEO 调度</div></div>
+      <div class="pipeline-node"><div class="pn-emoji">🧑‍🎤</div><div class="pn-label">③ PM 分析</div></div>
+      <div class="pipeline-node"><div class="pn-emoji">🏭</div><div class="pn-label">④ 行业专家召唤</div></div>
+      <div class="pipeline-node"><div class="pn-emoji">🤖</div><div class="pn-label">⑤ AI 训练师</div></div>
+      <div class="pipeline-node"><div class="pn-emoji">⚙️</div><div class="pn-label">⑥ 技术 + 设计</div></div>
+      <div class="pipeline-node highlight-sage"><div class="pn-emoji">👁</div><div class="pn-label">⑦ 3 总监专业审</div></div>
+      <div class="pipeline-node highlight-peach"><div class="pn-emoji">🧪</div><div class="pn-label">⑧ QA 一致性审</div></div>
+      <div class="pipeline-node"><div class="pn-emoji">📦</div><div class="pn-label">⑨ 交付 + 回流</div></div>
+    </div>
+
+    <div style="text-align: center; margin-top: var(--space-2xl);">
+      <a href="results.html" class="btn btn-secondary" style="margin-right: 8px;">📦 结果工作台</a>
+      <a href="methodology.html" class="btn btn-secondary">🎯 看完整方法论</a>
     </div>
   </div>
 </section>
 
-<!-- 20 行业 × B/G/C 三端 -->
+<!-- 20 行业库预告 -->
 <section style="background: var(--paper-light);">
   <div class="container">
-    <h2 class="squiggle section-title">覆盖领域</h2>
-    <p class="section-subtitle">11 个行业 × B 端 / G 端 / C 端 · 每个都有方法论</p>
-    <div class="grid grid-4">
-      <div class="card">
-        <h4 style="color: var(--peach);">🎓 教育</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">成人考证 · K12 · 素质教育</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 陪练 · 错题诊断 · 个性化学习</p>
+    <div style="text-align: center; margin-bottom: var(--space-2xl);">
+      <p class="hand">跨行业迁移引擎</p>
+      <h2 class="section-title" style="margin-top: var(--space-sm);">20 个行业 · 专家待命</h2>
+      <p class="section-subtitle">每个行业专家沉淀<strong>行业认知神经库</strong>：细分赛道 · 关键词信号 · AI介入点 · 风险红线 · 业务链路 · 模型架构模式 · 可回流资产 · 不是静态百科</p>
+    </div>
+
+    <div class="industry-preview-grid">
+      <div class="industry-preview-card">
+        <h4>🏥 医疗</h4>
+        <p class="ip-scene">诊疗辅助 · 医学咨询 · 健康管理</p>
+        <p class="ip-kpi">HIPAA 合规 · AI 不替代医生 · 患者隐私</p>
+        <span class="ip-tag">零容忍幻觉</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">💰 金融</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">招行 · 蚂蚁 · 度小满</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">智能信贷 · 风控 · 客服</p>
+      <div class="industry-preview-card">
+        <h4>💰 金融</h4>
+        <p class="ip-scene">智能信贷 · 风控 · 智能客服 · 反洗钱</p>
+        <p class="ip-kpi">等保三级 · 征信合规 · 链路追溯</p>
+        <span class="ip-tag">B 端禁外国模型</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">🏥 医疗</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">平安好医生 · 春雨</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 辅诊 · 医学咨询</p>
+      <div class="industry-preview-card">
+        <h4>🎓 教育</h4>
+        <p class="ip-scene">AI 陪练 · 批改 · 错题诊断 · 个性化学习</p>
+        <p class="ip-kpi">未保强 · 启发式原则 · 不代做作业</p>
+        <span class="ip-tag">K12 / 成人</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">📱 短视频</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">抖音 · 快手 · 小红书</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">推荐 · AI 剪辑 · 理解</p>
+      <div class="industry-preview-card">
+        <h4>🎬 短视频</h4>
+        <p class="ip-scene">推荐 · AI 剪辑 · 内容理解 · 选题</p>
+        <p class="ip-kpi">算法推荐备案 · 内容三审 · 防沉迷</p>
+        <span class="ip-tag">C 端</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">🎬 短剧</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">红果 · 九州 · 番茄</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 剧本 · 生图 · 配音</p>
+      <div class="industry-preview-card">
+        <h4>🎭 短剧</h4>
+        <p class="ip-scene">AI 剧本 · 分镜 · 配音 · 付费墙</p>
+        <p class="ip-kpi">爽点设计 · 版权合规 · 付费心理</p>
+        <span class="ip-tag">C 端</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">🛍 电商</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">淘宝 · 拼多多 · SHEIN</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 客服 · 推荐 · 选品</p>
+      <div class="industry-preview-card">
+        <h4>🛍 电商</h4>
+        <p class="ip-scene">AI 客服 · 推荐 · 选品 · 直播带货</p>
+        <p class="ip-kpi">SKU 管理 · 退换逻辑 · 直播合规</p>
+        <span class="ip-tag">C 端 / B 端</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">🏭 制造</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">三一 · 宁德 · 富士康</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 质检 · 预测维护</p>
+      <div class="industry-preview-card">
+        <h4>🏭 制造</h4>
+        <p class="ip-scene">AI 质检 · MES · 预测维护 · 产线优化</p>
+        <p class="ip-kpi">ERP / SCADA 集成 · ISO 26262</p>
+        <span class="ip-tag">B 端 / G 端</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">🚗 汽车</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">理想 · 蔚来 · 比亚迪</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">座舱大模型 · 智驾</p>
+      <div class="industry-preview-card">
+        <h4>🚗 汽车</h4>
+        <p class="ip-scene">智驾 · 座舱 · 车联网 · 电池管理</p>
+        <p class="ip-kpi">L0-L5 分级 · 功能安全 · 数据闭环</p>
+        <span class="ip-tag">B 端</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">🏛 政企</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">税务 · 公安 · 教育局</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">政务助手 · 合规审查</p>
+      <div class="industry-preview-card">
+        <h4>🏛 政企</h4>
+        <p class="ip-scene">政务助手 · 合规审查 · 智慧城市</p>
+        <p class="ip-kpi">等保三级 · 信创目录 · 国密</p>
+        <span class="ip-tag">G 端 · 禁外国模型</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">🏡 家装</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">贝壳 · 土巴兔 · 好好住</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 设计 · 效果图 · 报价</p>
+      <div class="industry-preview-card">
+        <h4>🏡 家装</h4>
+        <p class="ip-scene">AI 效果图 · 报价 · 方案 · 施工</p>
+        <p class="ip-kpi">真人签字 · 装修资质 · 效果图合规</p>
+        <span class="ip-tag">重决策 · 长周期</span>
       </div>
-      <div class="card">
-        <h4 style="color: var(--peach);">✍ 内容</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">小红书 · 知乎 · 36氪</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 创作 · 选题 · 分发</p>
+      <div class="industry-preview-card">
+        <h4>📰 内容</h4>
+        <p class="ip-scene">AI 创作 · 选题 · 分发 · SEO/GEO</p>
+        <p class="ip-kpi">算法推荐备案 · 内容审核</p>
+        <span class="ip-tag">C 端 / B 端</span>
       </div>
-      <div class="card" style="border-color: var(--peach);">
-        <h4 style="color: var(--peach);">💝 情感陪伴 ⭐新</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">星野 · Character.AI · Talkie</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">2025 爆款 · 付费强</p>
+      <div class="industry-preview-card">
+        <h4>💝 情感陪伴</h4>
+        <p class="ip-scene">AI 人设陪伴 · 长期记忆 · 心理危机</p>
+        <p class="ip-kpi">人设不破 · 涉黄零容忍 · 心理危机必响应</p>
+        <span class="ip-tag">C 端</span>
       </div>
-      <div class="card" style="border-color: var(--peach);">
-        <h4 style="color: var(--peach);">🎮 游戏 ⭐新</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">米哈游 · 腾讯 · Roblox</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">AI NPC · 美术 · 配音</p>
+      <div class="industry-preview-card">
+        <h4>🎮 游戏</h4>
+        <p class="ip-scene">AI NPC · 美术 · 配音 · 数值策划</p>
+        <p class="ip-kpi">未保防沉迷 · 付费设计 · 数值平衡</p>
+        <span class="ip-tag">C 端</span>
       </div>
-      <div class="card" style="border-color: var(--peach);">
-        <h4 style="color: var(--peach);">🏢 企业 SaaS ⭐新</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">飞书 · 钉钉 · Notion</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">NRR > 110%</p>
+      <div class="industry-preview-card">
+        <h4>🏢 企业 SaaS</h4>
+        <p class="ip-scene">CRM / ERP / HR 智能化</p>
+        <p class="ip-kpi">MRR · NRR · 多租户 · 阶梯定价</p>
+        <span class="ip-tag">B 端</span>
       </div>
-      <div class="card" style="border-color: var(--peach);">
-        <h4 style="color: var(--peach);">🌍 跨境电商 ⭐新</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">SHEIN · TEMU · Amazon</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">出海 · 多语种</p>
+      <div class="industry-preview-card">
+        <h4>🌏 跨境电商</h4>
+        <p class="ip-scene">出海 · 多语言 · 物流 · 本地化</p>
+        <p class="ip-kpi">GDPR / CCPA / 个保法三法对照</p>
+        <span class="ip-tag">C 端 · 出海</span>
       </div>
-      <div class="card" style="border-color: var(--peach);">
-        <h4 style="color: var(--peach);">🐾 宠物 ⭐新</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">波奇 · 小佩 · Pura</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">AI 问诊 · 新手焦虑</p>
+      <div class="industry-preview-card">
+        <h4>🐶 宠物</h4>
+        <p class="ip-scene">AI 问诊 · 用品推荐 · 社交 · 健康</p>
+        <p class="ip-kpi">情感消费 · 新手焦虑 · LTV 高</p>
+        <span class="ip-tag">C 端</span>
       </div>
-      <div class="card" style="border-color: var(--peach);">
-        <h4 style="color: var(--peach);">🔮 占卜 ⭐新</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">测测 · Co-Star</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">⚠️ 灰色 · 娱乐定位</p>
+      <div class="industry-preview-card">
+        <h4>🔮 占卜</h4>
+        <p class="ip-scene">塔罗 · 星座 · 命理 · 付费解读</p>
+        <p class="ip-kpi">合规边界极敏感 · 不能承诺 · 不引焦虑</p>
+        <span class="ip-tag">⚠️ 灰色 · 娱乐定位</span>
       </div>
-      <div class="card" style="border-color: var(--peach);">
-        <h4 style="color: var(--peach);">🌾 农业 ⭐新</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">极飞 · 大疆农业</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">G + B · 乡村振兴</p>
+      <div class="industry-preview-card">
+        <h4>🌾 农业</h4>
+        <p class="ip-scene">农业 SaaS · 物联网 · 农产品电商</p>
+        <p class="ip-kpi">政策补贴 · 土地流转 · 乡村振兴</p>
+        <span class="ip-tag">G 端 + B 端</span>
       </div>
-      <div class="card" style="border-color: var(--peach);">
-        <h4 style="color: var(--peach);">⚡ 新能源 ⭐新</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">宁德 · 比亚迪 · 隆基</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">双碳 · 储能元年</p>
+      <div class="industry-preview-card">
+        <h4>🔋 新能源</h4>
+        <p class="ip-scene">光伏 · 储能 · 电动车 · 虚拟电厂</p>
+        <p class="ip-kpi">双碳 · 政策导向 · 补贴变化</p>
+        <span class="ip-tag">B 端 · 大项目</span>
       </div>
-      <div class="card" style="border-color: var(--peach);">
-        <h4 style="color: var(--peach);">🏗 数字化项目 ⭐新</h4>
-        <p style="color: var(--ink-faint); font-size: 13px;">埃森哲 · 华为云 · 阿里云</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">大 B · 项目制 · ¥500 万-5 亿</p>
+      <div class="industry-preview-card">
+        <h4>📡 数字化项目</h4>
+        <p class="ip-scene">智慧城市 · 数字政府 · 政务云</p>
+        <p class="ip-kpi">等保四级 · 信创必选 · 涉密资质</p>
+        <span class="ip-tag">G 端 · 大项目</span>
       </div>
-      <div class="card" style="background: var(--peach); color: white; border: none;">
-        <h4 style="color: white;">+ 你的行业</h4>
-        <p style="color: rgba(255,255,255,0.8); font-size: 13px;">桃子公司通用引擎</p>
-        <p style="margin-top: var(--space-sm); font-size: 14px;">CEO 实时识别 · 不限预设</p>
-      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: var(--space-2xl);">
+      <a href="industries.html" class="btn btn-primary">🏭 进入行业专家库</a>
     </div>
   </div>
 </section>
 
-<!-- 双模式 -->
+<!-- 5 大资产层 -->
 <section>
   <div class="container">
-    <h2 class="squiggle section-title">两种工作模式</h2>
-    <div class="grid grid-2">
-      <div class="card animate-in stagger-1">
-        <div style="font-size: 64px; margin-bottom: var(--space-md);">⚡</div>
-        <h3 style="color: var(--peach);">闪电模式</h3>
-        <p class="hand" style="margin-bottom: var(--space-md);">快速展示 · 2 分钟出三件套</p>
-        <ul style="list-style: none; color: var(--ink-soft); line-height: 2;">
-          <li>✓ Product Brief 800 字</li>
-          <li>✓ Design & Tech Brief 800 字</li>
-          <li>✓ 可交互 Demo（HTML · 5 tab）</li>
-        </ul>
-        <p style="margin-top: var(--space-md); font-size: 14px; color: var(--ink-faint);">
-          触发词：<code style="background: var(--paper-dark); padding: 2px 8px; border-radius: var(--radius-sm);">桃子公司 闪电 · {公司} · {产品}</code>
-        </p>
+    <div style="text-align: center; margin-bottom: var(--space-2xl);">
+      <p class="hand">不造新 · 调已有</p>
+      <h2 class="section-title" style="margin-top: var(--space-sm);">5 大资产层 · Peach Studio的壁垒</h2>
+      <p class="section-subtitle">把你会变成系统会 · 资产激活是真正的差异化 · 而不是"又写一份新 Prompt"</p>
+    </div>
+
+    <div class="asset-grid">
+      <div class="asset-card">
+        <div class="ac-num">33</div>
+        <div class="ac-name">VELA 主模板</div>
+        <p class="ac-desc">01-33 · 6 阶段完整生命周期</p>
       </div>
-      <div class="card animate-in stagger-2">
-        <div style="font-size: 64px; margin-bottom: var(--space-md);">🐢</div>
-        <h3 style="color: var(--sage);">深度模式</h3>
-        <p class="hand" style="margin-bottom: var(--space-md);">工作正式 · 30-60 分钟出 33 份大厂文档</p>
-        <ul style="list-style: none; color: var(--ink-soft); line-height: 2;">
-          <li>✓ VELA 9 板块 PRD（500+ 行）</li>
-          <li>✓ 技术 / 设计 / 数据等 10+ 份文档</li>
-          <li>✓ Figma 原型 + HTML Demo + Mock 后端</li>
-          <li>✓ 3 总监深审 + CEO 冲突仲裁</li>
-        </ul>
-        <p style="margin-top: var(--space-md); font-size: 14px; color: var(--ink-faint);">
-          触发词：<code style="background: var(--paper-dark); padding: 2px 8px; border-radius: var(--radius-sm);">桃子公司 · {公司} · {产品}</code>
-        </p>
+      <div class="asset-card" style="border-color: var(--peach);">
+        <div class="ac-num" style="color: var(--peach);">2</div>
+        <div class="ac-name">🚀 闪电 Brief</div>
+        <p class="ac-desc">老板亲笔 · product + design-tech</p>
       </div>
+      <div class="asset-card">
+        <div class="ac-num">27</div>
+        <div class="ac-name">🧰 支撑工具</div>
+        <p class="ac-desc">S01-S27 · TAM/RICE/KANO/图表指南</p>
+      </div>
+      <div class="asset-card">
+        <div class="ac-num">10</div>
+        <div class="ac-name">训练师 SOP</div>
+        <p class="ac-desc">模型选型 / 评测 / Prompt / 降级</p>
+      </div>
+      <div class="asset-card" style="border-color: var(--sage);">
+        <div class="ac-num" style="color: var(--sage-dark);">72</div>
+        <div class="ac-name">完整资产</div>
+        <p class="ac-desc">33 + 2 + 27 + 10 齐 · methodology 全挂</p>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: var(--space-2xl);">
+      <a href="docs.html" class="btn btn-secondary">📚 进入资产层</a>
     </div>
   </div>
 </section>
 
-<!-- Living Agent -->
+<!-- Living Agent · 反馈回流 -->
 <section style="background: var(--paper-light);">
   <div class="container">
-    <h2 class="squiggle section-title">Living Agent · 员工会成长</h2>
-    <p class="section-subtitle">每个员工都能吃新资料 · 自我复盘 · 迭代人格</p>
+    <h2 class="squiggle section-title">Living System · 会进化</h2>
+    <p class="section-subtitle">每次产出都沉淀回知识库 · 下次更强 · 不是一次性聊天</p>
     <div class="grid grid-3">
       <div class="card animate-in stagger-1">
         <h4>📚 吃新资料</h4>
         <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
-          老板上传新文档 · Agent 下次任务自动学习
+          老板上传新文档 · Agent 下次任务自动学习 · 新模板加入 VELA · 新 Prompt 归档武器库
         </p>
       </div>
       <div class="card animate-in stagger-2">
-        <h4>🔄 自我复盘</h4>
+        <h4>🔄 结果回流</h4>
         <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
-          每次任务后写 retrospect · 记录做得好 / 弱 / 下次改
+          每次产出后决定：哪些模板值得沉淀 · 哪些 Prompt 表现好进武器库 · 哪些 Badcase 需归档
         </p>
       </div>
       <div class="card animate-in stagger-3">
-        <h4>🧬 人格迭代</h4>
+        <h4>🧬 版本管理</h4>
         <p style="color: var(--ink-soft); margin-top: var(--space-sm);">
-          Agent 提 proposal · 老板审批 · 版本控制更新
+          v1/v2/v3 · 每份文档含修改原因 + 影响范围 + 审批人 · 避免乱成一堆
         </p>
       </div>
     </div>
@@ -392,10 +1438,11 @@
 <!-- CTA -->
 <section>
   <div class="container" style="text-align: center;">
-    <h2 class="section-title">准备好看一场 2 分钟的一人公司运转了吗？</h2>
-    <a href="office.html" class="btn btn-primary" style="font-size: 18px; padding: 16px 40px; margin-top: var(--space-xl);">
-      🎬 进入办公室
-    </a>
+    <h2 class="section-title">准备好用Peach Studio做产品了吗？</h2>
+    <p class="section-subtitle" style="margin-bottom: var(--space-xl);">输入需求 → 识别行业信号 → 调度行业专家 → 拆解认知与架构 → 出方案 · 每次产出回流神经库</p>
+    <button onclick="document.getElementById('peach-input').focus(); window.scrollTo({top: 0, behavior: 'smooth'});" class="btn btn-primary" style="font-size: 18px; padding: 16px 40px;">
+      ⬆️ 回到输入框 · 开干
+    </button>
   </div>
 </section>
 
@@ -403,16 +1450,1179 @@
 <footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--paper-dark); margin-top: var(--space-3xl);">
   <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);">
     <div>
-      <p style="font-family: var(--font-serif); font-size: 18px;">🏢 桃子公司</p>
-      <p style="color: var(--ink-faint); font-size: 14px; margin-top: var(--space-xs);">一个人即一家 AI 产品公司 · v0.3 · 2026</p>
+      <p style="font-family: var(--font-serif); font-size: 18px;">🏢 Peach Studio</p>
+      <p style="color: var(--ink-faint); font-size: 14px; margin-top: var(--space-xs);">AI 产品经理分身系统 · v1.0 · 2026</p>
     </div>
     <div style="color: var(--ink-faint); font-size: 13px;">
-      <p>本地优先 · 零花钱策略 · 断网可跑</p>
+      <p>本地优先 · 零花钱策略 · Harness Engineering</p>
     </div>
   </div>
 </footer>
 
 <script src="js/theme.js"></script>
 <script src="js/launcher.js"></script>
+<script>
+  /* ========== Tab 1 · 需求入口 专用逻辑（覆盖 launcher.js 的 launchCompany） ========== */
+
+  (function() {
+    // 模式切换
+    let currentMode = localStorage.getItem('peach-mode') || 'lightning';
+
+    // ── 阶段选择器逻辑 ──────────────────────────────────────
+    const PHASE_DOCS = { p1:9, p2:5, p3:7, p4:4, p5:16, p6:14 };
+    const PHASE_TIME = { p1:4, p2:3, p3:5, p4:3, p5:8, p6:6 }; // 分钟（并行）
+
+    function updatePhaseSummary() {
+      const selected = getSelectedPhases();
+      const docs = selected.reduce((s, p) => s + (PHASE_DOCS[p] || 0), 0);
+      const hasP3 = selected.includes('p3');
+      const minutes = selected.length === 0 ? 0
+        : Math.max(...selected.map(p => PHASE_TIME[p] || 0)) + 2; // 分析2分+最长agent
+      document.getElementById('phaseDocCount').innerHTML =
+        `已选 <strong>${docs} 份文档</strong>${hasP3 ? ' + Demo' : ''}`;
+      document.getElementById('phaseTimeEst').textContent =
+        selected.length ? `预计 ${minutes}-${minutes+5} 分钟` : '⚠️ 请至少选一个阶段';
+      // 同步标准档按钮说明文字，让它与阶段选择实时对齐
+      const stdSpec = document.querySelector('.mode-btn[data-mode="standard"] .mode-spec');
+      if (stdSpec) {
+        if (selected.length === 0) {
+          stdSpec.textContent = '请选择至少一个阶段';
+        } else {
+          const demoSuffix = hasP3 ? ' + Demo' : '';
+          stdSpec.textContent = `${minutes}-${minutes+5} 分钟 · ${docs} 份 VELA 精品文档${demoSuffix}`;
+        }
+      }
+    }
+
+    function togglePhase(phase) {
+      const card = document.querySelector(`.phase-card[data-phase="${phase}"]`);
+      if (!card || card.classList.contains('disabled')) return;
+      card.classList.toggle('selected');
+      card.classList.remove('toggling');
+      void card.offsetWidth; // reflow 触发动画重置
+      card.classList.add('toggling');
+      card.addEventListener('animationend', () => card.classList.remove('toggling'), { once: true });
+      updatePhaseSummary();
+    }
+
+    function selectPhasePreset(preset) {
+      const all = ['p1','p2','p3','p4','p5','p6'];
+      const predev = ['p1','p2','p3'];
+      const target = preset === 'all' ? all : preset === 'predev' ? predev : [];
+      document.querySelectorAll('.phase-card:not(.disabled)').forEach(c => {
+        const inTarget = target.includes(c.dataset.phase);
+        c.classList.toggle('selected', inTarget);
+      });
+      updatePhaseSummary();
+    }
+
+    function getSelectedPhases() {
+      return [...document.querySelectorAll('.phase-card.selected:not(.disabled)')]
+        .map(c => c.dataset.phase);
+    }
+
+    function updateModeUI() {
+      const isStd = currentMode === 'standard';
+      document.querySelectorAll('.mode-btn').forEach(b => {
+        const active = b.dataset.mode === currentMode;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      // 闪电档说明更新
+      const lightningSpec = document.querySelector('.mode-btn[data-mode="lightning"] .mode-spec');
+      if (lightningSpec) lightningSpec.textContent = '2 分钟 · PRD + 设计文档 + Demo';
+      // 阶段选择器显隐
+      const ps = document.getElementById('phaseSelector');
+      if (ps) ps.style.display = isStd ? 'block' : 'none';
+      // 闪电档预览显隐
+      const lp = document.getElementById('lightningPreview');
+      if (lp) lp.style.display = isStd ? 'none' : 'block';
+      // CTA按钮
+      const cta = document.getElementById('launch-btn');
+      if (cta) {
+        cta.textContent = isStd
+          ? '🏭 按阶段生成方案'
+          : '⚡ 2 分钟 · PRD + 设计';
+      }
+      const hid = document.getElementById('selected-mode');
+      if (hid) hid.value = currentMode;
+      updatePhaseSummary(); // 始终同步，保持按钮文字与阶段选择一致
+    }
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentMode = btn.dataset.mode;
+        localStorage.setItem('peach-mode', currentMode);
+        updateModeUI();
+      });
+    });
+
+    // 行业单选
+    let selectedIndustry = '';
+    document.querySelectorAll('.industry-chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const val = chip.dataset.chip;
+        if (selectedIndustry === val) {
+          // 取消选中
+          chip.classList.remove('selected');
+          selectedIndustry = '';
+        } else {
+          // 单选
+          document.querySelectorAll('.industry-chip').forEach(c => c.classList.remove('selected'));
+          chip.classList.add('selected');
+          selectedIndustry = val;
+        }
+        const hid = document.getElementById('selected-industry');
+        if (hid) hid.value = selectedIndustry;
+        const hint = document.getElementById('industry-hint');
+        if (hint) {
+          hint.textContent = selectedIndustry
+            ? `已选：${selectedIndustry} · 该行业专家将参与产出`
+            : '20 个行业各有专家待命';
+        }
+      });
+    });
+
+    // 字数计数
+    const input = document.getElementById('peach-input');
+    const counter = document.getElementById('char-count');
+    if (input && counter) {
+      input.addEventListener('input', () => {
+        const len = input.value.length;
+        counter.textContent = `${len} / 500`;
+        counter.style.color = len > 450 ? 'var(--peach)' : 'var(--ink-faint)';
+      });
+      // 恢复上次草稿
+      const draft = localStorage.getItem('peach-draft');
+      if (draft) {
+        input.value = draft;
+        counter.textContent = `${draft.length} / 500`;
+      }
+      // 保存草稿
+      input.addEventListener('input', () => {
+        localStorage.setItem('peach-draft', input.value);
+      });
+    }
+
+    // 覆盖 launcher.js 的 launchCompany
+    window.launchCompany = function(e) {
+      e.preventDefault();
+      const need      = document.getElementById('peach-input').value.trim();
+      const industry  = document.getElementById('selected-industry').value;
+      const mode      = document.getElementById('selected-mode').value || currentMode;
+      const demoTier    = document.getElementById('selected-demo-tier')?.value || 'fast';
+      const generateDemo = document.getElementById('generate-demo')?.value || 'true';
+      const refUrlsRaw  = document.getElementById('ref-urls-value')?.value || '[]';
+      let refUrls = [];
+      try { refUrls = JSON.parse(refUrlsRaw); } catch(e) {}
+      const knownCompetitors = (document.getElementById('known-competitors-input')?.value || '').trim();
+      const knownUsers       = (document.getElementById('known-users-input')?.value || '').trim();
+      const knownExtra       = (document.getElementById('known-extra-input')?.value || '').trim();
+      const userBrief        = (document.getElementById('user-brief-value')?.value || '').trim();
+      const htmlDraft        = (document.getElementById('html-draft-value')?.value || '').trim();
+      // 标准档：收集已选阶段
+      const phases = mode === 'standard' ? getSelectedPhases() : [];
+
+      // 空态拦截
+      if (!need) {
+        const wrap = document.getElementById('input-wrap');
+        wrap.classList.add('input-shake');
+        wrap.style.borderColor = 'var(--peach)';
+        document.getElementById('peach-input').focus();
+        setTimeout(() => {
+          wrap.classList.remove('input-shake');
+          wrap.style.borderColor = 'var(--paper-dark)';
+        }, 800);
+        return false;
+      }
+
+      // 行业未选：提示但不拦截（Claude可自行判断）
+      if (!industry) {
+        const hint = document.getElementById('industry-hint');
+        if (hint) { hint.textContent = '（未选行业 · Claude 自动判断）'; hint.style.color = 'var(--ink-faint)'; }
+      }
+
+      // 存 sessionStorage 给 workspace 用
+      sessionStorage.setItem('peach-req', JSON.stringify({
+        need: need,
+        industry: industry,
+        mode: mode,
+        time: Date.now()
+      }));
+      // 清草稿
+      localStorage.removeItem('peach-draft');
+
+      // 按钮反馈
+      const btn = document.getElementById('launch-btn');
+      if (btn) btn.textContent = '🎬 调度 42 员工中...';
+
+      // 先调本地桥启动任务 · 拿到 run_id · 再跳 results（SSE实时流在那里）
+      fetch('/api/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product: need,
+          mode: mode,
+          industry: industry,
+          demo_tier: demoTier,
+          ref_urls: refUrls,
+          phases: phases,
+          known_competitors: knownCompetitors,
+          known_users: knownUsers,
+          known_extra: knownExtra,
+          user_brief: userBrief,
+          media_assets: _mediaAssets.filter(a => a.name && a.selected),
+          html_draft: htmlDraft,
+          competitor_urls: _competitorUrls.map(c => c.url),
+        }),
+      })
+      .then(r => {
+        if (!r.ok) {
+          if (btn) btn.textContent = r.status === 502
+            ? '❌ Clash 代理拦截 · 请用启动桥.command 打开的专属 Chrome'
+            : `❌ 桥返回 HTTP ${r.status}`;
+          return null;
+        }
+        return r.json();
+      })
+      .then(data => {
+        if (!data) return;
+        if (data.error) { if (btn) btn.textContent = '❌ ' + data.error; return; }
+        // /api/run 始终返回 run_id（含标准档，phase=analyze）；标准档的 batch_id 在 /api/generate 才返回
+        const params = new URLSearchParams({
+          run_id: data.run_id,
+          q: need,
+          industry: industry,
+          mode: mode,
+          demo_tier: demoTier,
+          generate_demo: generateDemo,
+          phase: data.phase || 'analyze',
+          project_dir: data.project_dir || '',
+        });
+        if (refUrls.length)        params.set('ref_urls', JSON.stringify(refUrls));
+        if (phases.length)         params.set('phases', JSON.stringify(phases));
+        if (knownCompetitors)      params.set('known_competitors', knownCompetitors);
+        if (knownUsers)            params.set('known_users', knownUsers);
+        if (knownExtra)            params.set('known_extra', knownExtra);
+        // 保存到 localStorage 历史
+        _saveHistory({
+          id: data.run_id,
+          product: need,
+          industry: industry || '自动判断',
+          mode: mode,
+          timestamp: Date.now(),
+          status: 'analyzing',
+          project_dir: data.project_dir || '',
+          run_id: data.run_id,
+        });
+        window.location.href = `results.html?${params.toString()}`;
+      })
+      .catch(err => {
+        if (btn) {
+          btn.textContent = '❌ 连接失败 · 请双击启动桥.command';
+          setTimeout(() => { btn.textContent = '✨ 启动 · 2 分钟出方案'; }, 3000);
+        }
+        console.warn('桥未启动', err);
+      });
+
+      return false;
+    };
+
+    // ─── Demo 开关 ───
+    window._demoEnabled = true;
+    window.toggleDemoOption = function() {
+      _demoEnabled = !_demoEnabled;
+      const track  = document.getElementById('demo-toggle-track');
+      const knob   = document.getElementById('demo-toggle-knob');
+      const label  = document.getElementById('demo-toggle-label');
+      const tierRow = document.getElementById('demo-tier-row');
+      const hidInput = document.getElementById('generate-demo');
+      if (_demoEnabled) {
+        track.style.background = 'var(--peach)';
+        knob.style.left = '19px';
+        label.style.color = 'var(--ink-soft)';
+        tierRow.style.display = 'flex';
+        if (hidInput) hidInput.value = 'true';
+      } else {
+        track.style.background = '#ccc';
+        knob.style.left = '3px';
+        label.style.color = 'var(--ink-faint)';
+        tierRow.style.display = 'none';
+        if (hidInput) hidInput.value = 'false';
+      }
+    };
+
+    // ─── Demo 档位切换 ───
+    window.setDemoTier = function(tier) {
+      const fastBtn    = document.getElementById('demo-fast-btn');
+      const premiumBtn = document.getElementById('demo-premium-btn');
+      const hint       = document.getElementById('demo-tier-hint');
+      const hidInput   = document.getElementById('selected-demo-tier');
+      if (tier === 'fast') {
+        fastBtn.style.background    = 'white';
+        fastBtn.style.color         = 'var(--peach)';
+        fastBtn.style.fontWeight    = '600';
+        fastBtn.style.boxShadow     = '0 1px 4px rgba(0,0,0,0.08)';
+        premiumBtn.style.background = 'transparent';
+        premiumBtn.style.color      = 'var(--ink-faint)';
+        premiumBtn.style.fontWeight = '500';
+        premiumBtn.style.boxShadow  = 'none';
+        hint.textContent = '骨架 + 假数据 · 2分钟出';
+      } else {
+        premiumBtn.style.background = 'white';
+        premiumBtn.style.color      = 'var(--peach)';
+        premiumBtn.style.fontWeight = '600';
+        premiumBtn.style.boxShadow  = '0 1px 4px rgba(0,0,0,0.08)';
+        fastBtn.style.background    = 'transparent';
+        fastBtn.style.color         = 'var(--ink-faint)';
+        fastBtn.style.fontWeight    = '500';
+        fastBtn.style.boxShadow     = 'none';
+        hint.textContent = '多页面 · 设计系统 · 真实交互 · 5-10分钟精雕';
+      }
+      if (hidInput) hidInput.value = tier;
+    };
+
+    // 点页面其他地方关闭导航下拉
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.nav-more-wrap')) {
+        document.querySelectorAll('.nav-more-wrap.open').forEach(el => el.classList.remove('open'));
+      }
+    });
+
+    // ─── 参考设计网站 ───
+    const _refUrls = [];
+    window.toggleBriefPanel = function() {
+      const panel = document.getElementById('brief-panel');
+      const btn   = document.getElementById('brief-toggle-btn');
+      const open  = panel.style.display === 'none';
+      panel.style.display = open ? 'block' : 'none';
+      btn.innerHTML = open
+        ? '📄 上传我的思路文档（.md）· 注入全 Agent ▲'
+        : '📄 上传我的思路文档（.md）· 注入全 Agent ▾';
+    };
+    window.readBriefFile = function(input) {
+      const files = Array.from(input.files);
+      if (!files.length) return;
+      let results = new Array(files.length);
+      let done = 0;
+      files.forEach(function(file, idx) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          results[idx] = '<!-- 文件：' + file.name + ' -->\n' + e.target.result;
+          done++;
+          if (done === files.length) {
+            const merged = results.join('\n\n---\n\n');
+            document.getElementById('user-brief-value').value = merged;
+            document.getElementById('brief-file-name').textContent =
+              files.length === 1 ? files[0].name : files.length + ' 个文件已合并';
+            const preview = document.getElementById('brief-preview');
+            preview.textContent = merged.slice(0, 500) + (merged.length > 500 ? '\n…（已截断预览）' : '');
+            preview.style.display = 'block';
+            document.getElementById('brief-clear-row').style.display = 'block';
+            document.getElementById('brief-upload-label').style.borderColor = 'var(--peach)';
+          }
+        };
+        reader.readAsText(file, 'UTF-8');
+      });
+    };
+    window.clearBrief = function() {
+      document.getElementById('user-brief-value').value = '';
+      document.getElementById('brief-file-name').textContent = '点击选择 .md 文件…';
+      document.getElementById('brief-preview').style.display = 'none';
+      document.getElementById('brief-clear-row').style.display = 'none';
+      document.getElementById('brief-file-input').value = '';
+      document.getElementById('brief-upload-label').style.borderColor = '';
+    };
+
+    // ─── HTML 初稿 ───
+    window.toggleDraftPanel = function() {
+      const panel = document.getElementById('draft-panel');
+      const btn   = document.getElementById('draft-toggle-btn');
+      const open  = panel.style.display === 'none';
+      panel.style.display = open ? 'block' : 'none';
+      btn.innerHTML = open
+        ? '💻 上传前端初稿（.html）· AI 以此为基础继续完善 ▲'
+        : '💻 上传前端初稿（.html）· AI 以此为基础继续完善 ▾';
+    };
+    window.readDraftFile = function(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const content = e.target.result;
+        document.getElementById('html-draft-value').value = content;
+        document.getElementById('draft-file-name').textContent = file.name + '  （' + Math.round(file.size/1024) + ' KB）';
+        const preview = document.getElementById('draft-preview');
+        preview.textContent = content.slice(0, 600) + (content.length > 600 ? '\n…（已截断预览）' : '');
+        preview.style.display = 'block';
+        document.getElementById('draft-clear-row').style.display = 'block';
+        document.getElementById('draft-upload-label').style.borderColor = 'var(--peach)';
+      };
+      reader.readAsText(file, 'UTF-8');
+    };
+    window.clearDraft = function() {
+      document.getElementById('html-draft-value').value = '';
+      document.getElementById('draft-file-name').textContent = '点击选择 .html 文件…';
+      document.getElementById('draft-preview').style.display = 'none';
+      document.getElementById('draft-clear-row').style.display = 'none';
+      document.getElementById('draft-file-input').value = '';
+      document.getElementById('draft-upload-label').style.borderColor = '';
+    };
+
+    // ─── 素材库 ───
+    const _mediaAssets = [];  // [{name, url, type, label}]
+
+    window.toggleMediaPanel = function() {
+      const panel = document.getElementById('media-panel');
+      const btn   = document.getElementById('media-toggle-btn');
+      const open  = panel.style.display === 'none';
+      panel.style.display = open ? 'block' : 'none';
+      btn.innerHTML = open
+        ? '🖼 素材库（图片/视频）· 告诉 Demo 首页用哪张 ▲'
+        : '🖼 素材库（图片/视频）· 告诉 Demo 首页用哪张 ▾';
+      if (open) _loadMediaList();
+    };
+
+    function _loadMediaList() {
+      fetch('/api/media-list').then(r => r.json()).then(d => {
+        // 追加库里的文件，默认未勾选
+        (d.files || []).forEach(f => {
+          if (!_mediaAssets.find(a => a.name === f.name)) {
+            _mediaAssets.push({name: f.name, url: f.url, type: f.type, label: '', selected: false});
+          }
+        });
+        _renderMediaList();
+      }).catch(() => {});
+    }
+
+    function _renderMediaList() {
+      const container = document.getElementById('media-list');
+      const empty     = document.getElementById('media-empty');
+      container.innerHTML = '';
+      if (_mediaAssets.length === 0) { empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+      _mediaAssets.forEach((asset, i) => {
+        const row = document.createElement('div');
+        const checked = asset.selected ? 'checked' : '';
+        const dimmed  = asset.selected ? '' : 'opacity:0.45;';
+        row.style.cssText = `display:flex;align-items:center;gap:10px;padding:8px 10px;background:#faf7f4;border-radius:8px;transition:opacity 0.15s;${dimmed}`;
+        const thumb = asset.type === 'image'
+          ? `<img src="${asset.url}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0;" onerror="this.style.display='none'">`
+          : `<div style="width:40px;height:40px;background:#eee;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🎬</div>`;
+        row.innerHTML = `
+          <input type="checkbox" ${checked} title="勾选才会传给 Agent"
+            style="width:16px;height:16px;flex-shrink:0;accent-color:var(--peach);cursor:pointer;"
+            onchange="_mediaAssets[${i}].selected=this.checked;_renderMediaList()">
+          ${thumb}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;color:var(--ink-soft);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${asset.name}</div>
+            <input type="text" placeholder="${asset.selected ? '用途：首页背景图 / 演示视频 / Logo…' : '先勾选，再填用途'}"
+              value="${asset.label || ''}"
+              ${asset.selected ? '' : 'disabled'}
+              style="width:100%;margin-top:4px;padding:4px 8px;border:1px solid var(--paper-dark);border-radius:6px;font-size:12px;font-family:var(--font-body);outline:none;box-sizing:border-box;"
+              oninput="_mediaAssets[${i}].label=this.value"
+              onfocus="this.style.borderColor='var(--peach)'"
+              onblur="this.style.borderColor='var(--paper-dark)'">
+          </div>
+          <button onclick="_removeMedia(${i})" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--ink-faint);flex-shrink:0;" title="从库里删除">✕</button>
+        `;
+        container.appendChild(row);
+      });
+      // 底部统计
+      const sel = _mediaAssets.filter(a => a.selected).length;
+      const stat = document.createElement('div');
+      stat.style.cssText = 'font-size:11px;color:var(--ink-faint);margin-top:6px;text-align:right;';
+      stat.textContent = sel > 0 ? `✅ 已选 ${sel} 个素材会传给 Demo Agent` : '☑ 勾选要在本项目使用的素材';
+      container.appendChild(stat);
+    }
+
+    window._removeMedia = function(i) {
+      _mediaAssets.splice(i, 1);
+      _renderMediaList();
+    };
+
+    window.openMediaFolder = function() {
+      fetch('/api/open-media-folder', { method: 'POST' }).catch(() => {});
+    };
+
+    window.handleMediaDrop = function(e) {
+      e.preventDefault();
+      document.getElementById('media-drop-zone').style.borderColor = 'var(--paper-dark)';
+      document.getElementById('media-drop-zone').style.background = '';
+      uploadMediaFiles(e.dataTransfer.files);
+    };
+
+    window.uploadMediaFiles = function(files) {
+      Array.from(files).forEach(file => {
+        const fd = new FormData();
+        fd.append('file', file);
+        fetch('/api/upload-media', { method: 'POST', body: fd })
+          .then(r => r.json())
+          .then(d => {
+            if (d.ok) {
+              if (!_mediaAssets.find(a => a.name === d.name)) {
+                // 刚上传的默认勾选（用户明确上传的 = 本项目要用的）
+                _mediaAssets.push({ name: d.name, url: d.url, type: d.type, label: '', selected: true });
+                _renderMediaList();
+              }
+            } else {
+              alert('上传失败：' + (d.error || '未知错误'));
+            }
+          })
+          .catch(() => alert('上传失败，请确认桥已启动'));
+      });
+    };
+
+    window.togglePresetPanel = function() {
+      const panel = document.getElementById('preset-panel');
+      const btn   = document.getElementById('preset-toggle-btn');
+      const open  = panel.style.display === 'none';
+      panel.style.display = open ? 'block' : 'none';
+      btn.innerHTML = open
+        ? '📋 我已知道的信息（竞品/用户/数据）· 选填 ▲'
+        : '📋 我已知道的信息（竞品/用户/数据）· 选填 ▾';
+    };
+    window.toggleRefPanel = function() {
+      const panel = document.getElementById('ref-panel');
+      const btn   = document.getElementById('ref-toggle-btn');
+      const open  = panel.style.display === 'none';
+      panel.style.display = open ? 'block' : 'none';
+      btn.innerHTML = open
+        ? '📐 参考哪个网站的设计？（精品Demo必填）▲'
+        : '📐 参考哪个网站的设计？（精品Demo必填）▾';
+      if (open) _loadDemoSamples();
+    };
+
+    async function _loadDemoSamples() {
+      const box = document.getElementById('demo-sample-picker');
+      if (!box) return;
+      box.innerHTML = '<span style="font-size:11px;color:var(--ink-faint);">加载中...</span>';
+      try {
+        const r = await fetch('/api/knowledge/list?type=demo');
+        const d = await r.json();
+        const urlItems = (d.items || []).filter(i => i.url || i.filename);
+        if (!urlItems.length) {
+          box.innerHTML = '<span style="font-size:11px;color:var(--ink-faint);">样板库还没有 URL，去 <a href="docs.html" target="_blank" style="color:var(--peach);text-decoration:none;">🧠 回流</a> 里存几个</span>';
+          return;
+        }
+        box.innerHTML = urlItems.map(item => {
+          const label = (item.desc || item.filename || item.url || '').slice(0, 50);
+          const href  = item.url || '';
+          return `<button type="button" onclick="_pickDemoUrl('${href||''}','${(item.desc||'').replace(/'/g,"\\'")}',this)"
+            style="padding:4px 10px;border:1px solid var(--paper-dark);border-radius:99px;background:white;font-size:11px;color:var(--ink-soft);cursor:pointer;font-family:inherit;transition:all 0.12s;"
+            onmouseover="this.style.borderColor='var(--peach)';this.style.color='var(--peach)'"
+            onmouseout="this.style.borderColor='var(--paper-dark)';this.style.color='var(--ink-soft)'"
+            title="${href}">${label}</button>`;
+        }).join('');
+      } catch(e) {
+        box.innerHTML = '<span style="font-size:11px;color:var(--ink-faint);">桥未启动，无法加载样板库</span>';
+      }
+    }
+
+    window._pickDemoUrl = function(url, desc, btn) {
+      const target = url || desc;
+      if (!target) return;
+      const inp = document.getElementById('ref-url-input');
+      inp.value = target;
+      addRefUrl();
+      btn.style.background = 'rgba(209,106,78,0.1)';
+      btn.style.borderColor = 'var(--peach)';
+      btn.style.color = 'var(--peach)';
+    };
+    window.addRefUrl = function() {
+      const inp = document.getElementById('ref-url-input');
+      let url = (inp.value || '').trim();
+      if (!url) return;
+      if (!url.startsWith('http')) url = 'https://' + url;
+      if (_refUrls.includes(url)) { inp.value = ''; return; }
+      _refUrls.push(url);
+      inp.value = '';
+      _renderRefChips();
+    };
+    function _renderRefChips() {
+      const container = document.getElementById('ref-url-chips');
+      const hidden    = document.getElementById('ref-urls-value');
+      container.innerHTML = _refUrls.map((u, i) => {
+        const label = u.replace(/^https?:\/\//, '').replace(/\/$/, '').slice(0, 40);
+        return `<span style="display:inline-flex;align-items:center;gap:4px;background:#f0ebe2;border-radius:99px;padding:4px 10px 4px 12px;font-size:12px;color:var(--ink-soft);">
+          ${label}
+          <button type="button" onclick="_removeRefUrl(${i})" style="background:none;border:none;cursor:pointer;font-size:14px;line-height:1;color:var(--ink-faint);padding:0 0 0 2px;">×</button>
+        </span>`;
+      }).join('');
+      if (hidden) hidden.value = JSON.stringify(_refUrls);
+    }
+    window._removeRefUrl = function(i) {
+      _refUrls.splice(i, 1);
+      _renderRefChips();
+    };
+
+    // ─── JD 解析功能 ───
+    window.toggleJdPanel = function() {
+      const panel = document.getElementById('jd-panel');
+      const btn   = document.getElementById('jd-toggle-btn');
+      const open  = panel.style.display === 'none';
+      panel.style.display = open ? 'block' : 'none';
+      btn.textContent = open
+        ? '📋 有JD？粘贴或传图 · 自动解析填入 ▲'
+        : '📋 有JD？粘贴或传图 · 自动解析填入 ▾';
+    };
+
+    window._jdFiles = [];
+
+    window._addJdFiles = function(newFiles) {
+      if (!newFiles || !newFiles.length) return;
+      newFiles.forEach(f => window._jdFiles.push(f));
+      _renderJdFileList();
+    };
+
+    window._removeJdFile = function(idx) {
+      window._jdFiles.splice(idx, 1);
+      _renderJdFileList();
+    };
+
+    function _renderJdFileList() {
+      const el = document.getElementById('jd-file-list');
+      if (!window._jdFiles.length) { el.innerHTML = ''; return; }
+      const total = window._jdFiles.length;
+      el.innerHTML =
+        `<div style="font-size:12px;color:var(--peach);font-weight:600;margin-bottom:4px;">` +
+        `📎 共 ${total} 张` +
+        `<span onclick="window._jdFiles=[];_renderJdFileList()" style="margin-left:8px;color:#aaa;cursor:pointer;font-weight:400;">全部清除</span></div>` +
+        window._jdFiles.map((f, i) =>
+          `<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);padding:2px 0;">` +
+          `<span style="color:var(--peach);">${i+1}.</span>` +
+          `<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</span>` +
+          `<span onclick="event.stopPropagation();_removeJdFile(${i})" style="cursor:pointer;color:#bbb;padding:0 4px;">✕</span>` +
+          `</div>`
+        ).join('');
+    }
+
+    window.parseJd = async function() {
+      const statusEl = document.getElementById('jd-status');
+      const resultEl = document.getElementById('jd-result');
+      const textVal  = (document.getElementById('jd-text-input').value || '').trim();
+      const files = window._jdFiles || [];
+
+      if (!textVal && !files.length) {
+        statusEl.textContent = '⚠️ 请先粘贴JD文字或上传图片';
+        return;
+      }
+      statusEl.textContent = `⏳ Claude 正在解析${files.length ? `（${files.length} 张图片）` : ''}...`;
+      resultEl.style.display = 'none';
+
+      window._jdDroppedFiles = null;  // consume once
+      try {
+        let resp;
+        if (files.length) {
+          const fd = new FormData();
+          files.forEach(f => fd.append('image', f));
+          resp = await fetch('/api/parse-jd', { method: 'POST', body: fd });
+        } else {
+          resp = await fetch('/api/parse-jd', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: textVal }),
+          });
+        }
+        if (!resp.ok) {
+          statusEl.textContent = resp.status === 502
+            ? '❌ 502：请用「双击启动桥.command」打开的专属 Chrome 窗口，Clash 会拦截普通浏览器的请求'
+            : `❌ HTTP ${resp.status}`;
+          return;
+        }
+        const data = await resp.json();
+        if (!data.ok) { statusEl.textContent = '❌ ' + (data.error || '解析失败'); return; }
+        if (data.parsed) {
+          _fillFromJd(data.parsed);
+          const imgCount = data.images_received;
+          statusEl.textContent = '✅ 已自动填入' + (imgCount ? `（${imgCount} 张图片全部识别）` : '');
+          window._jdFiles = []; _renderJdFileList();
+        } else {
+          statusEl.textContent = '⚠️ 未能提取结构，原始输出：' + (data.raw || '').slice(0, 80);
+        }
+      } catch(e) {
+        statusEl.textContent = e.message.includes('fetch')
+          ? '❌ 连接失败 · 请确认桥已启动（双击 启动桥.command）'
+          : '❌ ' + e.message;
+      }
+    };
+
+    function _fillFromJd(p) {
+      // 填 textarea
+      const desc = [p.product, p.subdomain].filter(Boolean).join(' · ');
+      const ta = document.getElementById('peach-input');
+      ta.value = desc;
+      ta.dispatchEvent(new Event('input'));
+
+      // 选行业芯片（模糊匹配）
+      const CHIPS = ['医疗','金融','教育','短视频','短剧','电商','制造','汽车','政企','家装','内容','情感陪伴','游戏','企业SaaS','跨境电商','宠物','占卜','农业','新能源','数字化'];
+      const ind = (p.industry || '').toLowerCase();
+      const mapping = {
+        '教': '教育', '学': '教育', '课': '教育', 'aigc': '短剧', '剧': '短剧',
+        '医': '医疗', '健康': '医疗', '药': '医疗',
+        '金融': '金融', '信贷': '金融', '银行': '金融',
+        '电商': '电商', '零售': '电商',
+        '游戏': '游戏', '宠物': '宠物', '汽车': '汽车', '制造': '制造',
+      };
+      let matched = null;
+      for (const chip of CHIPS) {
+        if (ind.includes(chip.toLowerCase())) { matched = chip; break; }
+      }
+      if (!matched) {
+        for (const [key, chip] of Object.entries(mapping)) {
+          if (ind.includes(key) || (p.product || '').toLowerCase().includes(key)) { matched = chip; break; }
+        }
+      }
+      if (matched) {
+        document.querySelectorAll('.industry-chip').forEach(el => {
+          el.classList.toggle('active', el.dataset.chip === matched);
+          if (el.dataset.chip === matched) {
+            document.getElementById('selected-industry').value = matched;
+            document.getElementById('industry-hint').textContent = '✅ 已选：' + matched;
+          }
+        });
+      }
+
+      // 设档位
+      if (p.mode === 'standard') {
+        document.querySelector('[data-mode="standard"]') && document.querySelector('[data-mode="standard"]').click();
+      }
+
+      // 展示解析结果卡片
+      const rEl = document.getElementById('jd-result');
+      rEl.style.display = 'block';
+      rEl.innerHTML = `
+        <div style="font-weight:600; color:#2d7a5a; margin-bottom:8px;">✅ JD解析完成 · 已填入表单</div>
+        <div><strong>产品：</strong>${p.product || '—'}</div>
+        <div><strong>行业：</strong>${p.industry || '—'} · ${p.subdomain || '—'}</div>
+        <div><strong>核心用户：</strong>${p.user || '—'}</div>
+        <div><strong>档位建议：</strong>${p.mode === 'standard' ? '📦 标准档' : '⚡ 闪电档'}</div>
+        <div style="margin-top:6px; color:#666;"><strong>面试官最在乎：</strong>${p.focus || '—'}</div>
+        ${p.key_requirements && p.key_requirements.length ? `<div style="margin-top:6px;"><strong>核心要求：</strong>${p.key_requirements.slice(0,3).map(r=>'<br>· '+r).join('')}</div>` : ''}
+      `;
+
+      // 滚动到启动按钮
+      document.getElementById('launch-btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // ── localStorage 历史记录 ─────────────────────────────────
+    window._saveHistory = function(entry) {
+      try {
+        const hist = JSON.parse(localStorage.getItem('peach-history') || '[]');
+        const idx = hist.findIndex(h => h.id === entry.id);
+        if (idx !== -1) Object.assign(hist[idx], entry);
+        else { hist.unshift(entry); if (hist.length > 20) hist.splice(20); }
+        localStorage.setItem('peach-history', JSON.stringify(hist));
+      } catch(e) {}
+    };
+
+    function renderHistory() {
+      try {
+        const hist = JSON.parse(localStorage.getItem('peach-history') || '[]');
+        const section = document.getElementById('history-section');
+        if (!hist.length) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+
+        const now = Date.now();
+        const STUCK_MS = 30 * 60 * 1000; // 30 min = stuck
+
+        // categorize
+        const layers = { red: [], yellow: [], green: [], blue: [] };
+        hist.forEach(h => {
+          const age = now - (h.timestamp || 0);
+          if (h.status === 'error') {
+            layers.red.push(h);
+          } else if ((h.status === 'analyzing' || h.status === 'generating') && age > STUCK_MS) {
+            layers.red.push({ ...h, _stuck: true });
+          } else if (h.status === 'analyzing' || h.status === 'generating') {
+            layers.yellow.push(h);
+          } else if (h.status === 'done') {
+            layers.green.push(h);
+          }
+        });
+
+        // fire banner
+        const fireBanner = document.getElementById('fire-banner');
+        const fireBannerText = document.getElementById('fire-banner-text');
+        if (layers.red.length) {
+          fireBanner.style.display = 'block';
+          const stuckCount = layers.red.filter(h => h._stuck).length;
+          const errCount   = layers.red.filter(h => h.status === 'error').length;
+          const parts = [];
+          if (stuckCount) parts.push(stuckCount + '个任务卡住超30分钟');
+          if (errCount)   parts.push(errCount + '个任务出错');
+          fireBannerText.textContent = '🔴 ' + parts.join(' · ') + ' · 建议先处理';
+        } else {
+          fireBanner.style.display = 'none';
+        }
+
+        // build card html helper
+        function buildUrl(h) {
+          const p = new URLSearchParams({
+            run_id: h.run_id || '',
+            q: h.product,
+            industry: h.industry,
+            mode: h.mode,
+            phase: h.status === 'done' ? 'generate' : 'analyze',
+            project_dir: h.project_dir || '',
+          });
+          if (h.batch_id) {
+            p.set('batch_id', h.batch_id);
+            Object.keys(h).forEach(k => { if (k.endsWith('_run') && h[k]) p.set(k, h[k]); });
+          }
+          return 'results.html?' + p.toString();
+        }
+        function fmtTime(ts) {
+          const dt = new Date(ts);
+          return (dt.getMonth()+1) + '/' + dt.getDate() + ' ' +
+                 dt.getHours().toString().padStart(2,'0') + ':' +
+                 dt.getMinutes().toString().padStart(2,'0');
+        }
+        function cardHtml(h, accent) {
+          const label = h.status === 'done'
+            ? '✅ 完成' + (h.file_count ? ' · ' + h.file_count + '个文件' : '')
+            : h._stuck
+              ? '⚠️ 疑似卡住 · 点击检查'
+              : { analyzing:'🔄 行业认知拆解中', generating:'⚡ 方案生成中', error:'❌ 出错' }[h.status] || '🕐 未知';
+          const border = accent || 'var(--paper-dark)';
+          return `<div onclick="window.location.href='${buildUrl(h)}'"
+            style="background:white;border:1px solid ${border};border-radius:12px;padding:16px;cursor:pointer;transition:all 0.15s;margin-bottom:10px;"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.07)'"
+            onmouseout="this.style.transform='';this.style.boxShadow=''">
+            <div style="font-size:11px;color:var(--ink-faint);margin-bottom:6px;">${fmtTime(h.timestamp)} · ${h.mode==='lightning'?'⚡ 闪电':'📦 标准'} · ${h.industry||'未知行业'}</div>
+            <div style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.4;margin-bottom:8px;">${(h.product||'').length>42?(h.product||'').slice(0,42)+'…':h.product}</div>
+            <div style="font-size:12px;color:var(--ink-soft);">${label}</div>
+          </div>`;
+        }
+        function layerHtml(id, emoji, title, items, accent, gridCols) {
+          const el = document.getElementById(id);
+          if (!items.length) { el.style.display = 'none'; return; }
+          el.style.display = 'block';
+          el.innerHTML = `<div style="font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+            <span>${emoji}</span><span>${title}</span>
+            <span style="font-size:11px;font-weight:400;background:var(--paper-dark);padding:2px 8px;border-radius:99px;">${items.length}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(${gridCols||'auto-fill, minmax(220px,1fr)'});gap:10px;">
+            ${items.map(h => cardHtml(h, accent)).join('')}
+          </div>`;
+        }
+
+        layerHtml('history-layer-red',    '🔴', '需要处理', layers.red,    '#e5737388');
+        layerHtml('history-layer-yellow', '🟡', '进行中',   layers.yellow, '#f59e0b88');
+        layerHtml('history-layer-green',  '🟢', '已完成',   layers.green,  'var(--paper-dark)');
+
+        // 🔵 strategy layer — show when >= 3 done records
+        const blueEl = document.getElementById('history-layer-blue');
+        const done = layers.green;
+        if (done.length >= 3) {
+          const industryMap = {};
+          done.forEach(h => { industryMap[h.industry||'未知'] = (industryMap[h.industry||'未知']||0)+1; });
+          const topIndustry = Object.entries(industryMap).sort((a,b)=>b[1]-a[1]).slice(0,3);
+          const modeMap = {};
+          done.forEach(h => { modeMap[h.mode||'lightning'] = (modeMap[h.mode||'lightning']||0)+1; });
+          blueEl.style.display = 'block';
+          blueEl.innerHTML = `<div style="font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+            <span>🔵</span><span>策略规律</span>
+            <span style="font-size:11px;font-weight:400;background:var(--paper-dark);padding:2px 8px;border-radius:99px;">${done.length}次归因</span>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="background:white;border:1px solid var(--paper-dark);border-radius:12px;padding:16px;flex:1;min-width:180px;">
+              <div style="font-size:11px;color:var(--ink-faint);margin-bottom:8px;">高频行业</div>
+              ${topIndustry.map(([ind,cnt]) => `<div style="font-size:13px;color:var(--ink);margin-bottom:4px;">${ind} <span style="color:var(--ink-faint);font-size:11px;">×${cnt}</span></div>`).join('')}
+            </div>
+            <div style="background:white;border:1px solid var(--paper-dark);border-radius:12px;padding:16px;flex:1;min-width:180px;">
+              <div style="font-size:11px;color:var(--ink-faint);margin-bottom:8px;">模式偏好</div>
+              ${Object.entries(modeMap).map(([m,c]) => `<div style="font-size:13px;color:var(--ink);margin-bottom:4px;">${m==='lightning'?'⚡ 闪电档':'📦 标准档'} <span style="color:var(--ink-faint);font-size:11px;">×${c}</span></div>`).join('')}
+            </div>
+            <div style="background:white;border:1px solid var(--paper-dark);border-radius:12px;padding:16px;flex:1;min-width:180px;">
+              <div style="font-size:11px;color:var(--ink-faint);margin-bottom:8px;">完成率</div>
+              <div style="font-size:22px;font-weight:700;color:var(--peach);">${Math.round(done.length/hist.length*100)}%</div>
+              <div style="font-size:11px;color:var(--ink-faint);">共${hist.length}次 · ${done.length}次完成</div>
+            </div>
+          </div>`;
+        } else {
+          blueEl.style.display = 'none';
+        }
+      } catch(e) { console.error('renderHistory error', e); }
+    }
+
+    window.clearHistory = function() {
+      localStorage.removeItem('peach-history');
+      document.getElementById('history-section').style.display = 'none';
+    };
+
+    // 把相位操作函数暴露到全局（HTML onclick 需要全局作用域）
+    window.togglePhase = togglePhase;
+    window.selectPhasePreset = selectPhasePreset;
+
+    // 初始化
+    updateModeUI();
+    renderHistory();
+
+    // 桥状态检测
+    (function checkBridge() {
+      const dot = document.getElementById('bridge-dot');
+      const msg = document.getElementById('bridge-msg');
+      fetch('/api/ping').then(r => r.json()).then(d => {
+        if (d.ok) {
+          dot.style.background = '#4caf82';
+          msg.style.color = '#2d7a5a';
+          const sm = d.models?.smart || 'sonnet';
+          const fm = d.models?.fast  || 'haiku';
+          msg.textContent = `🟢 桥已就绪 · ${sm} / ${fm}`;
+        } else {
+          dot.style.background = '#e57373';
+          msg.style.color = '#c62828';
+          msg.textContent = '🔴 桥异常 · 双击「启动桥.command」';
+        }
+      }).catch(() => {
+        dot.style.background = '#e57373';
+        msg.style.color = '#c62828';
+        msg.innerHTML = '🔴 未连接桥 · <strong>双击「启动桥.command」</strong>启动后刷新页面';
+      });
+    })();
+
+    // ─── 竞品链接 ───
+    const _competitorUrls = [];
+
+    window.toggleCompetitorPanel = function() {
+      const panel = document.getElementById('competitor-panel');
+      const btn   = document.getElementById('competitor-toggle-btn');
+      const open  = panel.style.display === 'none';
+      panel.style.display = open ? 'block' : 'none';
+      btn.textContent = open
+        ? `🔍 竞品链接（${_competitorUrls.length}个）▲`
+        : `🔍 竞品链接 · 自动深度拆解注入竞品分析 ▾`;
+    };
+
+    window.addCompetitorUrl = function() {
+      const input = document.getElementById('competitor-url-input');
+      const url = (input.value || '').trim();
+      if (!url || !url.startsWith('http')) { input.focus(); return; }
+      if (_competitorUrls.find(c => c.url === url)) { input.value = ''; return; }
+      _competitorUrls.push({ url });
+      input.value = '';
+      _renderCompetitorList();
+    };
+
+    function _renderCompetitorList() {
+      const container = document.getElementById('competitor-list');
+      const btn = document.getElementById('competitor-toggle-btn');
+      container.innerHTML = _competitorUrls.map((c, i) => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--paper);border-radius:8px;">
+          <span style="font-size:13px;color:var(--peach);">🔍</span>
+          <span style="flex:1;font-size:12px;color:var(--ink-soft);word-break:break-all;">${c.url}</span>
+          <button onclick="_removeCompetitor(${i})" style="background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:16px;padding:0;line-height:1;">×</button>
+        </div>`).join('');
+      btn.textContent = _competitorUrls.length > 0
+        ? `🔍 竞品链接（${_competitorUrls.length}个）▲`
+        : `🔍 竞品链接 · 自动深度拆解注入竞品分析 ▾`;
+    }
+
+    window._removeCompetitor = function(i) {
+      _competitorUrls.splice(i, 1);
+      _renderCompetitorList();
+    };
+
+  })();
+</script>
+
+<!-- ========== 引导浮层 · 5 步追问（2026-04-29） ========== -->
+<div id="guide-overlay" class="guide-overlay" onclick="if(event.target===this) closeGuide()">
+  <div class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guide-question">
+    <button class="guide-close" onclick="closeGuide()" aria-label="关闭">×</button>
+    <div class="guide-progress" id="guide-progress">
+      <span class="dot current"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>
+    <div id="guide-body"><!-- 由 JS 渲染 --></div>
+  </div>
+</div>
+
+<script>
+// ========== 引导浮层 · 5 步追问 状态机 ==========
+(function(){
+  const QUESTIONS = [
+    {
+      label: 'Q1 · 方向定位',
+      title: '你想给谁做一个什么样的产品？',
+      hint: '一句话讲清就行：<strong>谁用 + 什么场景 + 解决什么</strong>。<br>例：给汽车金融审核员用的智能信贷审核系统，把 45 分钟的人工审核压到 4 分钟以内。',
+      placeholder: '例：给 XX 用的 XX 产品，解决 XX 问题',
+      key: 'direction',
+      required: true,
+    },
+    {
+      label: 'Q2 · 局限与机会',
+      title: '他们现在最大的卡点是什么？AI 给了什么新机会？',
+      hint: '先讲<strong>痛点</strong>（现状有多糟），再讲<strong>AI 凭啥能改</strong>。<br>例：审核员每天翻 50 份扫描件，人工核 7 个字段错一个就重来；现在用 OCR + 多 Agent 协作可以全自动抽取核对。',
+      placeholder: '现在的卡点：...\nAI 给的新机会：...',
+      key: 'opportunity',
+      required: true,
+    },
+    {
+      label: 'Q3 · 竞品赛道',
+      title: '这赛道现在已经有谁在做？大概什么定价？',
+      hint: '不知道可以跳过。<strong>2-3 个名字 + 价位</strong>就够。<br>例：百融云金、同盾、冰鉴；定价大约 5-15 万/年起。',
+      placeholder: '已知的竞品和价位（不知道就跳过）',
+      key: 'competitors',
+      required: false,
+    },
+    {
+      label: 'Q4 · AI 用法',
+      title: '你打算用 AI 怎么解？什么技术架构？',
+      hint: '具体到<strong>架构选型</strong>：Agent / RAG / 多模型 / 微调 / Workflow。<br>例：LangGraph 多 Agent 编排 + RAG 检索内部规则库 + Qwen2-72B 核心推理 + GPT-4 兜底校验。',
+      placeholder: '例：用 XX 架构 + XX 模型，关键节点是 XX',
+      key: 'ai_approach',
+      required: true,
+    },
+    {
+      label: 'Q5 · 人机协同',
+      title: '哪一步必须留给人？AI 的红线在哪？',
+      hint: '<strong>HITL（人在回路）</strong>是 AI 产品必答题。哪些动作 AI 不能独立做、必须人审？<br>例：终审、调额超 50 万、风险等级 D 类必须人工复核；AI 只到"建议"层，不直接出结果。',
+      placeholder: '人必须卡的步骤：...\nAI 的能力边界：...',
+      key: 'hitl',
+      required: true,
+    },
+  ];
+
+  let answers = {};
+  let cur = 0;
+
+  const $body = () => document.getElementById('guide-body');
+  const $progress = () => document.getElementById('guide-progress');
+
+  function renderProgress() {
+    const dots = $progress().querySelectorAll('.dot');
+    dots.forEach((d, i) => {
+      d.classList.remove('done','current');
+      if (i < cur) d.classList.add('done');
+      else if (i === cur) d.classList.add('current');
+    });
+  }
+
+  function escapeHTML(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderQuestion() {
+    const q = QUESTIONS[cur];
+    const saved = answers[q.key] || '';
+    $body().innerHTML = `
+      <div class="guide-step-label">${q.label}${q.required ? '' : ' · 可跳过'}</div>
+      <div class="guide-question" id="guide-question">${q.title}</div>
+      <div class="guide-hint">${q.hint}</div>
+      <textarea class="guide-textarea" id="guide-input" placeholder="${escapeHTML(q.placeholder)}">${escapeHTML(saved)}</textarea>
+      <div class="guide-actions">
+        <div class="left">
+          ${cur > 0 ? '<button class="guide-btn guide-btn-ghost" onclick="guidePrev()">← 上一题</button>' : ''}
+        </div>
+        <div class="right">
+          ${!q.required ? '<button class="guide-btn guide-btn-ghost" onclick="guideSkip()">跳过</button>' : ''}
+          <button class="guide-btn guide-btn-primary" id="guide-next">${cur === QUESTIONS.length - 1 ? '✨ 整理成 brief' : '下一题 →'}</button>
+        </div>
+      </div>
+    `;
+    const ta = document.getElementById('guide-input');
+    const next = document.getElementById('guide-next');
+    function syncNextState() {
+      next.disabled = q.required ? !ta.value.trim() : false;
+    }
+    syncNextState();
+    ta.addEventListener('input', syncNextState);
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        if (!next.disabled) next.click();
+      }
+    });
+    next.addEventListener('click', () => {
+      answers[q.key] = ta.value.trim();
+      if (cur === QUESTIONS.length - 1) renderSummary();
+      else { cur++; renderProgress(); renderQuestion(); }
+    });
+    setTimeout(() => ta.focus(), 50);
+    renderProgress();
+  }
+
+  window.guidePrev = function() {
+    const ta = document.getElementById('guide-input') || document.getElementById('guide-summary');
+    if (ta) {
+      const onSummary = !!document.getElementById('guide-summary');
+      if (onSummary) { cur = QUESTIONS.length - 1; renderQuestion(); return; }
+      answers[QUESTIONS[cur].key] = ta.value.trim();
+    }
+    if (cur > 0) { cur--; renderQuestion(); }
+  };
+  window.guideSkip = function() {
+    answers[QUESTIONS[cur].key] = '';
+    if (cur === QUESTIONS.length - 1) renderSummary();
+    else { cur++; renderQuestion(); }
+  };
+
+  function assembleBrief() {
+    const a = answers;
+    const lines = [];
+    if (a.direction)    lines.push(a.direction);
+    if (a.opportunity)  lines.push('', `【现状卡点 & AI 机会】${a.opportunity}`);
+    if (a.competitors)  lines.push(`【已知竞品】${a.competitors}`);
+    if (a.ai_approach)  lines.push(`【AI 架构方案】${a.ai_approach}`);
+    if (a.hitl)         lines.push(`【人机协同红线】${a.hitl}`);
+    return lines.join('\n').trim();
+  }
+
+  function renderSummary() {
+    const brief = assembleBrief();
+    $body().innerHTML = `
+      <div class="guide-step-label">✨ 引导完成</div>
+      <div class="guide-question">这是整理好的 brief，确认后填进主输入框</div>
+      <div class="guide-hint">不满意可以<strong>直接编辑</strong>这段文字，或退回上一题改答案。</div>
+      <textarea class="guide-textarea" id="guide-summary" style="min-height:200px;">${escapeHTML(brief)}</textarea>
+      <div class="guide-actions">
+        <div class="left">
+          <button class="guide-btn guide-btn-ghost" onclick="guidePrev()">← 退回改答</button>
+        </div>
+        <div class="right">
+          <button class="guide-btn guide-btn-ghost" onclick="closeGuide()">关闭不发</button>
+          <button class="guide-btn guide-btn-primary" onclick="guideInject()">📤 填进主输入框</button>
+        </div>
+      </div>
+    `;
+    $progress().querySelectorAll('.dot').forEach(d => {
+      d.classList.remove('current'); d.classList.add('done');
+    });
+  }
+
+  window.guideInject = function() {
+    const text = document.getElementById('guide-summary').value.trim();
+    const input = document.getElementById('peach-input');
+    input.value = text;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    closeGuide();
+    setTimeout(() => {
+      input.focus();
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 320);
+  };
+
+  window.openGuide = function() {
+    document.getElementById('guide-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    const curText = (document.getElementById('peach-input').value || '').trim();
+    if (curText && !answers.direction) answers.direction = curText;
+    cur = 0;
+    renderQuestion();
+  };
+  window.closeGuide = function() {
+    document.getElementById('guide-overlay').classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('guide-overlay').classList.contains('active')) {
+      closeGuide();
+    }
+  });
+})();
+</script>
 </body>
 </html>

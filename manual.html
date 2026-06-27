@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📘 使用手册 · Peach Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    body { background: var(--paper); color: var(--ink); font-family: var(--font-body); }
+
+    /* ── 导航（与 index 一致）── */
+    .nav-links { flex-wrap: wrap; }
+    .nav-more-wrap { position: relative; }
+    .nav-more-trigger { background:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;color:var(--ink-soft);padding:0; }
+    .nav-more-trigger:hover { color:var(--peach); }
+    .nav-dropdown { position:absolute;top:calc(100% + 4px);right:0;background:white;border:1px solid var(--paper-dark);border-radius:var(--radius-md);padding:6px 0;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,0.08);opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .18s,transform .18s;z-index:9999; }
+    .nav-more-wrap:hover .nav-dropdown,.nav-more-wrap:focus-within .nav-dropdown,.nav-more-wrap.open .nav-dropdown { opacity:1;pointer-events:auto;transform:translateY(0); }
+    .nav-dropdown a { display:flex;align-items:center;gap:8px;padding:8px 16px;color:var(--ink-soft);text-decoration:none;font-size:14px; }
+    .nav-dropdown a:hover { background:var(--paper);color:var(--peach); }
+
+    /* ── 页面布局 ── */
+    .manual-wrap { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* ── Hero ── */
+    .manual-hero { text-align: center; margin-bottom: 64px; padding: 48px 24px; background: white; border-radius: 20px; border: 1.5px solid var(--paper-dark); position: relative; overflow: hidden; }
+    .manual-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 0%, rgba(209,106,78,0.07) 0%, transparent 60%); pointer-events: none; }
+    .manual-hero-eyebrow { font-family: var(--font-hand); font-size: 16px; color: var(--peach); margin-bottom: 12px; }
+    .manual-hero h1 { font-family: var(--font-serif); font-size: clamp(28px, 5vw, 42px); font-weight: 400; line-height: 1.2; margin-bottom: 16px; }
+    .manual-hero p { font-size: 15px; color: var(--ink-soft); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+
+    /* ── 目录侧边栏 ── */
+    .manual-layout { display: grid; grid-template-columns: 200px 1fr; gap: 40px; align-items: start; }
+    @media (max-width: 700px) { .manual-layout { grid-template-columns: 1fr; } .manual-toc { display: none; } }
+    .manual-toc { position: sticky; top: 80px; }
+    .manual-toc-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-faint); margin-bottom: 12px; }
+    .manual-toc a { display: block; font-size: 13px; color: var(--ink-soft); text-decoration: none; padding: 5px 0 5px 10px; border-left: 2px solid var(--paper-dark); margin-bottom: 2px; transition: all .15s; }
+    .manual-toc a:hover, .manual-toc a.active { color: var(--peach); border-left-color: var(--peach); }
+
+    /* ── 章节 ── */
+    .manual-section { margin-bottom: 56px; scroll-margin-top: 80px; }
+    .section-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--peach); margin-bottom: 8px; }
+    .section-title { font-family: var(--font-serif); font-size: 26px; font-weight: 400; margin-bottom: 16px; }
+    .section-body { font-size: 14px; line-height: 1.8; color: var(--ink-soft); }
+    .section-body p { margin-bottom: 12px; }
+
+    /* ── 步骤卡片 ── */
+    .steps { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .step { display: flex; gap: 16px; background: white; border: 1.5px solid var(--paper-dark); border-radius: 14px; padding: 16px 18px; align-items: flex-start; }
+    .step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--peach); color: white; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .step-body h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--ink); }
+    .step-body p { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+
+    /* ── 双栏卡片 ── */
+    .card-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+    @media (max-width: 600px) { .card-grid-2 { grid-template-columns: 1fr; } }
+    .mode-card { background: white; border: 1.5px solid var(--paper-dark); border-radius: 14px; padding: 20px; }
+    .mode-card.highlight { border-color: var(--peach); background: #fff9f7; }
+    .mode-card-icon { font-size: 28px; margin-bottom: 10px; }
+    .mode-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .mode-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 10px; }
+    .mode-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--paper-dark); color: var(--ink-soft); }
+    .mode-card.highlight .mode-tag { background: var(--peach); color: white; }
+
+    /* ── 流水线图 ── */
+    .pipeline { display: flex; flex-wrap: wrap; align-items: center; gap: 0; margin: 20px 0; }
+    .pipe-node { background: white; border: 1.5px solid var(--paper-dark); border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+    .pipe-node.active { border-color: var(--peach); color: var(--peach); background: #fff9f7; }
+    .pipe-node.gate { border-color: #e8b84b; color: #b8860b; background: #fffdf0; }
+    .pipe-node.qa { border-color: var(--sage); color: #5a7a52; background: #f5f9f4; }
+    .pipe-arrow { font-size: 16px; color: var(--ink-faint); padding: 0 4px; }
+
+    /* ── CEO Gate 评分维度 ── */
+    .gate-dims { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    @media (max-width: 560px) { .gate-dims { grid-template-columns: 1fr; } }
+    .gate-dim { background: white; border: 1.5px solid var(--paper-dark); border-radius: 10px; padding: 12px 14px; }
+    .gate-dim-label { font-size: 11px; font-weight: 700; color: var(--peach); margin-bottom: 4px; }
+    .gate-dim-desc { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+
+    /* ── 员工表格 ── */
+    .team-group { margin-bottom: 28px; }
+    .team-group-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-faint); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--paper-dark); }
+    .team-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .team-chip { background: white; border: 1.5px solid var(--paper-dark); border-radius: 8px; padding: 6px 12px; font-size: 12px; color: var(--ink-soft); }
+    .team-chip.key { border-color: var(--peach); color: var(--peach); background: #fff9f7; }
+
+    /* ── 输入体系表格 ── */
+    .input-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+    .input-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); padding: 8px 12px; border-bottom: 1.5px solid var(--paper-dark); }
+    .input-table td { padding: 10px 12px; border-bottom: 1px solid var(--paper-dark); color: var(--ink-soft); vertical-align: top; line-height: 1.6; }
+    .input-table tr:last-child td { border-bottom: none; }
+    .input-table td:first-child { font-weight: 600; color: var(--ink); white-space: nowrap; }
+
+    /* ── 哲学卡片 ── */
+    .philosophy-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+    @media (max-width: 640px) { .philosophy-cards { grid-template-columns: 1fr; } }
+    .ph-card { background: white; border: 1.5px solid var(--paper-dark); border-radius: 14px; padding: 20px; text-align: center; }
+    .ph-card-icon { font-size: 32px; margin-bottom: 10px; }
+    .ph-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .ph-card p { font-size: 12px; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+
+    /* ── 快捷键/提示 ── */
+    .tip-box { background: #f0fff8; border: 1.5px solid #4caf82; border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #2d6a4f; line-height: 1.7; margin-top: 16px; }
+    .tip-box strong { color: #1b4332; }
+
+    /* ── 判决表格 ── */
+    .verdict-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; }
+    .verdict-table th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); border-bottom: 1.5px solid var(--paper-dark); }
+    .verdict-table td { padding: 10px 12px; border-bottom: 1px solid var(--paper-dark); font-size: 13px; color: var(--ink-soft); }
+    .verdict-table tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .badge-pass { background: #d1fae5; color: #065f46; }
+    .badge-redo { background: #fef3c7; color: #92400e; }
+    .badge-term { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-content">
+    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>Peach Studio</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">🎯 需求入口</a>
+      <a href="methodology.html" class="nav-link">📚 方法论</a>
+      <a href="workspace.html" class="nav-link">📊 分析工作台</a>
+      <a href="collaboration.html" class="nav-link">🤝 协作台</a>
+      <a href="industries.html" class="nav-link">🏭 行业库</a>
+      <a href="results.html" class="nav-link">📦 结果工作台</a>
+      <div class="nav-more-wrap">
+        <button class="nav-more-trigger" aria-haspopup="true" onclick="this.closest('.nav-more-wrap').classList.toggle('open')">更多 ▾</button>
+        <div class="nav-dropdown">
+          <a href="projects.html">📁 项目历史</a>
+          <a href="manual.html" style="color:var(--peach);font-weight:600;">📘 使用手册</a>
+          <a href="docs.html">📖 资产层</a>
+          <a href="cases.html">📂 案例库</a>
+          <a href="team.html">👥 团队</a>
+          <a href="office.html">🎬 办公室</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="manual-wrap">
+
+  <!-- Hero -->
+  <div class="manual-hero">
+    <div class="manual-hero-eyebrow">Peach Studio · 使用手册</div>
+    <h1>一个人，一家公司<br><em>42 位 AI 员工随时待命</em></h1>
+    <p>你是老板，负责提需求和最终拍板。其余的——市场调研、用户研究、产品定义、前后端开发、质量审查——全部由 AI 员工自动完成。</p>
+  </div>
+
+  <div class="manual-layout">
+
+    <!-- 目录 -->
+    <nav class="manual-toc" id="toc">
+      <div class="manual-toc-title">目录</div>
+      <a href="#quickstart">快速开始</a>
+      <a href="#inputs">输入体系</a>
+      <a href="#modes">两档模式</a>
+      <a href="#pipeline">运行机制</a>
+      <a href="#ceo-gate">CEO Gate</a>
+      <a href="#team">42 员工阵容</a>
+      <a href="#philosophy">一人公司哲学</a>
+      <a href="#moat">壁垒 · 应对迭代</a>
+      <a href="#faq">常见问题</a>
+    </nav>
+
+    <!-- 正文 -->
+    <div class="manual-content">
+
+      <!-- 快速开始 -->
+      <section class="manual-section" id="quickstart">
+        <div class="section-eyebrow">Section 01</div>
+        <div class="section-title">快速开始</div>
+        <div class="section-body">
+          <p>三步启动，最快 2 分钟出产品方案 + Demo。</p>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h4>打开专属 Chrome</h4>
+              <p>双击桌面的 <strong>启动桥.command</strong>，它会自动启动本地服务并打开绕过代理的专属浏览器窗口。不能用普通 Chrome，Clash 梯子会拦截本地请求。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h4>输入你的产品需求</h4>
+              <p>在首页大输入框里写一句话，比如"宠物医疗 AI 问诊平台"或"给中小学生的 AI 写作辅导工具"。选行业（可选），选模式（闪电档 or 标准档）。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h4>点击启动，等待交付</h4>
+              <p>闪电档约 2 分钟出 3 份文档 + Demo；标准档 20-40 分钟自动跑完 P1→P6 全链路，包含市场、用户、产品、设计、技术、运营 共 30+ 份专业文档。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 输入体系 -->
+      <section class="manual-section" id="inputs">
+        <div class="section-eyebrow">Section 02</div>
+        <div class="section-title">输入体系</div>
+        <div class="section-body">
+          <p>除了产品描述，你还可以给 AI 更多信息，让产出更准确、更贴近你的真实想法。</p>
+        </div>
+        <table class="input-table">
+          <thead>
+            <tr>
+              <th>输入方式</th>
+              <th>适合场景</th>
+              <th>传给谁</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>📝 产品描述</td>
+              <td>一句话说清楚要做什么</td>
+              <td>全部 Agent</td>
+            </tr>
+            <tr>
+              <td>📋 已知信息面板</td>
+              <td>你已知道的竞品、目标用户、现有数据</td>
+              <td>全部 Agent（覆盖 AI 推断）</td>
+            </tr>
+            <tr>
+              <td>📄 上传思路文档（.md）</td>
+              <td>你已写好的产品思路、访谈摘要、市场判断</td>
+              <td>全部 Agent（最高优先级）</td>
+            </tr>
+            <tr>
+              <td>💻 上传前端初稿（.html）</td>
+              <td>你已有的页面原型或粗稿，AI 在此基础上完善</td>
+              <td>Demo / UI / Design QA Agent</td>
+            </tr>
+            <tr>
+              <td>🖼 素材库（图片/视频）</td>
+              <td>豆包/即梦生成的图片、产品宣传视频、Logo</td>
+              <td>Demo / UI / Design QA Agent</td>
+            </tr>
+            <tr>
+              <td>📐 参考网站 URL</td>
+              <td>你想参考的设计风格网站，Demo 会学习它的视觉</td>
+              <td>Demo Agent</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="tip-box">
+          <strong>素材库使用技巧：</strong>把豆包/即梦生成的图片放进 Finder 文件夹（文稿 → 桃子obsidian → 桃子资料 → 项目 → 素材库），点网页上的"📂 在 Finder 打开素材库"按钮直接跳转。勾选本项目要用的素材，标注用途（首页背景图、Logo、演示视频），Agent 会把它们放进 Demo 的正确位置。
+        </div>
+      </section>
+
+      <!-- 两档模式 -->
+      <section class="manual-section" id="modes">
+        <div class="section-eyebrow">Section 03</div>
+        <div class="section-title">两档模式</div>
+        <div class="section-body">
+          <p>根据你的时间和需求深度，选择合适的档位。</p>
+        </div>
+        <div class="card-grid-2">
+          <div class="mode-card">
+            <div class="mode-card-icon">⚡</div>
+            <h3>闪电档</h3>
+            <p>2 分钟出 3 份核心文档 + 1 个可点击 Demo。适合快速验证方向、对外汇报、客户演示用。</p>
+            <p><strong>产出：</strong>Product Brief · Design-Tech Brief · Demo HTML</p>
+            <span class="mode-tag">约 2 分钟</span>
+          </div>
+          <div class="mode-card highlight">
+            <div class="mode-card-icon">🏭</div>
+            <h3>标准档</h3>
+            <p>P1→P6 全链路自动流水线，含 CEO Gate 质量关口，30+ 份大厂标准文档。</p>
+            <p><strong>产出：</strong>市场报告 · 用户研究 · PRD · 技术方案 · 运营计划 · Demo 等</p>
+            <span class="mode-tag">20–40 分钟</span>
+          </div>
+        </div>
+        <div class="tip-box" style="margin-top:16px;">
+          <strong>推荐做法：</strong>先跑闪电档验证方向 → 方向对了再跑标准档的前端阶段（P3+P4）→ 前端确认后再跑后端阶段（P5+P6）。标准档可以只勾选你需要的阶段，不必每次全跑。
+        </div>
+      </section>
+
+      <!-- 运行机制 -->
+      <section class="manual-section" id="pipeline">
+        <div class="section-eyebrow">Section 04</div>
+        <div class="section-title">运行机制</div>
+        <div class="section-body">
+          <p>标准档的完整流水线分 6 个阶段，P2 完成后有一道 CEO Gate 质量关口，通过后才解锁 P3–P6。</p>
+        </div>
+
+        <div class="pipeline" style="margin-bottom:24px;">
+          <div class="pipe-node active">P1 市场洞察</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node active">P2 用户研究</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node gate">CEO Gate</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node active">P3 产品规划</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node active">P4 设计体验</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node active">P5 技术开发</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node active">P6 上线运营</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node qa">Reviewer</div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-node qa">CKO 蒸馏</div>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num" style="background:#9aa889;">P1</div>
+            <div class="step-body">
+              <h4>市场洞察</h4>
+              <p>市场数据报告、竞品深度分析、AI 边界分析（N34）、竞争壁垒报告、SWOT + 商业计划书、BRD + MRD。并发运行，约 8–12 分钟。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:#9aa889;">P2</div>
+            <div class="step-body">
+              <h4>用户研究</h4>
+              <p>用户调研报告、用户画像、用户旅程地图、产品定位 Charter、用户问卷设计。P1 全部完成后自动启动。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:#e8b84b;">🚦</div>
+            <div class="step-body">
+              <h4>CEO Gate · 质量关口</h4>
+              <p>P2 完成后 AI CEO 自动对 5 个维度打分（满分 500）。低于 400 回炉重做，低于 300 终止项目，连续 2 次不过强制推进。通过后 P3–P6 才会解锁。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--peach);">P3</div>
+            <div class="step-body">
+              <h4>产品规划</h4>
+              <p>PRD 产品需求文档、产品路线图、功能清单、MVP 方案、信息架构 + 数据指标体系。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--peach);">P4</div>
+            <div class="step-body">
+              <h4>设计体验</h4>
+              <p>交互原型文档、UI 设计规范、Demo HTML（带素材和初稿）、AI 模型选型报告、Design QA 审查。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--peach);">P5</div>
+            <div class="step-body">
+              <h4>技术开发</h4>
+              <p>技术方案报告、API 接口文档、数据库设计、Embedding 测试方案、AI 评测报告、SOP 技术安全规范。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--peach);">P6</div>
+            <div class="step-body">
+              <h4>上线运营</h4>
+              <p>上线运营计划、ASO + 增长数据复盘、合规隐私文档、项目归档 + 变更日志。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:#9aa889;">QA</div>
+            <div class="step-body">
+              <h4>Reviewer + CKO 蒸馏</h4>
+              <p>全链路一致性审查（PRD ↔ Demo ↔ 技术方案三向对齐）。CKO 将本次项目的 Prior Art 和 Anti-Pattern 写入知识库，下次项目自动学习。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CEO Gate -->
+      <section class="manual-section" id="ceo-gate">
+        <div class="section-eyebrow">Section 05</div>
+        <div class="section-title">CEO Gate · 质量关口</div>
+        <div class="section-body">
+          <p>P2 完成后，AI CEO 自动阅读全部 P1+P2 文档，对 5 个核心维度打分，决定项目是否值得进入深度生产。</p>
+        </div>
+
+        <div class="gate-dims">
+          <div class="gate-dim">
+            <div class="gate-dim-label">Q1 · 市场空间</div>
+            <div class="gate-dim-desc">有没有量化的 TAM/SAM 数字和增速？市场时机对不对？</div>
+          </div>
+          <div class="gate-dim">
+            <div class="gate-dim-label">Q2 · 竞品壁垒</div>
+            <div class="gate-dim-desc">差异化切入点够不够具体？能不能打穿竞品核心护城河？</div>
+          </div>
+          <div class="gate-dim">
+            <div class="gate-dim-label">Q3 · AI 边界</div>
+            <div class="gate-dim-desc">哪些功能必须 AI、哪些用传统方案更好？边界分析是否完整？</div>
+          </div>
+          <div class="gate-dim">
+            <div class="gate-dim-label">Q4 · 用户对齐</div>
+            <div class="gate-dim-desc">用户画像够不够具体？痛点有没有数据或访谈佐证？</div>
+          </div>
+          <div class="gate-dim" style="grid-column: 1 / -1;">
+            <div class="gate-dim-label">Q5 · 产品定位</div>
+            <div class="gate-dim-desc">产品定位能不能一句话说清楚？MVP 范围够不够收敛？北极星指标是否量化？</div>
+          </div>
+        </div>
+
+        <table class="verdict-table" style="margin-top:20px;">
+          <thead>
+            <tr><th>总分</th><th>判决</th><th>后续动作</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>≥ 400 且无低分项</td>
+              <td><span class="badge badge-pass">PASS</span></td>
+              <td>解锁 P3–P6，全速推进</td>
+            </tr>
+            <tr>
+              <td>300–399 或有低分项</td>
+              <td><span class="badge badge-redo">REDO</span></td>
+              <td>指定 Agent 返工，重新评分（最多 2 次）</td>
+            </tr>
+            <tr>
+              <td>&lt; 300 或多个低分项</td>
+              <td><span class="badge badge-term">TERMINATE</span></td>
+              <td>市场机会不足，建议终止</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 42 员工 -->
+      <section class="manual-section" id="team">
+        <div class="section-eyebrow">Section 06</div>
+        <div class="section-title">42 员工 · 每位都是独立 Agent</div>
+        <div class="section-body">
+          <p>公司里每一位员工 = 一个独立 AI Agent，拥有专属的系统提示词、方法论框架和判断标准。接到任务后自主运行，输出有理有据，不是泛泛而谈。</p>
+          <p>42 位常驻员工覆盖从战略到执行的完整链条。另有 <strong>200 位行业专家 Agent</strong>，按需激活，随时顶上。</p>
+        </div>
+
+        <div class="team-group">
+          <div class="team-group-title">决策层</div>
+          <div class="team-chips">
+            <span class="team-chip key">CEO Agent · 接单路由 + 终审</span>
+            <span class="team-chip key">快速 CEO Agent · 闪电档指挥</span>
+            <span class="team-chip">战略分析师 Agent</span>
+            <span class="team-chip">首席方法论官 Agent</span>
+          </div>
+        </div>
+
+        <div class="team-group">
+          <div class="team-group-title">总监层（并发审查）</div>
+          <div class="team-chips">
+            <span class="team-chip">产品总监 Agent</span>
+            <span class="team-chip">技术总监 Agent</span>
+            <span class="team-chip">设计总监 Agent</span>
+            <span class="team-chip">增长运营总监 Agent</span>
+          </div>
+        </div>
+
+        <div class="team-group">
+          <div class="team-group-title">质量守门（桃子独创）</div>
+          <div class="team-chips">
+            <span class="team-chip key">QA 一致性审查员 Agent</span>
+            <span class="team-chip key">CEO Gate 评审官 Agent</span>
+            <span class="team-chip">反指标监控员 Agent</span>
+            <span class="team-chip key">CKO 知识蒸馏 Agent</span>
+            <span class="team-chip key">Reviewer 全链审查 Agent</span>
+          </div>
+        </div>
+
+        <div class="team-group">
+          <div class="team-group-title">产品线 Agent</div>
+          <div class="team-chips">
+            <span class="team-chip">通用 PM</span>
+            <span class="team-chip">行业向 PM</span>
+            <span class="team-chip">需求分析师</span>
+            <span class="team-chip">用户研究员</span>
+            <span class="team-chip">数据 PM</span>
+          </div>
+        </div>
+
+        <div class="team-group">
+          <div class="team-group-title">AI 研发线 Agent</div>
+          <div class="team-chips">
+            <span class="team-chip">算法工程师</span>
+            <span class="team-chip">AI 训练师</span>
+            <span class="team-chip">Prompt 工程师</span>
+            <span class="team-chip">RAG 工程师</span>
+            <span class="team-chip">Agent 编排工程师</span>
+            <span class="team-chip">模型评测专家</span>
+          </div>
+        </div>
+
+        <div class="team-group">
+          <div class="team-group-title">设计线 Agent</div>
+          <div class="team-chips">
+            <span class="team-chip">UX 设计师</span>
+            <span class="team-chip">Figma 设计师</span>
+            <span class="team-chip">动效设计师</span>
+            <span class="team-chip">品牌插画师</span>
+            <span class="team-chip">Editorial 风设计师</span>
+            <span class="team-chip">+ 10 种视觉风格矩阵</span>
+          </div>
+        </div>
+
+        <div class="team-group">
+          <div class="team-group-title">工程线 Agent</div>
+          <div class="team-chips">
+            <span class="team-chip">全栈工程师</span>
+            <span class="team-chip">前端工程师</span>
+            <span class="team-chip">后端工程师</span>
+            <span class="team-chip">DevOps 工程师</span>
+            <span class="team-chip">测试工程师</span>
+          </div>
+        </div>
+
+        <div class="team-group">
+          <div class="team-group-title">数据运营线 Agent</div>
+          <div class="team-chips">
+            <span class="team-chip">数据分析师</span>
+            <span class="team-chip">BI 看板工程师</span>
+            <span class="team-chip">内容运营</span>
+            <span class="team-chip">ASO 运营</span>
+          </div>
+        </div>
+
+        <div class="team-group">
+          <div class="team-group-title">商务合规线 Agent</div>
+          <div class="team-chips">
+            <span class="team-chip">客户成功</span>
+            <span class="team-chip">商务法务</span>
+            <span class="team-chip">合规隐私专员</span>
+          </div>
+        </div>
+
+        <!-- 行业专家池 -->
+        <div style="margin-top:28px;padding:20px;background:white;border:1.5px solid var(--paper-dark);border-radius:14px;">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--peach);margin-bottom:12px;">200 位行业专家 Agent · 按需激活</div>
+          <div class="section-body">
+            <p>每个行业 Agent 不只是"懂行业知识"，而是具备<strong>四项专业判断力</strong>：</p>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:16px 0;">
+            <div style="background:#faf7f4;border-radius:10px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:700;color:var(--peach);margin-bottom:6px;">🎯 机会点识别</div>
+              <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;">这个行业当下最大的市场空白在哪？AI 能切入的真实场景是什么？谁在付钱解决这个问题？</div>
+            </div>
+            <div style="background:#faf7f4;border-radius:10px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:700;color:var(--peach);margin-bottom:6px;">⚠️ 行业弊端与风险</div>
+              <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;">这个行业的结构性难题是什么？监管红线在哪？历史上哪些方向被证明走不通？</div>
+            </div>
+            <div style="background:#faf7f4;border-radius:10px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:700;color:var(--peach);margin-bottom:6px;">🚀 如何快速获取机会</div>
+              <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;">最快的冷启动路径是什么？从哪个用户群切入？第一个月能做到什么程度的验证？</div>
+            </div>
+            <div style="background:#faf7f4;border-radius:10px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:700;color:var(--peach);margin-bottom:6px;">🔁 面对竞争快速迭代</div>
+              <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;">竞品跟进了怎么办？如何在 2 周内完成一轮功能迭代并重新占据差异化优势？</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;">
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🏥 医疗 10 细分</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">💰 金融 6 细分</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🎓 教育 6 细分</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🛍 电商 6 细分</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🚗 汽车 5 细分</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🏡 家装 5 细分</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🎮 游戏 6 细分</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🌏 跨境 6 细分</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🏭 制造业</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🐶 宠物</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">🎭 短剧</span>
+            <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#f0ebe4;color:var(--ink-soft);">+ 更多行业持续扩展</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 一人公司哲学 -->
+      <section class="manual-section" id="philosophy">
+        <div class="section-eyebrow">Section 07</div>
+        <div class="section-title">一人公司哲学</div>
+        <div class="section-body">
+          <p>桃子公司不是一个内容生成工具，而是一个<strong>可调度、可审查、可迭代</strong>的 AI 产品公司系统。</p>
+        </div>
+
+        <div class="philosophy-cards">
+          <div class="ph-card">
+            <div class="ph-card-icon">🔀</div>
+            <h4>可调度</h4>
+            <p>任务自动路由 → 调对应员工 → 并发 + 串行有规则，不需要你手动安排谁做什么。</p>
+          </div>
+          <div class="ph-card">
+            <div class="ph-card-icon">🛡</div>
+            <h4>可审查</h4>
+            <p>每一步都有硬审查（CEO Gate + QA + Reviewer），全程可回溯，产出有依据不是拍脑袋。</p>
+          </div>
+          <div class="ph-card">
+            <div class="ph-card-icon">🔁</div>
+            <h4>可迭代</h4>
+            <p>每跑一次更聪明。CKO 把成功案例和失败教训写入知识库，下次自动学习。</p>
+          </div>
+        </div>
+
+        <div class="section-body" style="margin-top:24px;">
+          <p><strong>你的角色：</strong>老板。提需求、看工作台、最终拍板。AI 员工负责执行，不需要你懂代码或写文档。</p>
+          <p><strong>核心等式：</strong>马海倩（1人）+ 有人格的 AI 工作流（42员工）= 10 人大厂团队的产出质量。</p>
+          <p><strong>三大信条：</strong>Demo 是文档的可视化表达，不是为了 Demo 做 Demo；员工是老板方法论的外化，不是通用工具人；老板有最终否决权，AI 给数据给选项，但你说了算。</p>
+        </div>
+      </section>
+
+      <!-- 壁垒 · 应对模型迭代 -->
+      <section class="manual-section" id="moat">
+        <div class="section-eyebrow">Section 08</div>
+        <div class="section-title">壁垒不在模型，在系统</div>
+        <div class="section-body">
+          <p>大模型每隔几个月就升级一次，这不是威胁，是<strong>底层基础设施的免费升级</strong>。真正的护城河，不在你用哪个模型，在你建了一套什么样的系统。</p>
+        </div>
+
+        <!-- 核心认知 -->
+        <div style="background:linear-gradient(135deg,rgba(209,106,78,0.06),rgba(154,168,137,0.06));border:1.5px solid var(--paper-dark);border-radius:16px;padding:24px 28px;margin:20px 0;">
+          <div style="font-family:var(--font-serif);font-size:20px;line-height:1.4;color:var(--ink);margin-bottom:12px;">「别人用锤子打钉子，我们建了一座工厂」</div>
+          <div style="font-size:13px;color:var(--ink-soft);line-height:1.7;">
+            竞品换了个更强的模型，等于买了把新锤子。桃子换了个更强的模型，42个Agent同时升级——工厂效率整体跃升。<br>
+            模型迭代越快，系统型产品的优势越大。
+          </div>
+        </div>
+
+        <!-- 四大壁垒 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0;">
+          <div style="background:white;border:1.5px solid var(--paper-dark);border-radius:14px;padding:18px 20px;">
+            <div style="font-size:20px;margin-bottom:8px;">⚙️</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;">工作流编排</div>
+            <div style="font-size:12px;color:var(--ink-soft);line-height:1.65;">42个Agent的调度逻辑、并发规则、8层审查链——这套协作机制是竞品抄不走的肌肉记忆。模型换了，编排层不动。</div>
+          </div>
+          <div style="background:white;border:1.5px solid var(--paper-dark);border-radius:14px;padding:18px 20px;">
+            <div style="font-size:20px;margin-bottom:8px;">📚</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;">方法论外化</div>
+            <div style="font-size:12px;color:var(--ink-soft);line-height:1.65;">VELA 33份模板 + 桃子PRD 15板块，是马海倩6年产品经验被结构化编码进系统的成果。这不是Prompt，是产品判断力的固化。</div>
+          </div>
+          <div style="background:white;border:1.5px solid var(--paper-dark);border-radius:14px;padding:18px 20px;">
+            <div style="font-size:20px;margin-bottom:8px;">🧬</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;">知识库积累（越跑越聪明）</div>
+            <div style="font-size:12px;color:var(--ink-soft);line-height:1.65;">每次跑完，CKO把成功案例写入Prior Art、失败教训写入Anti-Pattern。下次同类项目自动调用。跑100次，就有了100个项目的经验沉淀。</div>
+          </div>
+          <div style="background:white;border:1.5px solid var(--paper-dark);border-radius:14px;padding:18px 20px;">
+            <div style="font-size:20px;margin-bottom:8px;">🌐</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px;">行业深度专家池</div>
+            <div style="font-size:12px;color:var(--ink-soft);line-height:1.65;">200位行业专家Agent，每位都掌握该行业的机会点、弊端、获客路径、迭代打法——这是竞品靠换模型追不上的行业洞察深度。</div>
+          </div>
+        </div>
+
+        <!-- 应对策略三条 -->
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin:24px 0 12px;">面对模型升级，我们怎么打</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num" style="background:var(--sage);">1</div>
+            <div class="step-body">
+              <h4>模型是可替换的底层，上层工作流不动</h4>
+              <p>Claude 4 → GPT-5 → Qwen3，只需换 API key。42个Agent的角色、方法论、审查逻辑、VELA模板全部保留。升级成本接近零，竞争力整体跃升。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--sage);">2</div>
+            <div class="step-body">
+              <h4>竞品跟进了功能？我们的差异在产出质量标准</h4>
+              <p>工具层（"也能生成PRD"）很容易被追平，但质量层（8层审查 + N34 AI边界分析 + 反指标体系）不是加个功能就有的。我们的产出是有依据的，不是拍脑袋的。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--sage);">3</div>
+            <div class="step-body">
+              <h4>越用越强，形成数据飞轮</h4>
+              <p>每跑一个项目，知识库更丰富；知识库越丰富，下一个项目产出质量越高；质量越高，信任度越高，使用频率越高。这个飞轮，新进入者没有。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-body" style="margin-top:20px;">
+          <p style="font-size:13px;color:var(--ink-faint);font-style:italic;">结论：模型快速迭代，对桃子是顺风，不是逆风。我们的竞争优势来自系统深度，不来自模型版本号。</p>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="manual-section" id="faq">
+        <div class="section-eyebrow">Section 09</div>
+        <div class="section-title">常见问题</div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num" style="background:var(--ink-faint);">Q</div>
+            <div class="step-body">
+              <h4>网页打不开 / 502 报错？</h4>
+              <p>必须用"启动桥.command"打开的专属 Chrome，不能用普通浏览器。Clash 梯子会拦截 localhost 请求。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--ink-faint);">Q</div>
+            <div class="step-body">
+              <h4>跑到一半停了怎么办？</h4>
+              <p>进"📁 项目历史"页面找到这个项目，展开查看哪个 Agent 没跑完，点"迭代更新"重新触发。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--ink-faint);">Q</div>
+            <div class="step-body">
+              <h4>方向变了，已有项目怎么更新？</h4>
+              <p>去"📁 项目历史"，找到对应项目，在"迭代更新"框里写你改变了什么（比如"目标用户从 B 端改为 C 端"），勾选受影响的 Agent，提交。系统会先给旧文档做版本快照，再重跑选中的 Agent。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--ink-faint);">Q</div>
+            <div class="step-body">
+              <h4>CEO Gate 打了 TERMINATE，还能继续吗？</h4>
+              <p>可以。连续 2 次 REDO 未通过时系统会强制推进，或者你可以去项目历史手动触发迭代，补充 CEO 指出的缺失信息后重跑 P1/P2 Agent。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num" style="background:var(--ink-faint);">Q</div>
+            <div class="step-body">
+              <h4>想只出某一份文档，不跑全套？</h4>
+              <p>标准档里勾选对应阶段即可。比如只要 PRD，勾 P3；只要技术方案，勾 P5。已跑完的阶段不会重复计费。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /manual-content -->
+  </div><!-- /manual-layout -->
+</div><!-- /manual-wrap -->
+
+<script>
+  // 点页面其他地方关闭导航下拉
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.nav-more-wrap')) {
+      document.querySelectorAll('.nav-more-wrap.open').forEach(el => el.classList.remove('open'));
+    }
+  });
+
+  // 目录高亮跟随滚动
+  const sections = document.querySelectorAll('.manual-section');
+  const tocLinks = document.querySelectorAll('.manual-toc a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        tocLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`.manual-toc a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

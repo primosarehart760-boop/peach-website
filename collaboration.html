@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🤝 PM × AI 训练师协作台 · Peach Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/launcher.css">
+  <style>
+    /* ========== Tab 3 · PM × AI 训练师协作台（v1.0 · 2026-04-23） ========== */
+
+    body { background: var(--paper); }
+
+    /* 导航（和其他 tab 一致） */
+    .nav-links { flex-wrap: wrap; }
+    .nav-more-wrap { position: relative; }
+    .nav-more-trigger {
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: 14px;
+      color: var(--ink-soft); padding: 0;
+    }
+    .nav-more-trigger:hover { color: var(--peach); }
+    .nav-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: white; border: 1px solid var(--paper-dark);
+      border-radius: 8px; padding: 6px 0; min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      opacity: 0; pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 200;
+    }
+    .nav-more-wrap:hover .nav-dropdown,
+    .nav-more-wrap:focus-within .nav-dropdown {
+      opacity: 1; pointer-events: auto; transform: translateY(0);
+    }
+    .nav-dropdown a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; color: var(--ink-soft);
+      text-decoration: none; font-size: 14px;
+    }
+    .nav-dropdown a:hover { background: var(--paper); color: var(--peach); }
+
+    .collab-page { padding: var(--space-2xl) 0 80px; }
+
+    /* 顶部需求概览 · 简化版 */
+    .collab-brief {
+      max-width: 1400px; margin: 0 auto var(--space-lg);
+      padding: 14px 20px;
+      background: #1f1a14; color: #f4ede0;
+      border-radius: 14px;
+      display: flex; align-items: center; gap: 14px;
+      flex-wrap: wrap;
+    }
+    .cb-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--peach); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .cb-main { flex: 1; min-width: 200px; }
+    .cb-text { font-family: var(--font-serif); font-size: 17px; font-style: italic; }
+    .cb-meta { font-size: 12px; color: rgba(244,237,224,0.65); margin-top: 2px; }
+
+    /* 行业专家下发横条（交汇 ③ 起点） */
+    .expert-banner {
+      max-width: 1400px; margin: 0 auto var(--space-lg);
+      padding: var(--space-md) var(--space-xl);
+      background: linear-gradient(90deg, rgba(212,165,116,0.15), rgba(212,165,116,0.05));
+      border: 1.5px dashed #d4a574;
+      border-radius: 14px;
+      display: flex; align-items: center; gap: 14px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .expert-banner::before {
+      content: '⬇';
+      position: absolute;
+      bottom: -22px;
+      left: 25%;
+      font-size: 24px;
+      color: #d4a574;
+      animation: dropBounce 2s infinite;
+    }
+    .expert-banner::after {
+      content: '⬇';
+      position: absolute;
+      bottom: -22px;
+      right: 25%;
+      font-size: 24px;
+      color: #d4a574;
+      animation: dropBounce 2s infinite 0.3s;
+    }
+    @keyframes dropBounce {
+      0%, 100% { transform: translateY(0); opacity: 1; }
+      50% { transform: translateY(6px); opacity: 0.4; }
+    }
+    .expert-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: #d4a574; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+      color: white;
+    }
+    .expert-content { flex: 1; min-width: 220px; }
+    .expert-label {
+      font-family: var(--font-hand); color: #a68049;
+      font-size: 14px;
+    }
+    .expert-name {
+      font-family: var(--font-serif); font-size: 18px; color: var(--ink);
+      margin: 2px 0 4px;
+    }
+    .expert-pills {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .expert-pill {
+      padding: 3px 10px; font-size: 11px;
+      background: white; border: 1px solid #d4a574;
+      border-radius: 6px; color: #8c6a3a;
+    }
+
+    /* 主协作区 · 三栏 */
+    .collab-main {
+      max-width: 1400px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      gap: var(--space-md);
+      align-items: start;
+    }
+
+    /* 文档卡通用 */
+    .doc-card {
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 12px;
+      padding: var(--space-md);
+      margin-bottom: var(--space-sm);
+      position: relative;
+      transition: all 0.25s;
+    }
+    .doc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+    .doc-card.highlighted {
+      animation: highlightPulse 1.2s 2;
+    }
+    @keyframes highlightPulse {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(209,106,78,0.25); }
+    }
+    .doc-head {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .doc-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .doc-title {
+      flex: 1;
+      font-family: var(--font-serif); font-size: 16px;
+      color: var(--ink);
+    }
+    .doc-status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--paper);
+      color: var(--ink-faint);
+      white-space: nowrap;
+    }
+    .doc-status.working { background: #fff5ef; color: var(--peach); }
+    .doc-status.done { background: #f0faf2; color: var(--sage-dark); }
+    .doc-preview {
+      font-size: 12px; color: var(--ink-soft);
+      line-height: 1.6;
+      border-left: 2px solid var(--paper-dark);
+      padding: 4px 0 4px 10px;
+      margin-bottom: 8px;
+    }
+    .doc-evidence {
+      font-size: 11px;
+      color: var(--ink-faint);
+      padding: 4px 8px;
+      background: rgba(154,168,137,0.07);
+      border-radius: 6px;
+    }
+    .doc-evidence strong { color: var(--sage-dark); }
+
+    /* PM 侧 · Peach 调性 */
+    .pm-col .doc-card { border-top: 3px solid var(--peach); }
+    .pm-col .doc-icon { background: #fff0ea; color: var(--peach); }
+
+    /* AI 训练师侧 · Sage 调性 */
+    .trainer-col .doc-card { border-top: 3px solid var(--sage); }
+    .trainer-col .doc-icon { background: #ecf3e4; color: var(--sage-dark); }
+
+    /* 中间交汇点列 */
+    .cross-col {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0; padding-top: 40px;
+    }
+    .cross-label {
+      font-family: var(--font-hand);
+      color: var(--peach);
+      font-size: 18px;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      letter-spacing: 6px;
+      margin-top: var(--space-md);
+    }
+    .cross-dot {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--peach);
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 700;
+      box-shadow: 0 4px 12px rgba(209,106,78,0.3);
+      position: relative;
+      z-index: 5;
+    }
+    .cross-arrows {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+      font-size: 18px; color: var(--peach);
+      margin-top: var(--space-md);
+    }
+    .cross-arrow {
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: white;
+      border: 1.5px solid var(--peach);
+      font-size: 12px;
+      font-family: var(--font-sans);
+      color: var(--peach);
+    }
+    .cross-arrow.fire {
+      animation: arrowFire 0.6s;
+      background: var(--peach);
+      color: white;
+    }
+    @keyframes arrowFire {
+      0% { transform: scale(0.6); opacity: 0; }
+      50% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* 列标题 */
+    .col-head {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: var(--space-md);
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+    .pm-col .col-head {
+      background: rgba(209,106,78,0.08);
+      border-left: 3px solid var(--peach);
+    }
+    .trainer-col .col-head {
+      background: rgba(154,168,137,0.08);
+      border-left: 3px solid var(--sage);
+    }
+    .col-head-emoji { font-size: 22px; }
+    .col-head-title {
+      font-family: var(--font-serif); font-size: 18px;
+    }
+    .col-head-sub {
+      font-family: var(--font-hand);
+      font-size: 13px;
+    }
+    .pm-col .col-head-sub { color: var(--peach); }
+    .trainer-col .col-head-sub { color: var(--sage-dark); }
+
+    /* 飞行 pill（交汇动画） */
+    .flying-pill {
+      position: fixed;
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 14px;
+      font-family: var(--font-sans);
+      z-index: 1000;
+      pointer-events: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      white-space: nowrap;
+      transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .flying-pill.green { background: var(--sage); color: white; }
+    .flying-pill.yellow { background: #e0b75d; color: white; }
+    .flying-pill.red { background: var(--peach); color: white; }
+    .flying-pill.orange { background: #d4a574; color: white; }
+
+    /* 3 交汇点说明卡 */
+    .cross-explain {
+      max-width: 1400px; margin: var(--space-2xl) auto var(--space-xl);
+      padding: var(--space-lg);
+      background: linear-gradient(135deg, var(--paper-light), #fff5ef);
+      border: 1.5px dashed var(--peach);
+      border-radius: 14px;
+    }
+    .cross-explain h3 {
+      font-family: var(--font-serif);
+      color: var(--peach);
+      text-align: center;
+      margin-bottom: var(--space-md);
+    }
+    .cross-items {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+    }
+    .cross-item {
+      text-align: center;
+      padding: var(--space-md);
+      background: white;
+      border-radius: 10px;
+      border: 1px solid var(--paper-dark);
+    }
+    .cross-item .ci-num {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      color: var(--peach);
+      font-style: italic;
+      line-height: 1;
+    }
+    .cross-item .ci-title {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      margin: 6px 0;
+    }
+    .cross-item .ci-desc {
+      font-size: 12px;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+    .cross-item .ci-arrow {
+      display: inline-block;
+      padding: 2px 10px;
+      background: var(--peach);
+      color: white;
+      border-radius: 4px;
+      font-size: 11px;
+      margin: 4px 0;
+    }
+
+    /* 协作日志时间线 */
+    .collab-log {
+      max-width: 1400px; margin: var(--space-2xl) auto 0;
+      padding: var(--space-lg);
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 14px;
+    }
+    .collab-log h3 {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .log-items {
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .log-item {
+      display: flex; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--paper-dark);
+      font-size: 13px;
+      animation: logFadeIn 0.4s;
+    }
+    @keyframes logFadeIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-time {
+      color: var(--ink-faint);
+      font-family: 'SF Mono', monospace;
+      font-size: 11px;
+      min-width: 60px;
+      flex-shrink: 0;
+    }
+    .log-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+    .log-dot.pm { background: var(--peach); }
+    .log-dot.trainer { background: var(--sage); }
+    .log-dot.expert { background: #d4a574; }
+    .log-dot.cross { background: var(--ink); }
+    .log-text { flex: 1; color: var(--ink-soft); line-height: 1.6; }
+    .log-text strong { color: var(--ink); }
+    .log-tag {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      margin-left: 6px;
+    }
+    .log-tag.pm { background: #fff0ea; color: var(--peach); }
+    .log-tag.trainer { background: #ecf3e4; color: var(--sage-dark); }
+    .log-tag.expert { background: #faf3e7; color: #a68049; }
+    .log-tag.cross { background: var(--ink); color: white; }
+
+    /* 下一步 */
+    .next-actions {
+      max-width: 1400px; margin: var(--space-xl) auto 0;
+      padding: var(--space-xl);
+      background: linear-gradient(135deg, var(--paper-light), #fff5ef);
+      border: 2px dashed var(--peach);
+      border-radius: 16px;
+      text-align: center;
+    }
+    .next-actions h3 { font-family: var(--font-serif); font-size: 22px; margin-bottom: 6px; }
+    .next-actions .na-hint { color: var(--ink-soft); font-size: 13px; margin-bottom: var(--space-md); }
+    .next-actions .na-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    /* 空状态 */
+    .empty-state {
+      max-width: 640px; margin: 80px auto;
+      padding: var(--space-2xl);
+      background: white; border: 1.5px solid var(--paper-dark);
+      border-radius: 16px; text-align: center;
+    }
+
+    /* 响应式 */
+    @media (max-width: 1000px) {
+      .collab-main {
+        grid-template-columns: 1fr;
+      }
+      .cross-col {
+        flex-direction: row;
+        justify-content: center;
+        padding: var(--space-md) 0;
+      }
+      .cross-label { writing-mode: horizontal-tb; margin: 0 var(--space-md); }
+      .cross-arrows { flex-direction: row; }
+      .cross-explain .cross-items { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav">
+  <div class="container nav-content">
+    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>Peach Studio</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">🎯 需求入口</a>
+      <a href="methodology.html" class="nav-link">📚 方法论</a>
+      <a href="workspace.html" class="nav-link">📊 分析工作台</a>
+      <a href="collaboration.html" class="nav-link active">🤝 协作台</a>
+      <a href="industries.html" class="nav-link">🏭 行业库</a>
+      <a href="results.html" class="nav-link">📦 结果工作台</a>
+      <div class="nav-more-wrap">
+        <button class="nav-more-trigger" aria-haspopup="true">更多 ▾</button>
+        <div class="nav-dropdown">
+          <a href="docs.html">📖 资产层</a>
+          <a href="cases.html">📂 案例库</a>
+          <a href="team.html">👥 团队</a>
+          <a href="office.html">🎬 办公室</a>
+        </div>
+      </div>
+      <div class="theme-switcher">
+        <button class="theme-btn active" data-theme="editorial" title="Editorial Peach">🍑</button>
+        <button class="theme-btn" data-theme="airbnb" title="Airbnb">🏠</button>
+        <button class="theme-btn" data-theme="linear" title="Linear">⚡</button>
+        <button class="theme-btn" data-theme="pinterest" title="Pinterest">📌</button>
+        <button class="theme-btn" data-theme="stripe" title="Stripe">💳</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- 🆕 v1.1 · 8 层审批链可视化 + 并发时间轴（2026-04-23 阶段 4 注入） -->
+<section id="peach-collaboration-v11"></section>
+<script src="js/peach_collaboration_v11.js"></script>
+
+<div class="collab-page">
+  <div class="container wide">
+
+    <!-- 页面标题 -->
+    <div style="text-align:center; margin-bottom: var(--space-xl);">
+      <p class="hand" style="color: var(--peach); margin-bottom: var(--space-sm);">Peach Studio最核心的差异</p>
+      <h1 style="font-size: clamp(32px, 5vw, 48px); margin-bottom: var(--space-sm);">PM 文档 × AI 训练师文档</h1>
+      <p style="color: var(--ink-soft); max-width: 700px; margin: 0 auto;">大多数 AI 产品作品只有 PM 产出 · Peach Studio把 PM 和 AI 训练师的 5+5 份文档 <strong style="color: var(--peach);">绑定在一起生产</strong> · 3 个协作交汇点 · 实时联动。</p>
+    </div>
+
+    <!-- 需求概览 -->
+    <div class="collab-brief" id="briefCard" style="display:none;">
+      <div class="cb-icon">📝</div>
+      <div class="cb-main">
+        <div class="cb-text" id="bcText">—</div>
+        <div class="cb-meta"><span id="bcIndustry">—</span> · <span id="bcMode">—</span></div>
+      </div>
+    </div>
+
+    <!-- 行业专家下发 · 交汇 ③ 起点 -->
+    <div class="expert-banner" id="expertBanner" style="display:none;">
+      <div class="expert-icon">🏭</div>
+      <div class="expert-content">
+        <div class="expert-label">交汇 ③ · 行业专家下发（同时流向 PM 和 AI 训练师两侧）</div>
+        <div class="expert-name" id="expertName">—— 行业专家</div>
+        <div class="expert-pills" id="expertPills"></div>
+      </div>
+    </div>
+
+    <!-- 主协作区 · 三栏 -->
+    <div class="collab-main" id="collabMain" style="display:none;">
+
+      <!-- 左 · PM 侧 -->
+      <div class="pm-col">
+        <div class="col-head">
+          <span class="col-head-emoji">🧑‍🎤</span>
+          <div>
+            <div class="col-head-title">PM 侧</div>
+            <div class="col-head-sub">定义要解决什么问题</div>
+          </div>
+        </div>
+
+        <div class="doc-card" id="pm-1">
+          <div class="doc-head">
+            <div class="doc-icon">📋</div>
+            <div class="doc-title">① Brief</div>
+            <span class="doc-status" id="pm-1-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="pm-1-preview">—</div>
+          <div class="doc-evidence" id="pm-1-evidence">—</div>
+        </div>
+
+        <div class="doc-card" id="pm-2">
+          <div class="doc-head">
+            <div class="doc-icon">📋</div>
+            <div class="doc-title">② PRD Lite</div>
+            <span class="doc-status" id="pm-2-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="pm-2-preview">—</div>
+          <div class="doc-evidence" id="pm-2-evidence">—</div>
+        </div>
+
+        <div class="doc-card" id="pm-3">
+          <div class="doc-head">
+            <div class="doc-icon">📋</div>
+            <div class="doc-title">③ Full PRD · 15 板块</div>
+            <span class="doc-status" id="pm-3-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="pm-3-preview">—</div>
+          <div class="doc-evidence" id="pm-3-evidence">—</div>
+        </div>
+
+        <div class="doc-card" id="pm-4">
+          <div class="doc-head">
+            <div class="doc-icon">📋</div>
+            <div class="doc-title">④ 画像 + 旅程</div>
+            <span class="doc-status" id="pm-4-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="pm-4-preview">—</div>
+          <div class="doc-evidence" id="pm-4-evidence">—</div>
+        </div>
+
+        <div class="doc-card" id="pm-5">
+          <div class="doc-head">
+            <div class="doc-icon">📋</div>
+            <div class="doc-title">⑤ 指标体系</div>
+            <span class="doc-status" id="pm-5-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="pm-5-preview">—</div>
+          <div class="doc-evidence" id="pm-5-evidence">—</div>
+        </div>
+      </div>
+
+      <!-- 中间 · 交汇点 -->
+      <div class="cross-col">
+        <div class="cross-dot" title="3 个协作交汇点">×</div>
+        <div class="cross-label">协 作</div>
+        <div class="cross-arrows">
+          <div class="cross-arrow" id="arrow1">① 判 AI</div>
+          <div class="cross-arrow" id="arrow2">② 反要求</div>
+          <div class="cross-arrow" id="arrow3">③ 灌合规</div>
+        </div>
+      </div>
+
+      <!-- 右 · AI 训练师侧 -->
+      <div class="trainer-col">
+        <div class="col-head">
+          <span class="col-head-emoji">🤖</span>
+          <div>
+            <div class="col-head-title">AI 训练师侧</div>
+            <div class="col-head-sub">定义 AI 怎么可靠解决</div>
+          </div>
+        </div>
+
+        <div class="doc-card" id="ai-1">
+          <div class="doc-head">
+            <div class="doc-icon">🤖</div>
+            <div class="doc-title">① 模型选型</div>
+            <span class="doc-status" id="ai-1-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="ai-1-preview">—</div>
+          <div class="doc-evidence" id="ai-1-evidence">—</div>
+        </div>
+
+        <div class="doc-card" id="ai-2">
+          <div class="doc-head">
+            <div class="doc-icon">🤖</div>
+            <div class="doc-title">② Prompt 策略</div>
+            <span class="doc-status" id="ai-2-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="ai-2-preview">—</div>
+          <div class="doc-evidence" id="ai-2-evidence">—</div>
+        </div>
+
+        <div class="doc-card" id="ai-3">
+          <div class="doc-head">
+            <div class="doc-icon">🤖</div>
+            <div class="doc-title">③ 评测集设计</div>
+            <span class="doc-status" id="ai-3-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="ai-3-preview">—</div>
+          <div class="doc-evidence" id="ai-3-evidence">—</div>
+        </div>
+
+        <div class="doc-card" id="ai-4">
+          <div class="doc-head">
+            <div class="doc-icon">🤖</div>
+            <div class="doc-title">④ Badcase 飞轮</div>
+            <span class="doc-status" id="ai-4-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="ai-4-preview">—</div>
+          <div class="doc-evidence" id="ai-4-evidence">—</div>
+        </div>
+
+        <div class="doc-card" id="ai-5">
+          <div class="doc-head">
+            <div class="doc-icon">🤖</div>
+            <div class="doc-title">⑤ 降级与合规</div>
+            <span class="doc-status" id="ai-5-status">待生成</span>
+          </div>
+          <div class="doc-preview" id="ai-5-preview">—</div>
+          <div class="doc-evidence" id="ai-5-evidence">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 交汇点说明卡 -->
+    <div class="cross-explain">
+      <h3>🔀 3 个协作交汇点 · 不是并列陈列 · 是双向绑定</h3>
+      <div class="cross-items">
+        <div class="cross-item">
+          <div class="ci-num">①</div>
+          <div class="ci-title">PRD 功能 → 判 AI</div>
+          <div class="ci-arrow">PM → AI 训练师</div>
+          <p class="ci-desc">PM 的功能清单过一遍 · AI 训练师分类：🟢 强 AI / 🟡 可选 / 🔴 非 AI</p>
+        </div>
+        <div class="cross-item">
+          <div class="ci-num">②</div>
+          <div class="ci-title">AI 方案 → 反要求</div>
+          <div class="ci-arrow">AI 训练师 → PM</div>
+          <p class="ci-desc">AI 选型 + 评测后 · 反向要求 PRD 加反指标 / 边界 / Gherkin 验收</p>
+        </div>
+        <div class="cross-item">
+          <div class="ci-num">③</div>
+          <div class="ci-title">行业合规 → 双灌</div>
+          <div class="ci-arrow">行业专家 → 两侧</div>
+          <p class="ci-desc">合规红线 + 行业 KPI · 同时流向 PM 指标体系 + AI 评测集</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 协作日志 -->
+    <div class="collab-log" id="collabLog" style="display:none;">
+      <h3>📝 协作日志 · 每次绑定都留痕</h3>
+      <div class="log-items" id="logItems"></div>
+    </div>
+
+    <!-- 下一步 -->
+    <div class="next-actions" id="nextActions" style="display:none;">
+      <h3>✅ 协作完成 · 10 份文档绑定交付</h3>
+      <p class="na-hint">下一步 · 进结果工作台看整体产出 + 导出 / Obsidian 归档</p>
+      <div class="na-buttons">
+        <a href="results.html" class="btn btn-primary">📦 进结果工作台</a>
+        <a href="workspace.html" class="btn btn-secondary">⬅ 回分析</a>
+      </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div style="font-size: 56px; margin-bottom: var(--space-md);">🤝</div>
+      <h3>协作台需要先有需求</h3>
+      <p style="color: var(--ink-soft); margin: var(--space-md) 0;">请先从首页输入需求 · 跑完分析 · 再过来看协作。</p>
+      <a href="index.html" class="btn btn-primary">⬅ 回需求入口</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--paper-dark); margin-top: var(--space-3xl);">
+  <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);">
+    <div>
+      <p style="font-family: var(--font-serif); font-size: 18px;">🏢 Peach Studio</p>
+      <p style="color: var(--ink-faint); font-size: 14px; margin-top: var(--space-xs);">协作台 · v1.0 · PM × AI 训练师双向绑定</p>
+    </div>
+    <div style="color: var(--ink-faint); font-size: 13px;">
+      <p>5+5 文档 · 3 交汇点 · Peach Studio最核心差异</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/theme.js"></script>
+<script src="js/launcher.js"></script>
+<script>
+  /* ========== Tab 3 · 协作台 逻辑 ========== */
+
+  (function() {
+
+    // 读参数
+    function getReq() {
+      const u = new URL(location.href);
+      const q = u.searchParams.get('q');
+      const industry = u.searchParams.get('industry');
+      const mode = u.searchParams.get('mode') || 'lightning';
+      if (q && industry) return { need: q, industry, mode };
+      try {
+        const c = JSON.parse(sessionStorage.getItem('peach-req') || 'null');
+        if (c && c.need) return c;
+      } catch(e) {}
+      return null;
+    }
+
+    const req = getReq();
+    if (!req) {
+      document.getElementById('emptyState').style.display = 'block';
+      return;
+    }
+
+    // 渲染 brief
+    document.getElementById('briefCard').style.display = 'flex';
+    document.getElementById('expertBanner').style.display = 'flex';
+    document.getElementById('collabMain').style.display = 'grid';
+    document.getElementById('collabLog').style.display = 'block';
+    document.getElementById('bcText').textContent = req.need;
+    document.getElementById('bcIndustry').textContent = `🏭 ${req.industry}`;
+    document.getElementById('bcMode').textContent = req.mode === 'lightning' ? '⚡ 闪电档' : '📦 标准档';
+
+    // 行业专家下发数据
+    const EXPERT_DATA = {
+      '金融': { name: '金融行业专家', pills: ['等保三级', '反洗钱', '征信合规', '误拒率红线', '数据不出境'] },
+      '医疗': { name: '医疗行业专家', pills: ['HIPAA', '个保法', '医生在环', 'AI 不替代医生', '分诊 vs 诊疗边界'] },
+      '教育': { name: '教育行业专家', pills: ['未保合规', '启发式原则', '不代做作业', '不承诺考试结果'] },
+      '电商': { name: '电商行业专家', pills: ['广告法禁词', '退货率', '直播合规', '价格标注'] },
+      '企业SaaS': { name: '企业 SaaS 专家', pills: ['ISO 27001', '多租户', '数据隔离', 'NRR 铁律'] },
+      '政企': { name: '政企行业专家', pills: ['等保三级 / 四级', '信创目录', '国密算法', '境外模型禁'] },
+      '家装': { name: '家装行业专家', pills: ['真人签字', '装修资质', '效果图合规'] },
+      '制造': { name: '制造行业专家', pills: ['MES 集成', 'ISO 26262', '产线对接'] },
+      '汽车': { name: '汽车行业专家', pills: ['L0-L5 分级', 'ISO 26262', '数据闭环'] },
+      '短视频': { name: '短视频行业专家', pills: ['算法推荐备案', '内容三审', '防沉迷'] },
+      '短剧': { name: '短剧行业专家', pills: ['版权合规', '付费墙设计', '爽点'] },
+      '内容': { name: '内容行业专家', pills: ['算法推荐备案', '内容审核', 'GEO 优化'] },
+      '情感陪伴': { name: '情感陪伴专家', pills: ['人设不破', '涉黄零容忍', '心理危机响应'] },
+      '游戏': { name: '游戏行业专家', pills: ['未保防沉迷', '付费设计', '数值平衡'] },
+      '跨境电商': { name: '跨境电商专家', pills: ['GDPR', 'CCPA', '三法对照', '多语言'] },
+      '宠物': { name: '宠物行业专家', pills: ['情感消费', 'LTV 高', '新手焦虑'] },
+      '占卜': { name: '占卜行业专家', pills: ['合规边界', '不能承诺', '娱乐定位'] },
+      '农业': { name: '农业行业专家', pills: ['政策补贴', '土地流转', '乡村振兴'] },
+      '新能源': { name: '新能源专家', pills: ['双碳政策', '补贴变化', '虚拟电厂'] },
+      '数字化': { name: '数字化项目专家', pills: ['等保四级', '信创必选', '涉密资质'] }
+    };
+    const expertInfo = EXPERT_DATA[req.industry] || { name: `${req.industry} 行业专家（待深化）`, pills: ['行业合规待补', '行业 KPI 待补', '语言风格待补'] };
+    document.getElementById('expertName').textContent = '🏭 ' + expertInfo.name;
+    const pillsEl = document.getElementById('expertPills');
+    pillsEl.innerHTML = expertInfo.pills.map(p => `<span class="expert-pill">${p}</span>`).join('');
+
+    // ─── 协作文档数据（10 份 · 和 workspace 行业模板呼应） ─────
+    const DOC_DATA = {
+      '金融': {
+        pm: [
+          { preview: '为银行信贷审核员提供 AI 辅助审核 · 单件 45 分钟 → ≤ 5 分钟 · 误拒 15% → 2-4%。具体用户 林建国 38 岁审核员。', ev: 'VELA 02 + VELA 07 · 金融专家 · 小普定位公式' },
+          { preview: 'PRD Lite · 3 核心功能（征信聚合 / AI 预判 / 人工终审）· 5 态交互（正常/空/加载/首次/禁用）· 3 反指标（误拒率 / 幻觉率 / 弃用率）', ev: 'VELA 11 · 交互 5 态铁律 · 金融误拒率红线' },
+          { preview: '15 板块 PRD · 重点：等保三级章节 / 算法备案 / 数据不出境 / 反指标监控 · Gherkin 验收 5 条', ev: 'VELA 11 · 四铁律章节 · VELA 32 金融合规' },
+          { preview: '画像：林建国 38 岁消费金融信贷审核员 · 一日场景（早 8:30 到岗 → 晚 8:00 加班）· JTBD：减少交叉比对时间', ev: 'VELA 07 + VELA 10 · 场景还原法' },
+          { preview: '北极星：AHT（Average Handling Time）45 min → ≤ 5 min · 反指标：误拒率 ≤4% / 幻觉率 ≤0.5% / 弃用 ≤5%', ev: 'VELA 16 · 北极星 + 反指标护栏' }
+        ],
+        ai: [
+          { preview: '三层决策：文本模态 · 长文本 + 逻辑推理能力 · 私有化 API · Qwen2-72B + LoRA 微调 · 三层降级（Qwen → Llama 备 → 规则兜底）', ev: 'VELA 21 · 三层选型 + RAG 四门 · 胜超笔记 SFT' },
+          { preview: 'Prompt 13 段式（Meta + Role + Task + PriorArt + ... + Rubric）· System Prompt 加固防越狱 · Few-shot 3 例金融审核标注', ev: 'Obsidian 03 Prompt 库 · 小普 Prompt 2.0' },
+          { preview: '评测集 500 × 5 × 3 分布 · 维度：准确/幻觉/合规/时效/可解释 · 难度梯度 · LLM-as-Judge + 人工精标 10%', ev: '火箭兵笔记 · 蔡雨洋笔记 · VELA 21 评测' },
+          { preview: 'Badcase 周度飞轮 · 审核员标注 → 归类（输入问题 / 模型问题 / 数据问题）→ Prompt 微调迭代 · 周报告', ev: '蔡雨洋笔记 · 清华姐题设优化' },
+          { preview: '三层降级（主 / 备 / 规则）· 三法对照（GDPR 虽出海概率低但对标）· 个保法金融专项 · 算法备案清单 · 对抗五层', ev: 'VELA 32 · 三法对照 + 对抗防御五层' }
+        ]
+      },
+      '医疗': {
+        pm: [
+          { preview: '为三甲门诊护士提供 AI 辅助分诊 · 5 分钟 → ≤ 1 分钟 · 准确率 85% → 95%+ · 具体用户 张晓红 32 岁门诊护士', ev: 'VELA 02 + VELA 07 · 医疗专家 · 分诊边界' },
+          { preview: 'PRD Lite · 3 功能（症状输入 / AI 分诊建议 / 医生复核）· 5 态交互 · 3 反指标（分诊错误率 / 幻觉 / 投诉）', ev: 'VELA 11 · 交互 5 态 · 医疗红线' },
+          { preview: '15 板块 PRD · HIPAA 章节 / 医疗广告法 / 医生在环 HITL / 医学 Badcase 审委会', ev: 'VELA 11 + VELA 32 · 医疗 AI 专项' },
+          { preview: '画像：张晓红 32 岁三甲门诊护士 · 日均 120+ 分诊 · JTBD：减少记忆负担 + 规则辅助', ev: 'VELA 07 + VELA 10 · JTBD 三层' },
+          { preview: '北极星：MTT 5 min → ≤ 1 min · 反指标：分诊错误 ≤1% / 幻觉 ≤0.3% / 投诉 ≤3‰', ev: 'VELA 16 · 医疗专业指标' }
+        ],
+        ai: [
+          { preview: '三层决策：文本 · 医学垂类 + 长文本 · 院内私有化 · Qwen2-72B + 医学数据微调 · 三层降级', ev: 'VELA 21 · 医疗私有化部署 · 胜超笔记' },
+          { preview: 'Prompt 13 段式 · 医学伦理 AntiPattern · 分诊决策树 Few-shot 10 例 · 禁用"诊断"字眼', ev: 'Obsidian 03 + 医学 AntiPattern' },
+          { preview: '评测集 500 × 5 × 3 · 医学委员会人工精标 30%（严） · 分诊正确率 / 幻觉 / 合规三维', ev: '火箭兵 · 医学委员会人工精标' },
+          { preview: 'Badcase · 每周医学委员会审 · 专业 Badcase 库 1 万+ · 持续回流', ev: '蔡雨洋笔记 · 医学 Badcase 流程' },
+          { preview: '三层降级（主模型 / 备 / 规则）· HIPAA + 个保法 + 医疗广告法三法对照 · 数据不出院', ev: 'VELA 32 · 医疗三法对照' }
+        ]
+      },
+      '教育': {
+        pm: [
+          { preview: '为成人英语考证学员（BEC / 雅思）提供 24/7 AI 口语陪练 · ¥99/月 · 王佳 24 岁白领', ev: 'VELA 02 + VELA 07 · 教育专家' },
+          { preview: 'PRD Lite · 3 功能（主题对话 / 评分反馈 / 进度追踪）· 5 态交互 · 反指标（穿帮率 / 续费率 / 申诉率）', ev: 'VELA 11 · 交互 5 态' },
+          { preview: '15 板块 PRD · 未保章节（18 岁门槛）· 不承诺考试结果合规', ev: 'VELA 11 + 教育合规' },
+          { preview: '画像：王佳 24 岁白领 · 晚 19-22 自学 · 想外派新加坡 · JTBD：24/7 随时练口语不社恐', ev: 'VELA 07 · 一日场景' },
+          { preview: '北极星：WADD（周活对话时长）≥ 90 分钟 · 反指标：穿帮 ≤0.5% / 续费 ≥ 90% / 申诉 ≤2%', ev: 'VELA 16 · 教育粘性指标' }
+        ],
+        ai: [
+          { preview: '三层决策：语音 + 文本多模态 · 3 种外教人设 · 云端 API · 语音克隆技术', ev: 'VELA 21 · 语音多模态 · 胜超笔记' },
+          { preview: 'Prompt 13 段式 · 3 人设 System Prompt · 启发式 Few-shot · 禁"直接给答案"', ev: 'Obsidian 03 · 教育启发式' },
+          { preview: '评测集 500 × 5 × 3 · 语法正确 / 发音 / 启发度 / 续习率 / 穿帮 5 维', ev: '火箭兵笔记 · 语音评测' },
+          { preview: '每周 Badcase · 穿帮归类 · 外教审 · Prompt 迭代', ev: '蔡雨洋 + 清华姐 · 教育 Badcase' },
+          { preview: '降级：主模型 → 预录语音库 → 文本兜底 · 内容安全三层（预/实时/事后）· 未保强', ev: 'VELA 32 · 教育未保' }
+        ]
+      },
+      '电商': {
+        pm: [
+          { preview: '为直播带货选品团队提供 AI 选品助手 · 陈美丽 29 岁选品助理 · 1 分钟过 50 SKU', ev: 'VELA 02 + VELA 07 · 电商专家' },
+          { preview: 'PRD Lite · 3 功能（SKU 过滤 / 退货率预警 / 话术初稿）· 5 态交互 · 反指标（退货 / 误判 / 续费）', ev: 'VELA 11' },
+          { preview: '15 板块 PRD · 广告法禁词 / 直播合规 / SKU 退换逻辑', ev: 'VELA 11 + 电商合规' },
+          { preview: '画像：陈美丽 29 岁直播电商选品助理 · 每天筛 200+ SKU · JTBD：快速排除垃圾货', ev: 'VELA 07 · 一日场景' },
+          { preview: '北极星：POR（选品通过率）≥ 80% · 反指标：退货 ≤18% / 误判 ≤5% / 退订 ≤8%', ev: 'VELA 16 · 电商红线' }
+        ],
+        ai: [
+          { preview: '三层决策：多模态（图 + 文 + 评论）· 视觉理解 · 云 API · 多模态大模型', ev: 'VELA 21 · 多模态 · 胜超笔记' },
+          { preview: 'Prompt 13 段式 · 广告法禁词过滤 · Few-shot 10 例选品对比', ev: 'Obsidian 03 · 电商 Prompt' },
+          { preview: '评测集 500 × 5 × 3 · SKU 分类 / 退货预测 / 话术合规 / 转化 / 幻觉', ev: '火箭兵 · 多模态评测' },
+          { preview: '每周 Badcase · 选品师标注回流 · 退货率模型迭代', ev: '蔡雨洋 · 电商 Badcase' },
+          { preview: '降级：主 → 视觉简化版 → 规则过滤 · 广告法合规 · 三层内容安全', ev: 'VELA 32 · 广告法' }
+        ]
+      },
+      '企业SaaS': {
+        pm: [
+          { preview: '为 5000+ 人企业 HR 提供 AI 薪资核算 · 刘哥 41 岁 HR 总监 · 3 天 → 4 小时', ev: 'VELA 02 + VELA 07' },
+          { preview: 'PRD Lite · 3 功能（多地数据打通 / AI 对账 / 异常预警）· 5 态交互 · 3 反指标', ev: 'VELA 11' },
+          { preview: '15 板块 PRD · 劳动法 / 个税合规 / ISO 27001 / NRR ≥ 110%', ev: 'VELA 11 + 企业 SaaS' },
+          { preview: '画像：刘哥 41 岁 HR 总监 · 管 8000 人薪资 · 月末月头累到头痛 · JTBD：对账自动化', ev: 'VELA 07' },
+          { preview: '北极星：MPCT（薪资核算时间）3 天 → ≤ 4 小时 · 反指标：错账 ≤0.3% / 申诉 ≤0.5% / 退订 ≤5%', ev: 'VELA 16 · HR 专业指标' }
+        ],
+        ai: [
+          { preview: '三层决策：结构化表格 + 文本 · 规则 + 大模型融合 · 私有化 · Qwen 14B + 规则引擎', ev: 'VELA 21 · 结构化场景' },
+          { preview: 'Prompt 13 段式 · 劳动法 AntiPattern · 薪资规则 Few-shot', ev: 'Obsidian 03 · HR Prompt' },
+          { preview: '评测集 500 × 5 × 3 · 核算准确 / 合规 / 异常识别 / 效率 / 解释性', ev: '火箭兵 · HR 评测' },
+          { preview: '每月 Badcase · HR 复核回流', ev: '蔡雨洋笔记' },
+          { preview: '降级：大模型 → 规则引擎 → 人工兜底 · ISO 27001 · 多租户隔离', ev: 'VELA 32 · 企业合规' }
+        ]
+      }
+    };
+
+    // 降级模板（未深度的行业）
+    const fallback = {
+      pm: [
+        { preview: `Brief（${req.industry} 行业）· 待专家具体化 · 需求："${req.need}"`, ev: 'VELA 02 · 行业专家待召唤' },
+        { preview: `PRD Lite · 3 功能骨架 + 5 态交互 + 3 反指标 · 待行业专家补齐`, ev: 'VELA 11 · 交互 5 态铁律' },
+        { preview: `15 板块 PRD · 行业合规章节由 ${req.industry} 专家填`, ev: 'VELA 11 · 15 板块' },
+        { preview: `画像模板 · 具体到一个人（姓名 / 年龄 / 职业 / 一日场景 / JTBD）· 待行业专家填`, ev: 'VELA 07 + VELA 10' },
+        { preview: `指标体系 · 北极星 + 3 反指标 · 行业 KPI 待补`, ev: 'VELA 16 · 北极星 + 反指标' }
+      ],
+      ai: [
+        { preview: '三层选型（模态 / 能力 / 形态）· RAG 四门待评估 · 降级链路必有', ev: 'VELA 21' },
+        { preview: 'Prompt 13 段式骨架 · 行业 AntiPattern 待专家填', ev: 'Obsidian 03 · 小普 Prompt 2.0' },
+        { preview: '评测集 500 × 5 × 3 · 5 维待行业定', ev: '火箭兵 · 蔡雨洋笔记' },
+        { preview: 'Badcase 周度飞轮 · 归档 → 迭代', ev: '蔡雨洋笔记' },
+        { preview: '三层降级 · 三法对照 · 对抗五层 · 行业合规专项待填', ev: 'VELA 32' }
+      ]
+    };
+
+    const docs = DOC_DATA[req.industry] || fallback;
+
+    // ─── 逐份生成 + 协作日志 + 交汇动画 ───────
+    const log = [];
+    function addLog(time, dot, text) {
+      log.unshift({ time, dot, text });
+      renderLog();
+    }
+    function renderLog() {
+      const el = document.getElementById('logItems');
+      el.innerHTML = log.slice(0, 12).map(item => {
+        return `<div class="log-item">
+          <div class="log-time">${item.time}</div>
+          <div class="log-dot ${item.dot}"></div>
+          <div class="log-text">${item.text}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function fireArrow(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('fire');
+      void el.offsetWidth;
+      el.classList.add('fire');
+    }
+
+    function flashCard(id) {
+      const el = document.getElementById(id);
+      el.classList.add('highlighted');
+      setTimeout(() => el.classList.remove('highlighted'), 2400);
+    }
+
+    function now() {
+      const d = new Date();
+      return d.toTimeString().slice(0, 8);
+    }
+
+    // 渲染一份文档
+    function renderDoc(side, idx) {
+      const data = docs[side === 'pm' ? 'pm' : 'ai'][idx];
+      const prefix = side === 'pm' ? 'pm' : 'ai';
+      document.getElementById(`${prefix}-${idx + 1}-preview`).textContent = data.preview;
+      document.getElementById(`${prefix}-${idx + 1}-evidence`).innerHTML = `<strong>依据：</strong>${data.ev}`;
+      document.getElementById(`${prefix}-${idx + 1}-status`).textContent = '✅ 完成';
+      document.getElementById(`${prefix}-${idx + 1}-status`).className = 'doc-status done';
+    }
+    function startingDoc(side, idx) {
+      const prefix = side === 'pm' ? 'pm' : 'ai';
+      document.getElementById(`${prefix}-${idx + 1}-status`).textContent = '🔄 生成中';
+      document.getElementById(`${prefix}-${idx + 1}-status`).className = 'doc-status working';
+    }
+
+    // 编排脚本（闪电档 1 分钟 · 标准档 3 分钟）
+    const stepDelay = req.mode === 'lightning' ? 4500 : 14000;
+
+    const schedule = [
+      // 时刻 0 · 行业专家下发（交汇 ③）
+      () => {
+        fireArrow('arrow3');
+        addLog(now(), 'expert', `🏭 <strong>${expertInfo.name}</strong>下发合规红线 + 行业 KPI（<span class="log-tag expert">交汇 ③</span>）`);
+      },
+      // 时刻 1 · PM Brief 生成
+      () => {
+        startingDoc('pm', 0);
+        addLog(now(), 'pm', 'PM 开始生成 <strong>Brief</strong>（基于六步分析）');
+        setTimeout(() => {
+          renderDoc('pm', 0);
+          addLog(now(), 'pm', '<strong>Brief</strong> 完成 <span class="log-tag pm">PM 侧</span>');
+        }, stepDelay / 2);
+      },
+      // 时刻 2 · AI 模型选型
+      () => {
+        startingDoc('ai', 0);
+        addLog(now(), 'trainer', 'AI 训练师开始 <strong>模型选型</strong>（三层决策）');
+        setTimeout(() => {
+          renderDoc('ai', 0);
+          addLog(now(), 'trainer', '<strong>模型选型</strong>完成 <span class="log-tag trainer">AI 训练师侧</span>');
+        }, stepDelay / 2);
+      },
+      // 时刻 3 · PM PRD Lite
+      () => {
+        startingDoc('pm', 1);
+        addLog(now(), 'pm', 'PM 写 <strong>PRD Lite</strong>（3 功能 + 5 态交互）');
+        setTimeout(() => {
+          renderDoc('pm', 1);
+          flashCard('pm-2');
+          addLog(now(), 'pm', '<strong>PRD Lite</strong> 列 3 功能 <span class="log-tag pm">PM 侧</span>');
+        }, stepDelay / 2);
+      },
+      // 时刻 4 · 交汇 ① · PM 功能 → AI 训练师判 AI
+      () => {
+        fireArrow('arrow1');
+        flashCard('ai-1');
+        addLog(now(), 'cross', '🔀 PRD 的 3 个功能 → AI 训练师判分类：🟢 强 AI 2 个 · 🟡 可选 1 个 <span class="log-tag cross">交汇 ①</span>');
+      },
+      // 时刻 5 · AI Prompt 策略
+      () => {
+        startingDoc('ai', 1);
+        addLog(now(), 'trainer', 'AI 训练师写 <strong>Prompt 策略</strong>（13 段式）');
+        setTimeout(() => {
+          renderDoc('ai', 1);
+          addLog(now(), 'trainer', '<strong>Prompt 策略</strong> 13 段式 + Few-shot');
+        }, stepDelay / 2);
+      },
+      // 时刻 6 · AI 评测集
+      () => {
+        startingDoc('ai', 2);
+        addLog(now(), 'trainer', 'AI 训练师设计 <strong>评测集</strong>（500 × 5 × 3）');
+        setTimeout(() => {
+          renderDoc('ai', 2);
+          addLog(now(), 'trainer', '<strong>评测集</strong> · 幻觉率硬门槛');
+        }, stepDelay / 2);
+      },
+      // 时刻 7 · 交汇 ② · AI 方案反要求 PRD 加反指标
+      () => {
+        fireArrow('arrow2');
+        flashCard('pm-5');
+        flashCard('pm-3');
+        addLog(now(), 'cross', '🔀 AI 训练师反向要求 PRD 加 <strong>幻觉率反指标 + 边界异常处理 + Gherkin 验收</strong> <span class="log-tag cross">交汇 ②</span>');
+      },
+      // 时刻 8 · PM 指标体系（响应交汇 ②）
+      () => {
+        startingDoc('pm', 4);
+        addLog(now(), 'pm', 'PM 根据 AI 反要求 · 完善 <strong>指标体系</strong>');
+        setTimeout(() => {
+          renderDoc('pm', 4);
+          addLog(now(), 'pm', '<strong>指标体系</strong> · 北极星 + 3 反指标 <span class="log-tag pm">PM 侧</span>');
+        }, stepDelay / 2);
+      },
+      // 时刻 9 · PM 画像
+      () => {
+        startingDoc('pm', 3);
+        addLog(now(), 'pm', 'PM 写 <strong>画像 + 旅程</strong>（具体到一个人）');
+        setTimeout(() => {
+          renderDoc('pm', 3);
+          addLog(now(), 'pm', '<strong>画像</strong> · 一日场景 + JTBD');
+        }, stepDelay / 2);
+      },
+      // 时刻 10 · PM Full PRD
+      () => {
+        startingDoc('pm', 2);
+        addLog(now(), 'pm', 'PM 写 <strong>Full PRD 15 板块</strong>');
+        setTimeout(() => {
+          renderDoc('pm', 2);
+          addLog(now(), 'pm', '<strong>Full PRD</strong> 15 板块 · 四铁律章节齐');
+        }, stepDelay / 2);
+      },
+      // 时刻 11 · AI Badcase 飞轮
+      () => {
+        startingDoc('ai', 3);
+        addLog(now(), 'trainer', 'AI 训练师设计 <strong>Badcase 飞轮</strong>');
+        setTimeout(() => {
+          renderDoc('ai', 3);
+          addLog(now(), 'trainer', '<strong>Badcase 飞轮</strong> · 周度回流');
+        }, stepDelay / 2);
+      },
+      // 时刻 12 · AI 降级合规
+      () => {
+        startingDoc('ai', 4);
+        addLog(now(), 'trainer', 'AI 训练师完成 <strong>降级 + 合规</strong>');
+        setTimeout(() => {
+          renderDoc('ai', 4);
+          addLog(now(), 'trainer', '<strong>降级与合规</strong> · 三层降级 + 三法对照');
+        }, stepDelay / 2);
+      },
+      // 时刻 13 · 完成
+      () => {
+        addLog(now(), 'cross', '✅ <strong>10 份文档全部完成 · 3 个交汇点全触发</strong> · Peach Studio PM × AI 训练师协作闭环');
+        document.getElementById('nextActions').style.display = 'block';
+        document.getElementById('nextActions').scrollIntoView({ behavior: 'smooth' });
+      }
+    ];
+
+    // 按时刻跑
+    schedule.forEach((fn, i) => {
+      setTimeout(fn, 800 + i * stepDelay);
+    });
+
+  })();
+</script>
+</body>
+</html>

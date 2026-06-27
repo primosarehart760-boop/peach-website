@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏭 行业专家库 · Peach Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/launcher.css">
+  <style>
+    /* ========== Tab 4 · 行业专家库（v1.0 · 2026-04-23） ========== */
+
+    body { background: var(--paper); }
+
+    /* 导航下拉（统一） */
+    .nav-links { flex-wrap: wrap; }
+    .nav-more-wrap { position: relative; }
+    .nav-more-trigger {
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: 14px;
+      color: var(--ink-soft); padding: 0;
+    }
+    .nav-more-trigger:hover { color: var(--peach); }
+    .nav-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: white; border: 1px solid var(--paper-dark);
+      border-radius: 8px; padding: 6px 0; min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      opacity: 0; pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 200;
+    }
+    .nav-more-wrap:hover .nav-dropdown {
+      opacity: 1; pointer-events: auto; transform: translateY(0);
+    }
+    .nav-dropdown a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; color: var(--ink-soft);
+      text-decoration: none; font-size: 14px;
+    }
+    .nav-dropdown a:hover { background: var(--paper); color: var(--peach); }
+
+    .ind-page { padding: var(--space-2xl) 0 80px; }
+
+    /* 页面头 */
+    .ind-header {
+      max-width: 1200px; margin: 0 auto var(--space-xl);
+      text-align: center;
+    }
+
+    /* 过滤器 */
+    .ind-filters {
+      max-width: 1200px; margin: 0 auto var(--space-xl);
+      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    }
+    .ind-filter-btn {
+      padding: 8px 18px;
+      font-size: 13px;
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 10px;
+      cursor: pointer;
+      color: var(--ink-soft);
+      font-family: inherit;
+      transition: all 0.18s;
+    }
+    .ind-filter-btn:hover { border-color: var(--peach); color: var(--peach); }
+    .ind-filter-btn.active {
+      background: var(--peach);
+      border-color: var(--peach);
+      color: white;
+    }
+
+    /* 行业卡网格 */
+    .ind-grid {
+      max-width: 1200px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--space-md);
+    }
+    .ind-card {
+      padding: var(--space-lg);
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .ind-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--peach);
+      box-shadow: 0 12px 24px rgba(209,106,78,0.12);
+    }
+    .ind-card.hidden { display: none; }
+    .ind-card .ic-emoji { font-size: 38px; margin-bottom: 8px; }
+    .ind-card .ic-name {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .ind-card .ic-scene {
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.6;
+      margin-bottom: var(--space-sm);
+      min-height: 42px;
+    }
+    .ind-card .ic-tags {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .ind-card .ic-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--paper);
+      color: var(--ink-faint);
+    }
+    .ind-card .ic-tag.b { background: rgba(107,135,196,0.12); color: #4a6ba8; }
+    .ind-card .ic-tag.g { background: rgba(184,104,88,0.12); color: #884030; }
+    .ind-card .ic-tag.c { background: rgba(154,168,137,0.15); color: var(--sage-dark); }
+    .ind-card .ic-tag.risk { background: rgba(209,106,78,0.12); color: var(--peach); }
+    .ind-card .ic-detail-cue {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 12px;
+      color: var(--ink-faint);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .ind-card:hover .ic-detail-cue { opacity: 1; }
+
+    /* 抽屉 · 右侧滑出 */
+    .ind-drawer-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(31,26,20,0.4);
+      backdrop-filter: blur(4px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 900;
+    }
+    .ind-drawer-backdrop.show { opacity: 1; pointer-events: auto; }
+    .ind-drawer {
+      position: fixed;
+      top: 0; right: 0;
+      width: min(720px, 92%);
+      height: 100vh;
+      background: var(--paper);
+      box-shadow: -12px 0 32px rgba(0,0,0,0.15);
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+    .ind-drawer.show { transform: translateX(0); }
+    .ind-drawer-close {
+      position: sticky; top: 0;
+      float: right;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--ink-soft);
+      margin: 16px;
+      z-index: 10;
+    }
+    .ind-drawer-close:hover { border-color: var(--peach); color: var(--peach); }
+
+    .ind-drawer-content { padding: var(--space-xl) var(--space-2xl) 80px; }
+    .ind-drawer-head {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 2px dashed var(--paper-dark);
+    }
+    .idh-emoji { font-size: 64px; }
+    .idh-name { font-family: var(--font-serif); font-size: 36px; }
+    .idh-tag { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .idh-tag span {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--paper-light);
+      color: var(--ink-soft);
+    }
+
+    /* 8 项结构 · section */
+    .ind-section {
+      margin-bottom: var(--space-xl);
+    }
+    .ind-section-title {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--font-serif);
+      font-size: 18px;
+      color: var(--ink);
+      margin-bottom: var(--space-sm);
+    }
+    .ind-section-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--peach); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600;
+      font-family: var(--font-serif);
+    }
+    .ind-section-body {
+      background: white;
+      border: 1px solid var(--paper-dark);
+      border-radius: 10px;
+      padding: var(--space-md);
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.8;
+    }
+    .ind-section-body ul {
+      list-style: none; padding: 0;
+    }
+    .ind-section-body ul li {
+      padding-left: 18px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+    .ind-section-body ul li::before {
+      content: '•';
+      position: absolute; left: 4px;
+      color: var(--peach);
+    }
+    .ind-section-body strong { color: var(--ink); }
+
+    /* 场景子模块 · 行内标签 */
+    .sub-scene-list {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .sub-scene {
+      padding: 6px 12px;
+      background: linear-gradient(135deg, #fff5ef, #ffece0);
+      border: 1px solid var(--peach);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--peach);
+    }
+
+    /* 语言风格 · hand font */
+    .lang-style {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .lang-pill {
+      padding: 4px 10px;
+      background: var(--paper);
+      border-radius: 12px;
+      font-family: var(--font-hand);
+      color: var(--sage-dark);
+      font-size: 15px;
+    }
+
+    /* 依据栏 */
+    .ind-evidence {
+      margin-top: var(--space-xl);
+      padding: var(--space-md);
+      background: rgba(154,168,137,0.08);
+      border: 1px dashed rgba(154,168,137,0.4);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--ink-faint);
+    }
+    .ind-evidence strong { color: var(--sage-dark); }
+
+    /* ========== 细分赛道选择 + 产品分析 ========== */
+    .subdomain-select {
+      margin-bottom: var(--space-xl);
+      padding: var(--space-lg) var(--space-lg) var(--space-md);
+      background: linear-gradient(135deg, #fffaf7, #f5fff8);
+      border: 2px solid var(--peach);
+      border-radius: 14px;
+    }
+    .subdomain-select h4 {
+      font-family: var(--font-serif);
+      font-size: 17px; color: var(--ink);
+      margin-bottom: var(--space-md);
+    }
+    .subdomain-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sub-chip {
+      padding: 7px 15px;
+      background: white;
+      border: 1.5px solid var(--peach);
+      border-radius: 20px;
+      font-size: 13px; color: var(--peach);
+      cursor: pointer; font-family: inherit;
+      transition: all 0.18s;
+    }
+    .sub-chip:hover { background: var(--peach); color: white; transform: translateY(-1px); }
+    .sub-chip.active { background: var(--peach); color: white; }
+
+    .analysis-panel { margin-bottom: var(--space-xl); }
+    .analysis-placeholder {
+      text-align: center; padding: var(--space-xl) var(--space-lg);
+      color: var(--ink-faint); font-size: 14px;
+      border: 2px dashed var(--paper-dark); border-radius: 12px;
+    }
+    .analysis-loading {
+      display: flex; align-items: center; gap: 12px;
+      padding: var(--space-lg); background: var(--paper);
+      border-radius: 12px; color: var(--ink-soft); font-size: 14px;
+    }
+    .analysis-status-bar {
+      padding: 8px 14px;
+      background: rgba(154,168,137,0.12); border-radius: 8px;
+      font-size: 12px; color: var(--sage-dark); margin-bottom: 10px;
+    }
+    .analysis-content {
+      padding: var(--space-lg);
+      background: white; border: 1.5px solid var(--paper-dark);
+      border-radius: 14px; font-size: 14px; color: var(--ink-soft);
+      line-height: 1.85;
+    }
+    .analysis-content h2 {
+      font-family: var(--font-serif); font-size: 16px; color: var(--ink);
+      margin: var(--space-md) 0 6px;
+      padding-top: var(--space-md); border-top: 1px solid var(--paper-dark);
+    }
+    .analysis-content h2:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    .analysis-content strong { color: var(--ink); }
+    .analysis-actions {
+      display: flex; gap: 10px; margin-top: var(--space-lg); flex-wrap: wrap;
+    }
+    .btn-flash {
+      flex: 1; min-width: 160px;
+      padding: 13px 18px;
+      background: linear-gradient(135deg, var(--peach), #e07a50);
+      color: white; border: none; border-radius: 12px;
+      font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: all 0.2s;
+    }
+    .btn-flash:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(209,106,78,0.3); }
+    .btn-standard {
+      flex: 1; min-width: 160px;
+      padding: 13px 18px; background: white; color: var(--ink);
+      border: 1.5px solid var(--paper-dark); border-radius: 12px;
+      font-size: 14px; cursor: pointer; font-family: inherit; transition: all 0.2s;
+    }
+    .btn-standard:hover { border-color: var(--ink); }
+
+    /* 背景折叠 */
+    .ind-bg-toggle { margin-bottom: var(--space-xl); }
+    .ind-bg-toggle > summary {
+      cursor: pointer; padding: 12px var(--space-lg);
+      background: var(--paper); border: 1px solid var(--paper-dark);
+      border-radius: 10px; font-size: 13px; color: var(--ink-soft);
+      list-style: none; display: flex; align-items: center; justify-content: space-between;
+    }
+    .ind-bg-toggle > summary::-webkit-details-marker { display: none; }
+    .ind-bg-toggle > summary::after { content: '▸'; color: var(--peach); }
+    .ind-bg-toggle[open] > summary::after { content: '▾'; }
+    .ind-bg-toggle > summary:hover { border-color: var(--peach); color: var(--ink); }
+    .ind-bg-toggle > div { padding-top: var(--space-md); }
+
+    /* 使用 CTA (legacy, now replaced) */
+    .use-industry-cta { display: none; }
+
+    /* 响应式 */
+    @media (max-width: 560px) {
+      .ind-drawer { width: 100%; }
+      .ind-drawer-content { padding: var(--space-lg); }
+      .idh-emoji { font-size: 48px; }
+      .idh-name { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-content">
+    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>Peach Studio</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">🎯 需求入口</a>
+      <a href="methodology.html" class="nav-link">📚 方法论</a>
+      <a href="workspace.html" class="nav-link">📊 分析工作台</a>
+      <a href="collaboration.html" class="nav-link">🤝 协作台</a>
+      <a href="industries.html" class="nav-link active">🏭 行业库</a>
+      <a href="results.html" class="nav-link">📦 结果工作台</a>
+      <div class="nav-more-wrap">
+        <button class="nav-more-trigger" aria-haspopup="true">更多 ▾</button>
+        <div class="nav-dropdown">
+          <a href="docs.html">📖 资产层</a>
+          <a href="cases.html">📂 案例库</a>
+          <a href="team.html">👥 团队</a>
+          <a href="office.html">🎬 办公室</a>
+        </div>
+      </div>
+      <div class="theme-switcher">
+        <button class="theme-btn active" data-theme="editorial" title="Editorial Peach">🍑</button>
+        <button class="theme-btn" data-theme="airbnb" title="Airbnb">🏠</button>
+        <button class="theme-btn" data-theme="linear" title="Linear">⚡</button>
+        <button class="theme-btn" data-theme="pinterest" title="Pinterest">📌</button>
+        <button class="theme-btn" data-theme="stripe" title="Stripe">💳</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- 🆕 v1.1 · 20 一级行业 × 200 细分专家池（2026-04-23 阶段 4 注入） -->
+<section id="peach-industries-v11"></section>
+<script src="js/peach_industries_v11.js"></script>
+
+<div class="ind-page">
+  <div class="container wide">
+
+    <div class="ind-header">
+      <p class="hand" style="color: var(--peach);">跨行业迁移引擎</p>
+      <h1 style="font-size: clamp(36px, 5vw, 56px); margin-bottom: var(--space-sm);">20 个行业 · 专家待命</h1>
+      <p style="color: var(--ink-soft); max-width: 740px; margin: 0 auto;">每个行业沉淀 <strong>8 项固定结构</strong>：定义 / 画像 / 场景 / 痛点 / 竞品维度 / 指标 / 风险合规 / AI 切入点。点任意卡看详细 · Peach Studio的 PM 和 AI 训练师角色按需调用。</p>
+    </div>
+
+    <!-- 过滤器 -->
+    <div class="ind-filters">
+      <button class="ind-filter-btn active" data-filter="all">全部 20</button>
+      <button class="ind-filter-btn" data-filter="b">B 端</button>
+      <button class="ind-filter-btn" data-filter="g">G 端</button>
+      <button class="ind-filter-btn" data-filter="c">C 端</button>
+      <button class="ind-filter-btn" data-filter="risk">合规敏感</button>
+      <button class="ind-filter-btn" data-filter="cross">🌏 出海（跨行业维度）</button>
+    </div>
+
+    <!-- 出海维度说明（filter=cross 时显示） -->
+    <div id="crossHint" style="display:none; max-width: 1000px; margin: 0 auto var(--space-lg); padding: 14px 18px; background: linear-gradient(135deg, #fff5ef, #f0faf2); border: 1.5px dashed var(--peach); border-radius: 12px; font-size: 13px; color: var(--ink-soft);">
+      <strong style="color: var(--peach);">🌏 出海不是单独行业 · 是跨行业维度</strong>：游戏 / 短剧 / SaaS / 新能源 / 汽车 / 教育 / 医疗 / 金融 等都有出海场景 · 不只跨境电商。出海的共同铁律：<strong>GDPR + CCPA + 个保法三法对照</strong> · 多语言本地化 · 文化适配 · 各国合规分别备案。
+    </div>
+
+    <!-- 行业网格（JS 生成） -->
+    <div class="ind-grid" id="indGrid"></div>
+
+  </div>
+</div>
+
+<!-- 抽屉 · 行业详情 -->
+<div class="ind-drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+<div class="ind-drawer" id="indDrawer">
+  <button class="ind-drawer-close" onclick="closeDrawer()">✕</button>
+  <div class="ind-drawer-content" id="drawerContent"></div>
+</div>
+
+<!-- Footer -->
+<footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--paper-dark); margin-top: var(--space-3xl);">
+  <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);">
+    <div>
+      <p style="font-family: var(--font-serif); font-size: 18px;">🏢 Peach Studio</p>
+      <p style="color: var(--ink-faint); font-size: 14px; margin-top: var(--space-xs);">行业专家库 · v1.0 · 20 行业 × 8 项结构</p>
+    </div>
+    <div style="color: var(--ink-faint); font-size: 13px;">
+      <p>跨行业迁移引擎 · 不是空架子</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/theme.js"></script>
+<script src="js/launcher.js"></script>
+<script>
+  /* ========== Tab 4 · 行业专家库 数据 + 逻辑 ========== */
+
+  const INDUSTRY_DATA = [
+    {
+      id: '医疗', emoji: '🏥', channels: ['b', 'g', 'risk'],
+      scene_short: '诊疗辅助 · 医学咨询 · 健康管理 · 病历结构化',
+      tags: [['零容忍幻觉', 'risk'], ['B 端', 'b'], ['G 端', 'g']],
+      definition: '面向医疗场景的 AI 产品 · 严格受 HIPAA 和医疗广告法约束 · AI 不替代医生 · 必须医生在环（HITL）。',
+      user: '张晓红 · 32 岁 · 三甲医院全科门诊护士 · 日均分诊 120+ 患者 · HIPAA 合规要求数据不出院内',
+      scenes: ['AI 辅助分诊（非诊疗）· 症状初筛', '病历结构化 · OCR + 摘要 + 字段提取', '慢病管理 · 随访提醒 + 用药问答', '医学知识问答（医生端）· 循证检索', 'AI 辅助影像 · 医生复核'],
+      pains: ['常见病分诊规则繁多 · 新护士记不全', '患者自诉主观 · 需反复确认症状', 'HIPAA + 个保法 · 数据不能出院内系统'],
+      competitor_dims: '效果精度 / 合规保障 / HIS 集成难度 / 成本 / 医生接受度',
+      metrics: '北极星：分诊准确率 95%+ / 分诊时间 ≤1 min<br>反指标：分诊错误率 ≤1% · 幻觉率 ≤0.3% · 患者投诉率 ≤3‰',
+      risk: 'HIPAA · 个保法 · 医疗广告法 · AI 不替代医生声明 · 医生在环 HITL · 院内私有化部署 · 医学委员会审核',
+      ai_entry: '分诊辅助（非诊疗）· 病历结构化 · 患者问答 · 慢病随访 · 医学影像辅助（必须医生复核）',
+      sub_scenes: ['门诊分诊', '病历摘要', '慢病管理', '健康咨询', '医生端知识问答'],
+      language: ['AI 辅助不替代', '医生复核', '临床证据', '患者隐私', '院内部署', 'HITL', '医学委员会'],
+      evidence: 'VELA 32 合规模板 + 医疗行业专家 8 项框架 + AI 训练师清华姐医学垂类评测'
+    },
+    {
+      id: '金融', emoji: '💰', channels: ['b', 'risk'],
+      scene_short: '智能信贷 · 风控 · 智能客服 · 反洗钱 · 营销推荐',
+      tags: [['等保三级', 'risk'], ['B 端', 'b']],
+      definition: '面向银行 / 消费金融 / 保险的 AI 产品 · 等保三级底线 · 反洗钱 + 征信合规 · 数据不出境。',
+      user: '林建国 · 38 岁 · 股份制银行信贷审核员 · 日均 80 单 · 每单 45 分钟 · 上级每周抽查 5%',
+      scenes: ['智能信贷审核 · 征信聚合 + 反欺诈', '智能客服 · 知识库 + 工单分派', '反洗钱黑名单筛查', '智能营销 · 客群精准触达', '投诉处理 · 情绪识别 + 补救话术'],
+      pains: ['征信分散 8+ 接口 · 人工交叉比对费时', '反欺诈规则 200+ 条 · 容易漏判', '审核错一次扣 500 元 · 审核员压力大'],
+      competitor_dims: '效果精度 / 合规保障 / 核心系统对接 / 成本 / 风控部门接受度',
+      metrics: '北极星：单件审核时间 45 min → ≤5 min<br>反指标：误拒率 ≤4% · 幻觉率 ≤0.5% · 审核员弃用率 ≤5%',
+      risk: '等保三级 · 反洗钱黑名单 · 征信合规 · 算法备案 · 数据不出境 · 境外模型禁 · 决策链路追溯',
+      ai_entry: '信贷审核辅助 · 客服自动应答 · 反欺诈异常检测 · 营销推荐 · 投诉分类',
+      sub_scenes: ['消费信贷审核', '企业贷款审核', '反欺诈筛查', '智能客服', '营销推荐'],
+      language: ['误拒率', '反欺诈', '链路可追溯', '等保三级', '信创', '灰名单', '联防联控'],
+      evidence: 'VELA 21 模型选型 + VELA 32 金融合规 + 金融专家 · 消费金融信贷链路'
+    },
+    {
+      id: '教育', emoji: '🎓', channels: ['c', 'risk'],
+      scene_short: 'AI 陪练 · AI 批改 · 错题诊断 · 个性化学习',
+      tags: [['未保强', 'risk'], ['C 端', 'c']],
+      definition: '面向 K12 / 成人考证 / 素质教育的 AI 产品 · 未保强 · 不代做作业 · 启发式原则 · 不承诺考试结果。',
+      user: '王佳 · 24 岁 · 成人英语考证学员 · 晚 19-22 自学 · 工作外派需求 · 月付能力 ¥100-300',
+      scenes: ['AI 口语陪练 · 24/7 随叫随用', 'AI 批改 · 写作 / 翻译 · 即时反馈', '错题诊断 · 薄弱知识点推送', 'AI 讲题 · 题目分解 + 类比', '学习计划推荐 · 按目标排课'],
+      pains: ['口语没人陪练 · 害怕开口 · 想练又不敢', '写作批改慢 · 线下 3-5 天才改一次', '线下课贵 · ¥8000 预算只够 8 节 1v1'],
+      competitor_dims: '效果对齐考试标准 / 启发式不给答案 / 个性化 / 成本 / 学员粘性',
+      metrics: '北极星：周活对话时长（WADD）≥90 min/周<br>反指标：穿帮率 ≤0.5% · 续费率 ≥90%/月 · 申诉 ≤2%',
+      risk: '未成年保护（18 岁门槛 / 家长授权）· 启发式原则（不代做）· 不承诺考试结果 · 广告法禁词（最 / 绝对）',
+      ai_entry: '口语陪练 · 写作批改 · 错题诊断 · 讲题分解 · 学习路径推荐',
+      sub_scenes: ['AI 辅导（K12）', 'AI 批改', 'AI 陪练（成人）', '面向老师的工具', '面向家长的产品'],
+      language: ['启发式', '考点对齐', '循序渐进', '不代做', '个性化推送', '错题闭环'],
+      evidence: 'VELA 07 画像 + 教育专家 · 未保合规 + 启发式 + 成人考证赛道',
+      neural: {
+        sub_domains: ['AI口语陪练', '智能批改', '个性化学习', '教师备课', '职业教育AI', '校园SaaS'],
+        keywords: ['完课率', '开口率', '错题归因', '双减', '启发式', '家长付费学生用', '防沉迷'],
+        ai_entry: ['语音评测（ASR+LLM）', '批改+解析（Qwen3微调）', '知识图谱推荐', '学习路径个性化'],
+        risks: ['双减政策（K12学科）', '未保法（未成年支付/时长）', '内容准确性（教育内容不能出错）', '提分夸大（广告法）'],
+        metrics: ['周完课率 ≥60%', '月续费率 ≥90%', '开口率', '复练率'],
+        model_pattern: 'ASR → LLM批改/评测 → 知识图谱推荐 · 离线同步 · Qwen3-32B教育微调',
+        backflow: ['错题库（用户贡献越用越好）', '口语评测数据集（自有训练）', '学习路径图谱']
+      }
+    },
+    {
+      id: '短视频', emoji: '🎬', channels: ['c'],
+      scene_short: '推荐 · AI 剪辑 · 内容理解 · 选题 · 字幕',
+      tags: [['算法备案', 'risk'], ['C 端', 'c']],
+      definition: '短视频平台的 AI 能力 · 内容推荐 / 理解 / 创作 · 算法推荐备案 + 内容三审 + 未成年防沉迷。',
+      user: '26 岁创作者 · 日更短视频 · 选题依赖热点 · 剪辑平均 2 小时 / 条',
+      scenes: ['AI 选题 · 热点 + 个性化', 'AI 剪辑 · 自动拆条 + 配乐 + 字幕', '内容理解 · OCR + 情感分析', 'AI 分发 · 推荐算法', 'AI 审核 · 涉黄 / 涉政预检'],
+      pains: ['选题焦虑 · 不追热点没流量 · 追得慢已过气', '剪辑费时 · 手动剪 2 小时才出 1 条', '内容审核规则多 · 被限流不知道为什么'],
+      competitor_dims: '推荐准确度 / 剪辑效果 / 合规过审率 / 用户体验 / 创作者生态',
+      metrics: '北极星：用户日均观看时长 / 创作者日更率<br>反指标：举报率 ≤0.5% · 未成年防沉迷合规 ≥99% · 算法偏见',
+      risk: '算法推荐备案（网信办）· 内容三审（机审 + 人审 + 专家审）· 未成年防沉迷 · 版权合规',
+      ai_entry: '选题推荐 · 自动剪辑 · 字幕生成 · 内容审核 · 推荐分发',
+      sub_scenes: ['创作者端 · AI 剪辑', 'C 端 · 推荐流', '内容审核 · 平台侧'],
+      language: ['爆款率', '完播率', '推流', '限流', '算法推荐备案', '内容三审'],
+      evidence: 'VELA 24 埋点 + 短视频行业专家 · 算法推荐合规'
+    },
+    {
+      id: '短剧', emoji: '🎭', channels: ['c'],
+      scene_short: 'AI 剧本 · 分镜 · 配音 · 付费墙 · 爽点设计',
+      tags: [['版权敏感', 'risk'], ['C 端', 'c']],
+      definition: '短剧行业 AI 能力 · 剧本创作 / 配音 / 生图 · 爽点密度高 · 付费墙设计 · 版权合规。',
+      user: '32 岁短剧 PM · 每月 3-5 部剧上线 · 需要快速出剧本 + 测试付费点',
+      scenes: ['AI 剧本 · 爽点密集型桥段生成', 'AI 配音 · 角色多声线', 'AI 生图 · 分镜预览', '付费墙 A/B · 哪一集最容易付费', '爆款对标 · 改编合规'],
+      pains: ['剧本产能跟不上 · 优质编剧月产 1 部', '付费点试错成本高 · 错了一整剧白做', '版权模糊 · 改编易翻车'],
+      competitor_dims: '剧本爽点密度 / 配音自然度 / 生图质量 / 付费转化 / 平台生态',
+      metrics: '北极星：付费转化率 / 单剧 LTV<br>反指标：爽点错位率 · 版权投诉 · 审核拒绝率',
+      risk: '版权合规（改编授权）· 内容审核（涉黄 / 涉政 / 未成年）· 诱导付费底线 · 爽点设计不违反公序良俗',
+      ai_entry: '剧本辅助 · 配音 · 生图 · 付费点测试 · 热搜对标',
+      sub_scenes: ['剧本创作', '配音生成', '分镜预览', '付费点设计'],
+      language: ['爽点', '卡点', '付费墙', '单剧 LTV', '完播率', '弃剧率'],
+      evidence: '短剧行业专家 · 内容合规 + 付费心理 + 爽点设计'
+    },
+    {
+      id: '电商', emoji: '🛍', channels: ['c', 'b'],
+      scene_short: 'AI 客服 · 推荐 · 选品 · 直播 · 退换处理',
+      tags: [['广告法', 'risk'], ['C 端', 'c'], ['B 端', 'b']],
+      definition: '电商平台 / 商家 AI 能力 · 选品 / 客服 / 推荐 / 直播 · 广告法禁词 · SKU 管理 · 直播合规。',
+      user: '29 岁直播电商选品助理 · 日筛 200+ SKU · 主播团队核心成员',
+      scenes: ['AI 选品 · 多模态（图 / 文 / 评论）过滤', 'AI 客服 · 7x24 咨询 · 知识库', '退换逻辑 · 自动判定', 'AI 直播辅助 · 实时话术', '个性化推荐 · 千人千面'],
+      pains: ['SKU 信息分散 · 商家吹牛皮 · 选错赔万', '退货率预判难 · 一场直播失败全亏', '同质化严重 · 差异化卖点难找'],
+      competitor_dims: '多模态理解 / 退货预测准度 / 合规性 / 成本 / 商家生态',
+      metrics: '北极星：选品通过率 POR ≥80% / GMV 转化率<br>反指标：退货率 ≤18% · 误判率 ≤5% · 客诉 ≤2%',
+      risk: '广告法禁词（最 / 第一 / 国家级）· 直播合规（食品 / 医疗 / 金融三禁）· SKU 标注真实性 · 未成年限制',
+      ai_entry: '选品 · 客服 · 推荐 · 直播辅助 · 退换自动判定 · 评论情感',
+      sub_scenes: ['选品助手', '智能客服', '直播助手', '个性化推荐', '退换处理'],
+      language: ['GMV', '客单价', 'ROI', '复购', '退货率', '直播转化', 'ROAS'],
+      evidence: 'VELA 24 埋点 + 电商行业专家 · 广告法 + 直播合规'
+    },
+    {
+      id: '制造', emoji: '🏭', channels: ['b'],
+      scene_short: 'AI 质检 · MES · 预测维护 · 产线优化',
+      tags: [['MES 集成', 'b'], ['B 端', 'b']],
+      definition: '制造业 AI 能力 · 质检 / 产线 / 供应链 · 需 MES + ERP + SCADA 集成 · ISO 26262 功能安全。',
+      user: '某汽车零部件厂质检经理 · 管 3 条产线 · 日均 10000+ 件 · KPI 是缺陷漏检率',
+      scenes: ['AI 视觉质检 · 缺陷识别', '设备预测维护 · 故障预警', '产线节拍优化', '供应链预测', '工艺参数推荐'],
+      pains: ['人工质检疲劳 · 漏检率 3-5%', '设备突发故障 · 停产损失大', '产线切换参数需经验 · 老师傅经验难传承'],
+      competitor_dims: '缺陷识别精度 / MES 集成难度 / 响应延迟 / 成本 / 老师傅接受度',
+      metrics: '北极星：漏检率 / 停机时间减少<br>反指标：误检率（挤压良品）· 接入稳定性 · 工人投诉',
+      risk: '功能安全（ISO 26262）· 数据不出厂 · 设备稳定性 · 与现有 MES / ERP 接口兼容',
+      ai_entry: '视觉质检 · 预测维护 · 产线调度 · 工艺推荐 · 供应链预测',
+      sub_scenes: ['视觉质检', '预测维护', '工艺推荐', '供应链预测'],
+      language: ['OEE', '良品率', '漏检率', 'MES', 'SCADA', 'OPC UA', '产线节拍'],
+      evidence: '制造行业专家 · MES + ERP 集成 + ISO 26262'
+    },
+    {
+      id: '汽车', emoji: '🚗', channels: ['b'],
+      scene_short: '智驾 · 座舱 · 车联网 · 电池管理',
+      tags: [['ISO 26262', 'risk'], ['B 端', 'b']],
+      definition: '汽车行业 AI · 智能驾驶 + 智能座舱 + 车联网 · 功能安全 ISO 26262 · L0-L5 分级 · 数据闭环。',
+      user: '主机厂智驾功能 PM · 管 1 个车型 ADAS 迭代 · 每月 OTA 1-2 版本',
+      scenes: ['智能驾驶 · 感知 / 决策 / 控制', '智能座舱 · 语音 + 手势', '车联网 · 远程升级 OTA', '电池管理 · 寿命 + 充电优化', 'AI 语音助手 · 上下文理解'],
+      pains: ['场景长尾无限 · 边缘 case 难覆盖', 'OTA 升级风险 · 错一次全车召回', '数据闭环慢 · 问题复现需要上万里程'],
+      competitor_dims: '感知精度 / 功能安全 / 场景覆盖 / OTA 稳定性 / 用户体验',
+      metrics: '北极星：MPI（千公里接管次数）→ 下降<br>反指标：事故率 · 误触发率 · OTA 失败率',
+      risk: 'ISO 26262 功能安全 · 网信办汽车数据合规 · L2/L3 分级驾驶声明 · 数据闭环',
+      ai_entry: '感知（BEV + Transformer）· 规划决策 · 语音助手 · 场景挖掘',
+      sub_scenes: ['智驾感知', '智驾规划', '智能座舱', 'OTA 升级', '电池管理'],
+      language: ['BEV', 'MPI', '接管率', '功能安全', 'L2 / L3', 'OTA', 'HMI'],
+      evidence: '汽车行业专家 · ISO 26262 + 智驾数据闭环',
+      neural: {
+        sub_domains: ['智驾感知', '规划决策', '智能座舱', 'OTA升级', '电池管理', '车联网'],
+        keywords: ['MPI（千公里接管次数）', 'L2/L3分级', 'OTA召回风险', '功能安全', 'BEV感知', '边缘推理', '数据闭环'],
+        ai_entry: ['感知（BEV+Transformer）', '规划决策（端到端）', '语音助手（车载LLM）', '场景挖掘（长尾case）'],
+        risks: ['ISO 26262功能安全（ASIL-D）', '网信办汽车数据合规', 'L2/L3分级驾驶声明', 'OTA升级失败召回风险'],
+        metrics: ['MPI下降（每版本OTA）', '误触发率 ≤0.1%', 'OTA成功率 ≥99.5%', '场景覆盖里程'],
+        model_pattern: 'BEV+Transformer感知 → 端到端规划 → 车载小模型推理 · 边缘部署 · 数据闭环驱动迭代',
+        backflow: ['长尾场景库（每次OTA扩充）', '驾驶行为数据集（自有闭环）', '功能安全验证用例']
+      }
+    },
+    {
+      id: '政企', emoji: '🏛', channels: ['g', 'risk'],
+      scene_short: '政务助手 · 合规审查 · 智慧城市 · 公文处理',
+      tags: [['境外模型 100% 禁', 'risk'], ['G 端', 'g']],
+      definition: '政府 / 国企数字化 AI · 等保三级 / 四级 · 信创目录必选 · 国密算法 · 境外模型 100% 禁。',
+      user: '某省政务云 PM · 管 200+ 应用上云 · 合规压力大',
+      scenes: ['政务问答 · 办事指南', '公文处理 · 摘要 + 纠错', '智慧城市 · 事件识别 + 调度', '合规审查 · 文档自动比对', '12345 热线智能分派'],
+      pains: ['办事流程复杂 · 市民反复跑动', '公文批改耗时 · 重复低效劳动', '12345 话务员培训慢'],
+      competitor_dims: '本地化能力 / 信创兼容 / 私有化部署 / 响应精度 / 安全可控',
+      metrics: '北极星：市民办事满意度 / 工单首次解决率<br>反指标：越权操作 · 数据泄露 · 政策误读',
+      risk: '等保三级 / 四级 · 信创目录 · 国密算法 · 数据境内存储 · 境外模型 100% 禁 · 涉密资质',
+      ai_entry: '政务问答 · 公文智能 · 合规审查 · 事件识别 · 热线分派',
+      sub_scenes: ['政务服务', '公文处理', '智慧城市', '合规审查', '12345 热线'],
+      language: ['等保三级', '信创', '国密', '党政机关', '涉密', '可信安全'],
+      evidence: 'VELA 32 合规 + 政企行业专家 · 等保 + 信创 + 国密'
+    },
+    {
+      id: '家装', emoji: '🏡', channels: ['c', 'b'],
+      scene_short: 'AI 效果图 · 报价 · 方案 · 施工管理',
+      tags: [['真人签字', 'risk'], ['C 端 + B 端', 'c']],
+      definition: '家装行业 AI · 效果图生成 / 报价 / 方案 / 施工 · 重决策长周期 · 真人签字 · 装修资质。',
+      user: '29 岁新婚小夫妻 · 婚房装修 · 预算 ¥15 万 · 信任门槛高',
+      scenes: ['AI 效果图 · 5 分钟出图（传统 3 天）', 'AI 报价 · 拆解材料 + 人工', 'AI 方案 · 风格 + 户型匹配', '施工监理 · 进度 + 质量', '售后保障 · AI 客服'],
+      pains: ['效果图贵 · 设计师 3 天 ¥3000', '报价黑盒 · 装完发现超预算 30%+', '施工信任低 · 监理费又贵'],
+      competitor_dims: '效果图质量 / 报价透明 / 方案匹配 / 施工能力 / 售后保障',
+      metrics: '北极星：签单转化率 / 老带新率<br>反指标：工期超时率 · 客诉 · 施工返工',
+      risk: '装修资质（二级 / 一级）· 施工必须真人签字 · 效果图免责声明（实际效果可能差异）· 工程合同法',
+      ai_entry: 'AI 效果图 · 报价推算 · 方案推荐 · 施工进度 · 售后客服',
+      sub_scenes: ['C 端看图', 'C 端选方案', 'B 端设计师提效', '工长管理'],
+      language: ['全屋定制', '硬装 / 软装', '工长制', '平方报价', '口碑装修', '签字留痕'],
+      evidence: '家装行业专家 · 装修资质 + 真人签字流程'
+    },
+    {
+      id: '内容', emoji: '📰', channels: ['c'],
+      scene_short: 'AI 创作 · 选题 · 分发 · SEO/GEO · 知识付费',
+      tags: [['算法备案', 'risk'], ['C 端', 'c']],
+      definition: '内容社区 AI · UGC 创作 / 选题 / 分发 / SEO / GEO 优化 · 算法推荐备案 + 内容三审。',
+      user: '32 岁专栏作者 · 公众号 + 小红书 + 知乎 3 平台分发 · 月更 20+ 篇',
+      scenes: ['AI 选题 · 热搜 + 个性化', 'AI 创作 · 初稿 + 润色', 'SEO / GEO 优化 · 关键词 + 摘要', '多平台分发 · 一稿多发', '数据分析 · 哪篇爆了为什么'],
+      pains: ['选题焦虑 · 热搜快消退', '写作时间长 · 2000 字稿 3 小时', '多平台分发 · 手动改格式费时'],
+      competitor_dims: 'AI 文风自然度 / SEO 优化 / 分发效率 / 原创检测 / 用户数据',
+      metrics: '北极星：发布到 10000 阅读量速度 / 转化率<br>反指标：AI 感过强 · 原创度 · 合规拒稿',
+      risk: '算法推荐备案 · AI 内容标识 · 原创声明 · 广告法 · 未成年',
+      ai_entry: '选题 · 创作 · SEO / GEO · 分发 · 数据分析',
+      sub_scenes: ['公众号创作', '小红书', '知乎', '知识付费'],
+      language: ['GEO', 'SEO', '爆款率', '完播', '留存', '原创度', 'AI 标识'],
+      evidence: 'VELA 24 + 内容行业专家 · 算法推荐 + GEO 优化'
+    },
+    {
+      id: '情感陪伴', emoji: '💝', channels: ['c', 'risk'],
+      scene_short: 'AI 人设陪伴 · 长期记忆 · 心理危机响应',
+      tags: [['涉黄零容忍', 'risk'], ['C 端', 'c']],
+      definition: '情感陪伴类 AI · 人设一致性 + 长期记忆 + 心理危机响应 · 涉黄零容忍 · 未保严格。',
+      user: '23 岁女性 · 异地恋分手 · 夜晚孤独 · 需要陪伴和倾诉',
+      scenes: ['AI 人设陪伴 · 角色扮演', '长期记忆 · 记住用户偏好', '日常问候 · 情绪关怀', '心理危机响应 · 引导求助', '付费解锁 · 亲密度系统'],
+      pains: ['人设破一次 3 天流失', '心理危机漏响应等于事故', '情色擦边易被封'],
+      competitor_dims: '人设稳定度 / 长期记忆 / 情感共鸣 / 付费设计 / 安全护栏',
+      metrics: '北极星：周活对话时长 / 付费转化<br>反指标：人设穿帮率 · 涉黄命中率 · 心理危机漏报',
+      risk: '涉黄零容忍 · 未成年保护 · 心理危机响应（自杀 / 自残引导求助）· 用户沉迷防范',
+      ai_entry: '人设对话 · 记忆检索 · 情绪识别 · 危机拦截',
+      sub_scenes: ['人设恋爱', '人设友情', '知己对话', '剧情互动'],
+      language: ['亲密度', '人设', '穿帮', 'RP（角色扮演）', '心理危机'],
+      evidence: '情感陪伴专家 · 人设稳定 + 涉黄零容忍 + 心理危机 + VELA 32 内容安全'
+    },
+    {
+      id: '游戏', emoji: '🎮', channels: ['c', 'risk'],
+      scene_short: 'AI NPC · 美术 · 配音 · 数值策划',
+      tags: [['未保防沉迷', 'risk'], ['C 端', 'c']],
+      definition: '游戏行业 AI · NPC 对话 / 美术生成 / 配音 / 数值 · 防沉迷 + 付费合规 + 数值平衡。',
+      user: 'MMO 游戏策划 · 负责新 NPC 设计 · 玩家留存是核心 KPI',
+      scenes: ['AI NPC · 对话 + 记忆 + 任务引导', 'AI 美术 · 原画 + 贴图 + 角色 3D', 'AI 配音 · 多声线 + 情感', '数值策划 · 经济 + 战力平衡', '玩家社区 · 自动审核'],
+      pains: ['NPC 对话僵硬 · 破沉浸感', '美术产能跟不上 · 外包成本高', '数值调整依赖经验 · 错一次整服炸'],
+      competitor_dims: 'NPC 智能度 / 美术质量 / 数值平衡 / 防沉迷合规 / 付费设计',
+      metrics: '北极星：日活 / 付费 ARPU / 7 日留存<br>反指标：NPC 穿帮 · 美术重复度 · 未成年超时',
+      risk: '未成年防沉迷（国务院规定）· 付费消费合规 · 数值平衡（防止 P2W 过分）· 社区内容安全',
+      ai_entry: 'NPC 对话 · 美术生成 · 配音 · 数值仿真 · 社区审核',
+      sub_scenes: ['MMO / RPG', '卡牌', '休闲', '模拟经营'],
+      language: ['ARPU', 'LTV', '留存', 'DAU', '防沉迷', '数值平衡'],
+      evidence: '游戏行业专家 · 防沉迷 + 付费合规 + NPC 设计'
+    },
+    {
+      id: '企业SaaS', emoji: '🏢', channels: ['b'],
+      scene_short: 'CRM / ERP / HR / 财务 SaaS 智能化',
+      tags: [['多租户', 'b'], ['B 端', 'b']],
+      definition: '企业 SaaS 的 AI 能力 · MRR / NRR 指标 · 多租户隔离 · 阶梯定价 · 角色权限细。',
+      user: '41 岁 HR 总监 · 管 8000 人薪资 · 月末核算 3 天 · 错账率 3%',
+      scenes: ['AI 薪资核算 · 多地打通', 'AI 招聘 · 简历筛选', 'AI 客服 · 内外双端', 'AI 合同 · 风险识别', '报表智能化 · 自然语言查询'],
+      pains: ['多地子公司用不同系统 · 数据合并手工', 'HR 规则改 · 系统跟不上', '审核错账扣绩效'],
+      competitor_dims: '功能广度 / 集成能力 / 多租户 / 定价灵活 / 客户成功',
+      metrics: '北极星：NRR ≥ 110% / MRR 增长<br>反指标：流失率 · 产品支持工单 · NPS',
+      risk: 'ISO 27001 · 数据隔离 · 客户数据主权 · 多租户合规 · GDPR（出海）',
+      ai_entry: '规则处理 · 数据查询 · 客服 · 合同审 · 报表',
+      sub_scenes: ['CRM', 'ERP', 'HR SaaS', '财务 SaaS', 'OA'],
+      language: ['MRR', 'NRR', 'Churn', 'LTV/CAC', '多租户', 'RBAC', 'ISO 27001'],
+      evidence: 'VELA 21 + 企业 SaaS 专家 · 多租户 + NRR 铁律',
+      neural: {
+        sub_domains: ['CRM智能化', 'HR SaaS', 'ERP AI模块', '财务SaaS', 'OA智能助理', '合同管理'],
+        keywords: ['NRR（净收入留存）', 'MRR增长', 'Churn率', '多租户隔离', 'RBAC权限', '私有化部署', '集成能力'],
+        ai_entry: ['自然语言查询报表', 'AI合同风险识别', 'AI简历筛选', '智能客服（内外双端）', '规则处理自动化'],
+        risks: ['ISO 27001数据安全', '多租户数据隔离（一客户泄露影响全盘）', '客户数据主权', 'GDPR（出海SaaS）'],
+        metrics: ['NRR ≥110%', 'MRR环比增长', 'Churn ≤5%/年', '客户成功NPS ≥50'],
+        model_pattern: 'Text2SQL（报表查询）+ LLM合同审 + RAG知识库（规则变更实时同步）· 私有化优先 · Qwen2.5-72B',
+        backflow: ['规则知识库（客户贡献政策/法规变更）', '合同风险案例库', '用户操作行为埋点']
+      }
+    },
+    {
+      id: '跨境电商', emoji: '🌏', channels: ['c', 'cross', 'risk'],
+      scene_short: '出海 · 多语言 · 物流 · 本地化',
+      tags: [['GDPR', 'risk'], ['出海', 'cross'], ['C 端', 'c']],
+      definition: '跨境电商 AI · 出海多地合规 · 多语言 · 物流 · 本地化 · 三法对照（GDPR + CCPA + 个保法）。',
+      user: '30 岁跨境电商创业者 · 东南亚 + 欧美双市场 · 月 GMV 200 万',
+      scenes: ['多语言客服 · 实时翻译', '商品描述生成 · 多语言', '本地化内容 · 文化适配', '物流跟踪 · 智能异常预警', '汇率 / 税务 · 自动计算'],
+      pains: ['多语言人工成本高 · 小语种难招人', '文化差异 · 一句话在 A 国对 B 国冒犯', '各国合规不同 · 一处漏全盘废'],
+      competitor_dims: '多语言质量 / 本地化深度 / 合规覆盖 / 物流整合 / 成本',
+      metrics: '北极星：跨境 GMV / 多语言复购<br>反指标：文化差异投诉 · 合规处罚 · 物流延迟',
+      risk: 'GDPR（欧盟）· CCPA（加州）· 个保法（中国）· 各国进出口税 · 本地广告法',
+      ai_entry: '多语言客服 / 商品生成 / 本地化 / 合规检测 / 物流',
+      sub_scenes: ['东南亚', '欧美', '中东', '日韩'],
+      language: ['GMV', 'LTV', '复购', 'GDPR', 'CCPA', '小语种', '本地化'],
+      evidence: 'VELA 32 三法对照 + 跨境电商专家'
+    },
+    {
+      id: '宠物', emoji: '🐶', channels: ['c'],
+      scene_short: 'AI 问诊 · 用品推荐 · 社交 · 健康管理',
+      tags: [['情感消费', 'c'], ['C 端', 'c']],
+      definition: '宠物行业 AI · 问诊 / 用品 / 社交 / 健康 · 情感消费强 · 新手焦虑 · LTV 高。',
+      user: '28 岁都市女性 · 养猫 2 年 · 新手 · 月花 ¥800 猫粮 + 美容 + 医疗',
+      scenes: ['AI 宠物问诊 · 症状初筛', '用品推荐 · 按品种年龄', '宠友社交 · 兴趣匹配', '健康管理 · 疫苗 / 驱虫提醒', '情感陪伴 · 宠物丢失焦虑'],
+      pains: ['新手焦虑 · 小问题不知是否要看医生', '用品选择恐惧 · 不知道买啥好', '猫咪生病心急 · 半夜没医院'],
+      competitor_dims: '问诊精度 / 推荐适配 / 社交活跃 / 医疗资源 / 情感共鸣',
+      metrics: '北极星：月活 · 付费率 · ARPU<br>反指标：推荐误诊（必须提示真医）· 过度营销 · 社区乱象',
+      risk: '不替代兽医 · 宠物医疗广告合规 · 过度营销 · 宠物权益',
+      ai_entry: '初诊辅助 · 推荐 · 社交 · 健康提醒',
+      sub_scenes: ['新手饲养', '医疗问诊', '社交圈', '用品推荐'],
+      language: ['ARPU', 'LTV', '复购', '宠主', '猫友 / 狗友', '爱心领养'],
+      evidence: '宠物行业专家 · 情感消费 + 新手焦虑'
+    },
+    {
+      id: '占卜', emoji: '🔮', channels: ['c', 'risk'],
+      scene_short: '塔罗 · 星座 · 命理 · 付费解读',
+      tags: [['⚠️ 灰色', 'risk'], ['C 端', 'c']],
+      definition: '占卜行业 AI · 塔罗 / 星座 / 命理 · 合规边界极敏感 · 娱乐定位 · 不能承诺 · 不引焦虑。',
+      user: '25 岁女性 · 感情困惑 · 付费 ¥19-99 塔罗解读',
+      scenes: ['AI 塔罗 · 每日牌 + 问题牌', 'AI 星盘 · 生辰八字', '命理解读 · 年运 / 月运', '情感指引 · 付费深度解读', '社区讨论'],
+      pains: ['解读过于模糊 · 说了等于没说', '过度付费设计 · 被骂套路', '心理脆弱用户被引导焦虑'],
+      competitor_dims: '解读深度 / 付费设计 / 合规边界 / 用户体验 / 社区',
+      metrics: '北极星：付费转化 / 复购<br>反指标：投诉率 · 引导焦虑风险 · 客诉',
+      risk: '不能承诺（绝对发 / 必遇）· 不引焦虑 · 未保严格（18+ 门槛）· 封建迷信合规 · 娱乐定位必须明示',
+      ai_entry: 'AI 牌阵解读 · 星盘分析 · 付费心理咨询（非医疗）',
+      sub_scenes: ['塔罗', '星座', '命理', '情感咨询'],
+      language: ['娱乐参考', '心灵陪伴', '能量 / 磁场', '非科学非医疗'],
+      evidence: '占卜行业专家 · 合规边界 + 付费设计 + 不引焦虑'
+    },
+    {
+      id: '农业', emoji: '🌾', channels: ['g', 'b'],
+      scene_short: '农业 SaaS · 物联网 · 农产品电商',
+      tags: [['政策补贴', 'g'], ['G 端 + B 端', 'g']],
+      definition: '农业行业 AI · 种植 / 养殖 / 电商 / 物联网 · 政策补贴强 · 乡村振兴 · 土地流转合规。',
+      user: '某省农业合作社负责人 · 管 2000 亩 · 需智能灌溉 + 病虫害预警',
+      scenes: ['智能灌溉 · 天气 + 土壤', '病虫害识别 · 图像', '农产品溯源 · 区块链', '销路推荐 · B2B + B2C', '政策补贴对接'],
+      pains: ['老农技术跟不上 · 教育成本高', '农资价格不透明 · 中间商多', '销路不稳定 · 丰产不增收'],
+      competitor_dims: '识别精度 / 物联网稳定 / 政策对接 / 成本 / 老农接受度',
+      metrics: '北极星：亩产 + 亩均收入 提升<br>反指标：误报病虫 · 物联网断线 · 老农弃用',
+      risk: '农业补贴申报合规 · 土地流转法 · 食品安全 · 农民权益',
+      ai_entry: '灌溉 · 病虫害 · 溯源 · 销路 · 补贴对接',
+      sub_scenes: ['种植', '养殖', '溯源', '电商'],
+      language: ['亩产', '分成', '农合', '政策补贴', '溯源'],
+      evidence: '农业行业专家 · 政策 + 乡村振兴'
+    },
+    {
+      id: '新能源', emoji: '🔋', channels: ['b'],
+      scene_short: '光伏 · 储能 · 电动车 · 虚拟电厂',
+      tags: [['双碳政策', 'risk'], ['B 端', 'b']],
+      definition: '新能源行业 AI · 光伏 / 储能 / 电动车 / 虚拟电厂 · 双碳政策导向 · 补贴变化快 · 技术迭代快。',
+      user: '某光伏公司运维总监 · 管 20 个电站 · 发电效率 + 故障率是 KPI',
+      scenes: ['光伏电站运维 · 故障预警', '储能调度 · 充放电优化', '电动车充电调度', '虚拟电厂聚合', '碳交易辅助'],
+      pains: ['电站偏远 · 人工巡检成本高', '故障诊断依赖老师傅', '储能调度错一次亏几十万'],
+      competitor_dims: '预警精度 / 调度效率 / 政策适配 / 集成能力 / 运维成本',
+      metrics: '北极星：发电量 / 故障处理时间<br>反指标：误报 · 停机时间 · 政策误判',
+      risk: '电力安全规范 · 双碳政策 · 补贴变化 · 电网接入合规',
+      ai_entry: '运维预警 · 调度优化 · 碳核算 · 虚拟电厂',
+      sub_scenes: ['光伏电站', '储能', '电动车', '虚拟电厂'],
+      language: ['发电量', 'LCOE', '双碳', '可再生', '虚拟电厂'],
+      evidence: '新能源专家 · 双碳政策 + 电站运维'
+    },
+    {
+      id: '数字化', emoji: '📡', channels: ['g', 'risk'],
+      scene_short: '智慧城市 · 数字政府 · 政务云',
+      tags: [['等保四级', 'risk'], ['G 端 · 大项目', 'g']],
+      definition: '数字化大项目 · 智慧城市 / 数字政府 / 政务云 · 等保四级 · 信创必选 · 涉密资质 · 项目制 · ¥500 万-5 亿。',
+      user: '某省级政务数字化项目总监 · 管 20+ 子系统上云 · 3 年大项目',
+      scenes: ['智慧城市 · 交通 / 应急 / 环境', '数字政府 · 一网通办', '政务云 · 多部门数据打通', '决策驾驶舱 · 领导看板', '应急指挥 · 事件响应'],
+      pains: ['部门数据孤岛 · 打通极难', '涉密资质高 · 人才稀缺', '项目交付周期长 · 3 年起步'],
+      competitor_dims: '集成能力 / 合规保障 / 项目交付 / 政府关系 / 运维',
+      metrics: '北极星：市民办事满意度 / 部门协同效率<br>反指标：数据泄露 · 系统宕机 · 政策误读',
+      risk: '等保四级 · 信创目录 · 国密 · 涉密资质 · 境外模型 100% 禁 · 数据不出境',
+      ai_entry: '跨部门数据打通 · 智能决策 · 事件识别 · 办事智能',
+      sub_scenes: ['智慧城市', '数字政府', '政务云', '应急指挥'],
+      language: ['一网通办', '放管服', '政务云', '涉密', '等保四级'],
+      evidence: 'VELA 32 · 数字化行业专家 · 等保四级 + 信创 + 涉密'
+    }
+  ];
+
+  /* ========== 出海是跨行业维度 · 不是单独行业 ========== */
+  const CROSS_BORDER_INDUSTRIES = [
+    '跨境电商',  // 主场
+    '游戏',      // 米哈游等 · 出海主力
+    '短剧',      // ReelShort 等北美短剧爆品
+    '企业SaaS',  // Notion 类国产 SaaS 出海
+    '新能源',    // 光伏 / 电动车出海
+    '汽车',      // 新能源车出海（欧洲 / 东南亚）
+    '教育',      // 出国考证 / AI 跨境陪练
+    '医疗',      // 医疗器械 / 远程诊疗出海
+    '金融',      // 跨境支付 / 海外消金
+    '内容',      // 内容工具出海 · TikTok 生态
+    '短视频',    // TikTok 生态
+    '制造'       // 中国制造出海建厂
+  ];
+
+  function isCrossBorder(id) {
+    return CROSS_BORDER_INDUSTRIES.includes(id);
+  }
+
+  /* ========== 渲染 ========== */
+  function renderCards(filter = 'all') {
+    const grid = document.getElementById('indGrid');
+    const hint = document.getElementById('crossHint');
+    if (hint) hint.style.display = filter === 'cross' ? 'block' : 'none';
+
+    grid.innerHTML = INDUSTRY_DATA.map(item => {
+      let hidden = false;
+      if (filter === 'cross') {
+        hidden = !isCrossBorder(item.id);
+      } else if (filter !== 'all') {
+        hidden = !item.channels.includes(filter);
+      }
+      const crossBadge = isCrossBorder(item.id)
+        ? `<span style="position:absolute; top:12px; right:12px; padding:2px 8px; background:linear-gradient(135deg,#d16a4e,#9aa889); color:white; font-size:10px; border-radius:4px; font-weight:500; letter-spacing:0.3px;">🌏 可出海</span>`
+        : '';
+      const tagsHtml = item.tags.map(([text, cls]) => `<span class="ic-tag ${cls}">${text}</span>`).join('');
+      return `
+        <div class="ind-card ${hidden ? 'hidden' : ''}" onclick="openDrawer('${item.id}')">
+          ${crossBadge}
+          <div class="ic-emoji">${item.emoji}</div>
+          <div class="ic-name">${item.id}</div>
+          <p class="ic-scene">${item.scene_short}</p>
+          <div class="ic-tags">${tagsHtml}</div>
+          <div class="ic-detail-cue">${item.neural ? '🧠 点看神经库 →' : '点看 8 项 →'}</div>
+        </div>`;
+    }).join('');
+  }
+
+  const BRIDGE = '';
+
+  /* ========== 抽屉 · 升级版 ========== */
+  function openDrawer(id) {
+    const item = INDUSTRY_DATA.find(x => x.id === id);
+    if (!item) return;
+    const content = document.getElementById('drawerContent');
+    const subs = (item.sub_scenes && item.sub_scenes.length) ? item.sub_scenes
+      : item.scenes.slice(0, 5).map(s => s.split('·')[0].trim());
+
+    const bgSections = `
+      <div class="ind-section"><div class="ind-section-title"><span class="ind-section-num">1</span>行业定义</div><div class="ind-section-body">${item.definition}</div></div>
+      <div class="ind-section"><div class="ind-section-title"><span class="ind-section-num">2</span>核心用户画像</div><div class="ind-section-body">${item.user}</div></div>
+      <div class="ind-section"><div class="ind-section-title"><span class="ind-section-num">3</span>高频场景</div><div class="ind-section-body"><ul>${item.scenes.map(s => `<li>${s}</li>`).join('')}</ul></div></div>
+      <div class="ind-section"><div class="ind-section-title"><span class="ind-section-num">4</span>核心痛点</div><div class="ind-section-body"><ul>${item.pains.map(s => `<li>${s}</li>`).join('')}</ul></div></div>
+      <div class="ind-section"><div class="ind-section-title"><span class="ind-section-num">5</span>竞品维度</div><div class="ind-section-body">${item.competitor_dims}</div></div>
+      <div class="ind-section"><div class="ind-section-title"><span class="ind-section-num">6</span>北极星 + 反指标</div><div class="ind-section-body">${item.metrics}</div></div>
+      <div class="ind-section"><div class="ind-section-title"><span class="ind-section-num">7</span>风险 / 合规</div><div class="ind-section-body"><strong>红线：</strong>${item.risk}</div></div>
+      <div class="ind-section"><div class="ind-section-title"><span class="ind-section-num">8</span>AI 切入点</div><div class="ind-section-body">${item.ai_entry}</div></div>
+      <div class="ind-section"><div class="ind-section-title">🗣 行业语言库</div><div class="ind-section-body"><div class="lang-style">${item.language.map(s => `<span class="lang-pill">${s}</span>`).join('')}</div></div></div>`;
+
+    content.innerHTML = `
+      <div class="ind-drawer-head">
+        <div class="idh-emoji">${item.emoji}</div>
+        <div>
+          <div class="idh-name">${item.id}</div>
+          <div class="idh-tag">${item.tags.map(([t]) => `<span>${t}</span>`).join('')}</div>
+        </div>
+      </div>
+
+      <div class="subdomain-select">
+        <h4>🎯 选择细分赛道 · 自动启动产品分析</h4>
+        <div class="subdomain-chips">
+          ${subs.map(s => `<button class="sub-chip" data-industry="${id}" onclick="startAnalysis('${id}',this,'${s.replace(/'/g,"\\'")}')">${s}</button>`).join('')}
+        </div>
+      </div>
+
+      <div class="analysis-panel" id="ap-${id}">
+        <div class="analysis-placeholder">↑ 点一个细分赛道 · 行业专家自动搜索 + CEO 输出方向分析</div>
+      </div>
+
+      ${item.neural ? `
+      <details class="ind-bg-toggle" open>
+        <summary>🧠 行业认知神经库 · ${item.id}（已蒸馏）</summary>
+        <div style="padding:var(--space-md) 0 var(--space-sm);">
+          <div style="display:flex;flex-wrap:wrap;gap:var(--space-md);margin-bottom:var(--space-md);">
+            <div style="flex:1;min-width:200px;">
+              <div style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">细分赛道</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">${item.neural.sub_domains.map(d=>`<span style="background:var(--peach-bg,#fdf0ec);color:var(--peach);border:1px solid rgba(209,106,78,.25);border-radius:20px;padding:3px 10px;font-size:12px;">${d}</span>`).join('')}</div>
+            </div>
+            <div style="flex:1;min-width:200px;">
+              <div style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">关键词信号</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">${item.neural.keywords.map(k=>`<span style="background:#f5f5f5;color:var(--ink-soft);border-radius:20px;padding:3px 10px;font-size:12px;">${k}</span>`).join('')}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md);margin-bottom:var(--space-md);">
+            <div>
+              <div style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">AI切入路径</div>
+              <ul style="padding-left:16px;margin:0;font-size:13px;color:var(--ink);line-height:1.8;">${item.neural.ai_entry.map(e=>`<li>${e}</li>`).join('')}</ul>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">主要风险</div>
+              <ul style="padding-left:16px;margin:0;font-size:13px;color:var(--ink);line-height:1.8;">${item.neural.risks.map(r=>`<li>${r}</li>`).join('')}</ul>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md);margin-bottom:var(--space-md);">
+            <div>
+              <div style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">核心指标</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">${item.neural.metrics.map(m=>`<span style="background:#fff9f0;color:#a0601e;border:1px solid #f0d5b0;border-radius:6px;padding:4px 10px;font-size:12px;">${m}</span>`).join('')}</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">数据飞轮</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">${item.neural.backflow.map(b=>`<span style="background:#f0faf5;color:#2e7d5a;border:1px solid #b8e8ce;border-radius:6px;padding:4px 10px;font-size:12px;">🔁 ${b}</span>`).join('')}</div>
+            </div>
+          </div>
+          <div style="background:var(--paper,#faf5ea);border:1px solid var(--border,#e8ddd4);border-radius:8px;padding:10px 14px;">
+            <div style="font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">推荐模型架构</div>
+            <div style="font-size:13px;color:var(--ink);font-family:monospace;">${item.neural.model_pattern}</div>
+          </div>
+        </div>
+      </details>` : ''}
+
+      <details class="ind-bg-toggle">
+        <summary>${item.emoji} ${item.id} 行业背景参考（8 项）</summary>
+        <div>${bgSections}</div>
+      </details>
+
+      <div class="ind-evidence"><strong>依据：</strong>${item.evidence}</div>`;
+
+    document.getElementById('indDrawer').classList.add('show');
+    document.getElementById('drawerBackdrop').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    document.getElementById('indDrawer').classList.remove('show');
+    document.getElementById('drawerBackdrop').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  /* ========== 行业 × 细分 → 产品分析 ========== */
+  async function startAnalysis(industryId, chipEl, subdomain) {
+    const item = INDUSTRY_DATA.find(x => x.id === industryId);
+    if (!item) return;
+
+    // 高亮选中
+    document.querySelectorAll(`.sub-chip[data-industry="${industryId}"]`).forEach(c => c.classList.remove('active'));
+    chipEl.classList.add('active');
+
+    const panel = document.getElementById(`ap-${industryId}`);
+    panel.innerHTML = `<div class="analysis-loading"><span style="font-size:22px">🔍</span><span>${item.emoji} ${industryId} 行业专家正在分析「${subdomain}」…</span></div>`;
+
+    try {
+      const resp = await fetch(`${BRIDGE}/api/brief-analysis`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          industry: industryId, subdomain,
+          context: { user: item.user, pains: item.pains, risk: item.risk,
+                     ai_entry: item.ai_entry, metrics: item.metrics, language: item.language }
+        })
+      });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+      let text = '';
+      panel.innerHTML = `<div id="ap-status-${industryId}" class="analysis-status-bar" style="display:none"></div>
+                         <div class="analysis-content" id="ap-body-${industryId}"></div>`;
+
+      const reader = resp.body.getReader();
+      const dec = new TextDecoder();
+      let buf = '';
+
+      while (true) {
+        const {value, done} = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, {stream: true});
+        const lines = buf.split('\n');
+        buf = lines.pop() || '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const d = JSON.parse(line.slice(6));
+            if (d.status) {
+              const sb = document.getElementById(`ap-status-${industryId}`);
+              if (sb) { sb.style.display = 'block'; sb.textContent = '⚙️ ' + d.status; }
+            } else if (d.chunk !== undefined) {
+              text += d.chunk;
+              const body = document.getElementById(`ap-body-${industryId}`);
+              if (body) body.innerHTML = mdToHtml(text);
+            } else if (d.done) {
+              const sb = document.getElementById(`ap-status-${industryId}`);
+              if (sb) sb.style.display = 'none';
+              const body = document.getElementById(`ap-body-${industryId}`);
+              if (body) body.innerHTML = mdToHtml(text) + actionButtons(industryId, subdomain);
+            }
+          } catch(e) {}
+        }
+      }
+    } catch(e) {
+      panel.innerHTML = `<div style="padding:var(--space-lg);background:#fff5f5;border:1.5px solid #fca5a5;border-radius:12px;font-size:14px;color:#b91c1c;">
+        ⚠️ 连接失败：${e.message}<br><small style="color:#888">请先双击「Peach Studio」启动本地桥（端口 7788）</small></div>`;
+    }
+  }
+
+  function mdToHtml(text) {
+    return text
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n{2,}/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function actionButtons(industryId, subdomain) {
+    return `<div class="analysis-actions">
+      <button class="btn-flash" onclick="launchFlash('${industryId}','${subdomain.replace(/'/g,"\\'")}')">⚡ 闪电档 · 2 分钟出 3 份文档</button>
+      <button class="btn-standard" onclick="goToMethodology('${industryId}','${subdomain.replace(/'/g,"\\'")}')">📋 标准档 · 进方法论选文档</button>
+    </div>`;
+  }
+
+  function goToMethodology(industryId, subdomain) {
+    const item = INDUSTRY_DATA.find(x => x.id === industryId);
+    if (!item) return;
+    // 把完整行业上下文存 localStorage，methodology.html 读取
+    const ctx = {
+      industry: industryId, subdomain,
+      user: item.user, pains: item.pains, risk: item.risk,
+      ai_entry: item.ai_entry, metrics: item.metrics, language: item.language
+    };
+    try { localStorage.setItem('peach_industry_ctx', JSON.stringify(ctx)); } catch(e) {}
+    window.location.href = `methodology.html?industry=${encodeURIComponent(industryId)}&subdomain=${encodeURIComponent(subdomain)}`;
+  }
+
+  async function launchFlash(industryId, subdomain) {
+    const item = INDUSTRY_DATA.find(x => x.id === industryId);
+    const product = `${industryId}·${subdomain} AI产品`;
+    const slug = `${industryId}_${subdomain}`.replace(/[·\s\/·]+/g,'_').slice(0,30);
+    try {
+      const resp = await fetch(`${BRIDGE}/api/run`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ product, slug, mode: 'lightning' })
+      });
+      const data = await resp.json();
+      if (data.run_id) {
+        const params = new URLSearchParams({
+          run_id: data.run_id,
+          mode: 'lightning',
+          industry: industryId,
+          product: product,
+          project_dir: data.project_dir || '',
+        });
+        window.location.href = `results.html?${params.toString()}`;
+      } else alert('启动失败：' + JSON.stringify(data));
+    } catch(e) { alert('连接失败：' + e.message); }
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+  /* ========== 过滤器 ========== */
+  document.querySelectorAll('.ind-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ind-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCards(btn.dataset.filter);
+    });
+  });
+
+  /* ========== 启动 ========== */
+  renderCards('all');
+</script>
+</body>
+</html>

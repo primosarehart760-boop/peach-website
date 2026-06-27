@@ -4,3 +4,9 @@ node_modules/
 .env
 .wrangler/
 worker/node_modules/
+
+# 部署脚本含 API key，不入库
+一键部署.command
+
+# 旧本地桥代码（已废弃）
+bridge/

@@ -1,4 +1,4 @@
-// 桃子公司办公室仿真 · 2 分钟流水线动画
+// Peach Studio办公室仿真 · 2 分钟流水线动画
 // 120 秒 · 7 Scene · JS 状态机驱动
 
 const SCENES = [

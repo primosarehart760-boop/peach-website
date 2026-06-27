@@ -1,0 +1,14 @@
+{
+  "name": "peach-worker",
+  "version": "1.0.0",
+  "description": "桃子公司 Cloudflare Worker · DeepSeek API 云端桥",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "upload-assets": "node upload-assets.js"
+  },
+  "dependencies": {
+    "wrangler": "^4.96.0"
+  }
+}

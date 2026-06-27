@@ -1,5 +1,5 @@
 /**
- * 桃子公司 · AI 启动器
+ * Peach Studio · AI 启动器
  * - 首页大输入框逻辑 + 行业 chip 填充
  * - 全站浮动 CHAT 按钮（右下角 · 任何页可用）
  * - 后端桥接（Round 4 接 server/bridge.py · 目前先占位跳转）
@@ -67,7 +67,7 @@ function injectFloatingChat() {
   const btn = document.createElement('button');
   btn.id = 'peach-float-chat';
   btn.innerHTML = '<span class="float-chat-icon">💬</span><span class="float-chat-label">需求入口</span>';
-  btn.setAttribute('aria-label', '打开桃子公司需求入口');
+  btn.setAttribute('aria-label', '打开Peach Studio需求入口');
   btn.addEventListener('click', openChatDrawer);
   document.body.appendChild(btn);
 
@@ -79,7 +79,7 @@ function injectFloatingChat() {
     <div class="chat-drawer-panel">
       <div class="chat-drawer-header">
         <div>
-          <div class="chat-drawer-title">🏢 桃子公司 · 需求入口</div>
+          <div class="chat-drawer-title">🏢 Peach Studio · 需求入口</div>
           <div class="chat-drawer-subtitle">告诉我你要做什么产品 · 整个公司立即开工</div>
         </div>
         <button class="chat-drawer-close" onclick="closeChatDrawer()" aria-label="关闭">✕</button>

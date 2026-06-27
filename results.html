@@ -1,0 +1,3881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📦 结果工作台 · Peach Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/launcher.css">
+  <style>
+    /* ========== Tab 5 · 结果工作台（v1.0 · 2026-04-23） ========== */
+
+    body { background: var(--paper); }
+
+    /* 导航 */
+    .nav-links { flex-wrap: wrap; }
+    .nav-more-wrap { position: relative; }
+    .nav-more-trigger {
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: 14px;
+      color: var(--ink-soft); padding: 0;
+    }
+    .nav-more-trigger:hover { color: var(--peach); }
+    .nav-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: white; border: 1px solid var(--paper-dark);
+      border-radius: 8px; padding: 6px 0; min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      opacity: 0; pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 9999;
+    }
+    .nav-more-wrap:hover .nav-dropdown,
+    .nav-more-wrap.open .nav-dropdown {
+      opacity: 1; pointer-events: auto; transform: translateY(0);
+    }
+    .nav-dropdown a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; color: var(--ink-soft);
+      text-decoration: none; font-size: 14px;
+    }
+    .nav-dropdown a:hover { background: var(--paper); color: var(--peach); }
+
+    .res-page { padding: var(--space-2xl) 0 80px; }
+
+    /* 顶部任务概览 + 完成度环 */
+    .task-overview {
+      max-width: 1400px; margin: 0 auto var(--space-2xl);
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 16px;
+      padding: var(--space-xl);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: var(--space-xl);
+      align-items: center;
+    }
+    .task-ring {
+      width: 140px; height: 140px;
+      position: relative;
+    }
+    .task-ring svg { transform: rotate(-90deg); }
+    .task-ring .ring-bg {
+      fill: none; stroke: var(--paper-dark); stroke-width: 10;
+    }
+    .task-ring .ring-fill {
+      fill: none; stroke: var(--peach); stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 377;
+      stroke-dashoffset: 377;
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .task-ring-label {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .task-ring-label .tr-num {
+      font-family: var(--font-serif);
+      font-size: 38px;
+      color: var(--peach);
+      font-style: italic;
+      line-height: 1;
+    }
+    .task-ring-label .tr-sub {
+      font-size: 11px; color: var(--ink-faint);
+      margin-top: 2px;
+    }
+
+    .task-main {
+      flex: 1;
+    }
+    .task-main .tm-label {
+      font-family: var(--font-hand);
+      color: var(--peach);
+      font-size: 14px;
+    }
+    .task-main .tm-text {
+      font-family: var(--font-serif);
+      font-size: 22px; font-style: italic;
+      margin: 2px 0 8px;
+    }
+    .task-main .tm-meta {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      font-size: 12px;
+    }
+    .tm-meta-item {
+      padding: 3px 10px;
+      background: var(--paper);
+      border-radius: 6px;
+      color: var(--ink-soft);
+    }
+    .tm-meta-item.mode-lightning { background: rgba(209,106,78,0.15); color: var(--peach); }
+    .tm-meta-item.mode-standard { background: rgba(154,168,137,0.15); color: var(--sage-dark); }
+
+    .task-actions {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    /* 主体 3 列 */
+    .res-main {
+      max-width: 1400px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.3fr 1fr;
+      gap: var(--space-md);
+    }
+
+    /* 列卡通用 */
+    .res-col {
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 14px;
+      padding: var(--space-lg);
+    }
+    .res-col-head {
+      display: flex; align-items: center; gap: 10px;
+      padding-bottom: var(--space-md);
+      margin-bottom: var(--space-md);
+      border-bottom: 2px dashed var(--paper-dark);
+    }
+    .res-col-head h3 {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      margin: 0;
+    }
+    .res-col-head .rc-count {
+      font-family: var(--font-hand);
+      color: var(--peach);
+      font-size: 18px;
+      margin-left: auto;
+    }
+
+    /* 左 · 文档清单 */
+    .doc-list { list-style: none; padding: 0; }
+    .doc-list li {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--paper-light);
+      border: 1px solid var(--paper-dark);
+      margin-bottom: 6px;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .doc-list li:hover {
+      border-color: var(--peach);
+      transform: translateX(2px);
+    }
+    .doc-list li .dl-icon {
+      width: 28px; height: 28px; border-radius: 7px;
+      background: var(--paper);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .doc-list li.done .dl-icon { background: #f0faf2; color: var(--sage-dark); }
+    .doc-list li.working .dl-icon { background: #fff5ef; color: var(--peach); }
+    .doc-list li .dl-text { flex: 1; color: var(--ink-soft); }
+    .doc-list li.done .dl-text { color: var(--ink); }
+    .doc-list li .dl-status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--paper);
+      color: var(--ink-faint);
+    }
+    .doc-list li.done .dl-status { background: #e5f3e2; color: var(--sage-dark); }
+    .doc-list li.working .dl-status { background: #fff1e8; color: var(--peach); }
+
+    /* 中 · 9 层流水线 */
+    .pipe-list {
+      display: flex; flex-direction: column;
+      gap: 8px;
+    }
+    .pipe-layer {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: var(--paper-light);
+      border: 1px solid var(--paper-dark);
+      border-radius: 10px;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+    .pipe-layer.done {
+      background: #f0faf2;
+      border-color: var(--sage);
+    }
+    .pipe-layer.working {
+      background: #fff5ef;
+      border-color: var(--peach);
+      animation: pipePulse 1.4s infinite;
+    }
+    @keyframes pipePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(209,106,78,0.2); }
+      50% { box-shadow: 0 0 0 6px rgba(209,106,78,0); }
+    }
+    .pipe-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--paper); color: var(--ink-faint);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-serif);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .pipe-layer.done .pipe-num { background: var(--sage); color: white; }
+    .pipe-layer.working .pipe-num { background: var(--peach); color: white; }
+    .pipe-info { flex: 1; }
+    .pipe-info .pi-name { color: var(--ink); font-weight: 500; }
+    .pipe-info .pi-role {
+      font-size: 11px; color: var(--ink-faint);
+      margin-top: 2px;
+    }
+    .pipe-time {
+      font-size: 11px;
+      color: var(--ink-faint);
+      font-family: 'SF Mono', monospace;
+    }
+    .pipe-layer.highlight {
+      border-width: 2px;
+    }
+    .pipe-layer.highlight-sage { border-color: var(--sage-dark); }
+    .pipe-layer.highlight-peach { border-color: var(--peach); }
+
+    /* 右 · 审查面板 */
+    .review-panel {
+      display: flex; flex-direction: column;
+      gap: 10px;
+    }
+    .review-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: var(--paper-light);
+      border: 1px solid var(--paper-dark);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .review-row.pass { background: #f0faf2; border-color: var(--sage); }
+    .review-row.warn { background: #fff8e8; border-color: #d4a574; }
+    .review-row.reject { background: #fff0eb; border-color: var(--peach); }
+    .review-row .rr-emoji { font-size: 22px; }
+    .review-row .rr-info { flex: 1; }
+    .review-row .rr-role {
+      font-family: var(--font-serif);
+      font-size: 14px;
+    }
+    .review-row .rr-status {
+      font-size: 11px; color: var(--ink-faint);
+      margin-top: 2px;
+    }
+    .review-row.pass .rr-status { color: var(--sage-dark); }
+    .review-row.warn .rr-status { color: #8c6a3a; }
+    .review-row.reject .rr-status { color: var(--peach); }
+
+    /* 底部 · 导出 + 归档 + 回流 */
+    .res-footer {
+      max-width: 1400px; margin: var(--space-2xl) auto 0;
+      padding: var(--space-xl);
+      background: linear-gradient(135deg, var(--paper-light), #fff5ef);
+      border: 2px dashed var(--peach);
+      border-radius: 16px;
+    }
+    .res-footer h3 {
+      font-family: var(--font-serif); font-size: 22px;
+      text-align: center;
+      margin-bottom: var(--space-md);
+    }
+    .res-footer .rf-sub {
+      text-align: center;
+      color: var(--ink-soft); font-size: 13px;
+      margin-bottom: var(--space-lg);
+    }
+    .res-footer-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-md);
+    }
+    .rf-action {
+      padding: var(--space-lg);
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .rf-action:hover {
+      border-color: var(--peach);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(209,106,78,0.1);
+    }
+    .rf-action .rfa-emoji { font-size: 36px; margin-bottom: 8px; }
+    .rf-action .rfa-name {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .rf-action .rfa-desc {
+      font-size: 11px;
+      color: var(--ink-faint);
+    }
+
+    /* 回流说明 */
+    .feedback-loop {
+      max-width: 1400px; margin: var(--space-xl) auto 0;
+      padding: var(--space-lg);
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 14px;
+    }
+    .feedback-loop h3 {
+      font-family: var(--font-serif); font-size: 18px;
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-md);
+    }
+    .fl-item {
+      padding: var(--space-md);
+      background: var(--paper-light);
+      border-radius: 10px;
+      border-left: 3px solid var(--sage);
+    }
+    .fl-item h4 {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .fl-item p {
+      font-size: 12px;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+
+    /* 空状态 */
+    .empty-state {
+      max-width: 640px; margin: 80px auto;
+      padding: var(--space-2xl);
+      background: white; border: 1.5px solid var(--paper-dark);
+      border-radius: 16px; text-align: center;
+    }
+    .empty-state .es-emoji { font-size: 56px; margin-bottom: var(--space-md); }
+
+    /* ── 4 Agent 并行泳道 ── */
+    .agent-lanes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .agent-lane {
+      background: #0d1117;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .agent-lane-header {
+      padding: 7px 14px;
+      font-size: 12px;
+      font-family: monospace;
+      color: #8b949e;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.04);
+    }
+    .agent-lane-header.working { color: #ffa657; background: rgba(255,166,87,0.1); animation: lanePulse 1.4s infinite; }
+    .agent-lane-header.done    { color: #3fb950; background: rgba(63,185,80,0.1); }
+    .agent-lane-header.pending { color: #58a6ff; background: rgba(88,166,255,0.1); }
+    @keyframes lanePulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+    /* 协调链 */
+    .coord-node { display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 10px; border-radius:8px; min-width:72px; transition:all .25s; }
+    .coord-node.active { background:rgba(209,106,78,.1); }
+    .coord-node.done { background:rgba(154,168,137,.12); }
+    .cn-emoji { font-size:20px; }
+    .cn-name { font-size:11px; font-weight:600; color:var(--ink); white-space:nowrap; }
+    .cn-role { font-size:10px; color:var(--ink-faint); white-space:nowrap; }
+    .coord-arrow { color:var(--ink-faint); font-size:14px; padding:0 2px; flex-shrink:0; }
+    .agent-lane-body {
+      padding: 8px 14px;
+      min-height: 90px;
+      max-height: 160px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #8b949e;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* ── Refine 对话 ── */
+    .refine-chat {
+      margin-top: 12px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+    .refine-history {
+      max-height: 160px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+    .refine-msg-user   { color: #79c0ff; margin-bottom: 6px; }
+    .refine-msg-claude { color: #c9d1d9; margin-bottom: 10px; white-space: pre-wrap; }
+    .refine-input-row  { display: flex; gap: 8px; }
+    .refine-input {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #c9d1d9;
+      font-family: inherit;
+    }
+    .refine-input:focus { outline: none; border-color: rgba(255,166,87,0.6); }
+    .refine-send {
+      background: rgba(154,168,137,0.3);
+      color: #c9d1d9;
+      border: 1px solid rgba(154,168,137,0.4);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .refine-send:hover { background: rgba(154,168,137,0.5); }
+    .egg-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .egg-row:last-child { border-bottom: none; }
+    .egg-btn {
+      background: transparent; color: #ffa657;
+      border: 1px solid rgba(255,166,87,0.4); border-radius: 6px;
+      padding: 4px 12px; font-size: 11px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .egg-btn:hover { background: rgba(255,166,87,0.15); }
+
+    /* ── 文件列表反馈按钮 ── */
+    .dl-feedback { display: flex; gap: 4px; margin-left: 4px; }
+    .dl-feedback button {
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; opacity: 0.5; padding: 2px;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .dl-feedback button:hover { opacity: 1; transform: scale(1.2); }
+    .dl-feedback button.voted { opacity: 1; }
+
+    /* 响应式 */
+    @media (max-width: 1100px) {
+      .res-main { grid-template-columns: 1fr; }
+      .task-overview { grid-template-columns: auto 1fr; }
+      .task-actions { grid-column: span 2; flex-direction: row; }
+      .agent-lanes { grid-template-columns: 1fr; }
+    }
+
+    /* ── 行业认知卡片（7张）── */
+    .cognitive-section {
+      max-width: 1400px; margin: 0 auto 20px;
+      animation: pageIn var(--motion-normal, 250ms) ease-out;
+    }
+    @keyframes pageIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .cognitive-section h3 {
+      font-family: var(--font-serif); font-size: 18px;
+      color: var(--peach); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .cognitive-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .cog-card {
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 12px;
+      padding: 16px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .cog-card:hover { border-color: var(--peach); transform: translateY(-2px); }
+    .cog-card-head {
+      display: flex; align-items: center; gap: 8px;
+      padding-bottom: 10px; margin-bottom: 10px;
+      border-bottom: 1.5px dashed var(--paper-dark);
+    }
+    .cog-card-emoji { font-size: 20px; }
+    .cog-card-title { font-family: var(--font-serif); font-size: 15px; font-weight: 600; }
+    .cog-card-body { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+    .cog-card-body table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .cog-card-body th, .cog-card-body td {
+      text-align: left; padding: 4px 6px;
+      border-bottom: 1px solid var(--paper-dark);
+    }
+    .cog-card-body th { color: var(--ink-faint); font-weight: 500; }
+    .cog-tag {
+      display: inline-block;
+      background: var(--paper); border: 1px solid var(--paper-dark);
+      border-radius: 4px; padding: 2px 8px;
+      font-size: 11px; color: var(--ink-soft);
+      margin: 2px 2px 0 0;
+    }
+    .cog-tag.primary { background: #fff5ef; border-color: var(--peach); color: var(--peach); }
+    .cog-tag.risk { background: #fff0eb; border-color: #e57373; color: #c62828; }
+    .cog-tag.op { background: #f0faf2; border-color: var(--sage); color: var(--sage-dark); }
+    .risk-item {
+      padding: 6px 8px; border-radius: 8px;
+      background: #fff8f6; border-left: 3px solid #e57373;
+      margin-bottom: 6px; font-size: 12px;
+    }
+    .risk-item strong { color: #c62828; display: block; }
+
+    /* ── 行业认知摘要条（折叠式）── */
+    .cognitive-summary-bar {
+      max-width: 1400px; margin: 0 auto 16px;
+      background: linear-gradient(135deg, #fff5ef, #f0faf2);
+      border: 1.5px solid var(--peach);
+      border-radius: 12px; padding: 14px 20px;
+      cursor: pointer;
+    }
+    .csb-head {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .csb-head h4 {
+      font-family: var(--font-serif); font-size: 16px; color: var(--peach);
+    }
+    .csb-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px; margin-top: 12px;
+    }
+    .csb-item { font-size: 12px; }
+    .csb-item strong { display: block; color: var(--ink-faint); margin-bottom: 2px; font-size: 11px; }
+    .csb-item span { color: var(--ink); }
+    .csb-assets { margin-top: 10px; }
+    .csb-assets strong { font-size: 11px; color: var(--ink-faint); }
+
+    /* ── 文档修改栏（v2 · 三层机制） ── */
+    .lane-revise {
+      padding: 10px 12px 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+    }
+    .lr-row { display: flex; gap: 8px; align-items: flex-start; }
+    .lr-main { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .lane-revise textarea {
+      width: 100%; box-sizing: border-box;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px; color: #cdd9e5; font-size: 12px;
+      font-family: inherit; padding: 6px 10px;
+      resize: none; min-height: 34px; line-height: 1.4; outline: none;
+    }
+    .lane-revise textarea:focus { border-color: var(--peach); }
+    .lane-revise textarea::placeholder { color: #6e7681; }
+    .lr-btn {
+      background: rgba(209,106,78,0.12); border: 1px solid var(--peach);
+      color: var(--peach); border-radius: 6px; padding: 6px 14px;
+      font-size: 12px; cursor: pointer; white-space: nowrap;
+      transition: background 0.15s; align-self: flex-start; flex-shrink: 0;
+    }
+    .lr-btn:hover { background: rgba(209,106,78,0.28); }
+    .lr-btn:disabled { opacity: 0.5; cursor: default; }
+    /* 补充资料折叠区 */
+    .lr-extra-toggle {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; color: #8b949e; cursor: pointer;
+      padding: 2px 0; user-select: none;
+      transition: color 0.15s;
+    }
+    .lr-extra-toggle:hover { color: var(--peach); }
+    .lr-extra-panel {
+      display: none; flex-direction: column; gap: 6px;
+      padding: 8px 10px; background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07); border-radius: 6px;
+    }
+    .lr-extra-panel.open { display: flex; }
+    .lr-upload-label {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; color: #8b949e; cursor: pointer;
+      padding: 4px 8px; border: 1px dashed rgba(255,255,255,0.15);
+      border-radius: 4px; transition: all 0.15s; width: fit-content;
+    }
+    .lr-upload-label:hover { border-color: var(--peach); color: var(--peach); }
+    .lr-file-status { font-size: 11px; color: #8b949e; }
+    .lr-file-status.ok { color: #57ab5a; }
+    .lr-file-status.err { color: #e5534b; }
+    /* 变更日志 */
+    .lr-changelog {
+      margin-top: 6px; padding: 8px 10px;
+      background: rgba(154,168,137,0.06);
+      border: 1px solid rgba(154,168,137,0.15);
+      border-radius: 6px; font-size: 11px; color: #8b949e;
+    }
+    .lr-changelog-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none; margin-bottom: 0;
+    }
+    .lr-changelog-hd:hover { color: #cdd9e5; }
+    .lr-changelog-body { display: none; margin-top: 6px; }
+    .lr-changelog-body.open { display: block; }
+    .lr-cl-item {
+      padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+      line-height: 1.5;
+    }
+    .lr-cl-item:last-child { border-bottom: none; }
+    .lr-cl-ts { color: #6e7681; margin-right: 6px; }
+    /* CEO Gate */
+    .gate-q { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px 12px; }
+    .gate-q input[type=range] { height: 6px; border-radius: 3px; }
+    #gate-submit:hover { background: #b85a3e !important; }
+    #gate-submit:disabled { opacity: 0.6; cursor: default; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-content">
+    <a href="index.html" target="_blank" class="nav-logo"><span class="emoji">🏢</span>Peach Studio</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">🎯 需求入口</a>
+      <a href="methodology.html" class="nav-link">📚 方法论</a>
+      <a href="workspace.html" class="nav-link">📊 分析工作台</a>
+      <a href="collaboration.html" class="nav-link">🤝 协作台</a>
+      <a href="industries.html" class="nav-link">🏭 行业库</a>
+      <a href="results.html" class="nav-link active">📦 结果工作台</a>
+      <a href="docs.html" class="nav-link">🧠 回流</a>
+      <div class="nav-more-wrap">
+        <button class="nav-more-trigger" aria-haspopup="true" onclick="this.closest('.nav-more-wrap').classList.toggle('open')">更多 ▾</button>
+        <div class="nav-dropdown">
+          <a href="projects.html">📁 项目历史</a>
+          <a href="manual.html">📘 使用手册</a>
+          <a href="cases.html">📂 案例库</a>
+          <a href="team.html">👥 团队</a>
+          <a href="office.html">🎬 办公室</a>
+        </div>
+      </div>
+      <div class="theme-switcher">
+        <button class="theme-btn active" data-theme="editorial" title="Editorial Peach">🍑</button>
+        <button class="theme-btn" data-theme="airbnb" title="Airbnb">🏠</button>
+        <button class="theme-btn" data-theme="linear" title="Linear">⚡</button>
+        <button class="theme-btn" data-theme="pinterest" title="Pinterest">📌</button>
+        <button class="theme-btn" data-theme="stripe" title="Stripe">💳</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="res-page">
+  <div class="container wide">
+
+    <!-- 任务概览 + 完成度环 -->
+    <div class="task-overview" id="taskOverview" style="display:none;">
+      <div class="task-ring">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle class="ring-bg" cx="70" cy="70" r="60"/>
+          <circle class="ring-fill" id="ringFill" cx="70" cy="70" r="60"/>
+        </svg>
+        <div class="task-ring-label">
+          <div class="tr-num"><span id="ringNum">0</span>%</div>
+          <div class="tr-sub">完成度</div>
+        </div>
+      </div>
+
+      <div class="task-main">
+        <div class="tm-label">当前任务</div>
+        <div class="tm-text" id="taskText">—</div>
+        <div class="tm-meta">
+          <span class="tm-meta-item" id="taskIndustry">—</span>
+          <span class="tm-meta-item" id="taskMode">—</span>
+          <span class="tm-meta-item" id="taskTime">—</span>
+        </div>
+      </div>
+
+      <div class="task-actions">
+        <a href="collaboration.html" target="_blank" class="btn btn-secondary" style="font-size:13px; padding: 8px 14px;">⬅ 回协作台</a>
+        <a href="index.html" target="_blank" class="btn btn-primary" style="font-size:13px; padding: 8px 14px;">+ 新需求</a>
+      </div>
+    </div>
+
+    <!-- 员工协调链 · 全局可见 -->
+    <div id="coordChain" style="display:none; max-width:1400px; margin: 0 auto 20px;">
+      <div style="display:flex; align-items:center; gap:0; background:white; border:1.5px solid var(--paper-dark); border-radius:10px; padding:10px 16px; overflow-x:auto;">
+        <div class="coord-node" id="cn-ceo" style="opacity:.35;">
+          <div class="cn-emoji">👑</div><div class="cn-name">CEO</div><div class="cn-role">接单路由</div>
+        </div>
+        <div class="coord-arrow">→</div>
+        <div class="coord-node" id="cn-expert" style="opacity:.35;">
+          <div class="cn-emoji">🏭</div><div class="cn-name">行业专家</div><div class="cn-role">认知分析</div>
+        </div>
+        <div class="coord-arrow">→</div>
+        <div class="coord-node" id="cn-pm" style="opacity:.35;">
+          <div class="cn-emoji">📄</div><div class="cn-name">AI PM</div><div class="cn-role">PRD</div>
+        </div>
+        <div class="coord-node" id="cn-ux" style="opacity:.35;">
+          <div class="cn-emoji">🎨</div><div class="cn-name">UX设计师</div><div class="cn-role">UI规格</div>
+        </div>
+        <div class="coord-node" id="cn-flow" style="opacity:.35;">
+          <div class="cn-emoji">🗺</div><div class="cn-name">设计师</div><div class="cn-role">流程图</div>
+        </div>
+        <div class="coord-node" id="cn-competitor" style="opacity:.35;">
+          <div class="cn-emoji">🔍</div><div class="cn-name">战略分析师</div><div class="cn-role">竞品分析</div>
+        </div>
+        <div class="coord-node" id="cn-tech" style="opacity:.35;">
+          <div class="cn-emoji">⚙️</div><div class="cn-name">技术顾问</div><div class="cn-role">技术方案</div>
+        </div>
+        <div class="coord-arrow">→</div>
+        <div class="coord-node" id="cn-fe" style="opacity:.35;">
+          <div class="cn-emoji">💻</div><div class="cn-name">前端工程师</div><div class="cn-role">Demo</div>
+        </div>
+        <div class="coord-arrow">→</div>
+        <div class="coord-node" id="cn-cko" style="opacity:.35;">
+          <div class="cn-emoji">🧠</div><div class="cn-name">CKO</div><div class="cn-role">蒸馏回流</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CEO Dashboard · 四层实时状态 -->
+    <div id="ceoDashboard" style="display:none; max-width:1400px; margin: 0 auto 20px;">
+      <div style="background:#0d1117; border-radius:12px; border:1px solid rgba(209,106,78,0.25); overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 18px; background:rgba(209,106,78,0.08); border-bottom:1px solid rgba(209,106,78,0.2); cursor:pointer;"
+             onclick="const b=document.getElementById('dash-body');b.style.display=b.style.display==='none'?'block':'none';">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="dash-traffic" style="font-size:16px;" title="整体健康状态">🔵</span>
+            <div style="font-size:13px; font-weight:600; color:#ffa657;">👑 CEO Dashboard · 四层状态</div>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <span id="dash-pt-badge" style="font-size:11px; padding:2px 8px; border-radius:4px; background:rgba(154,168,137,0.15); color:#9aa889;">项目类型检测中...</span>
+            <span style="font-size:11px; color:#6e7681;">点击折叠 ▾</span>
+          </div>
+        </div>
+        <div id="dash-body" style="padding:14px 18px;">
+          <!-- 第一层：战场总览（6卡） -->
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:10px;">
+            <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 12px;">
+              <div style="font-size:10px; color:#6e7681; margin-bottom:4px;">项目类型</div>
+              <div id="dash-type" style="font-size:12px; font-weight:600; color:#c9d1d9;">—</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 12px;">
+              <div style="font-size:10px; color:#6e7681; margin-bottom:4px;">端类型 · AI风险</div>
+              <div id="dash-end" style="font-size:12px; font-weight:600; color:#c9d1d9;">—</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 12px;">
+              <div style="font-size:10px; color:#6e7681; margin-bottom:4px;">推荐模型</div>
+              <div id="dash-model" style="font-size:11px; color:#79c0ff; word-break:break-all;">—</div>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px;">
+            <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 12px;">
+              <div style="font-size:10px; color:#6e7681; margin-bottom:4px;">合规重点</div>
+              <div id="dash-compliance" style="font-size:10px; color:#ffa657; word-break:break-all;">—</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 12px;">
+              <div style="font-size:10px; color:#6e7681; margin-bottom:4px;">北极星候选指标</div>
+              <div id="dash-north-star" style="font-size:10px; color:#9aa889; word-break:break-all;">—</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 12px;">
+              <div style="font-size:10px; color:#6e7681; margin-bottom:4px;">自动匹配Agent组合</div>
+              <div id="dash-phase-combo" style="font-size:10px; color:#c9d1d9;">—</div>
+            </div>
+          </div>
+          <!-- 第二层：Agent 矩阵摘要 -->
+          <div style="margin-bottom:12px;">
+            <div style="font-size:11px; color:#6e7681; margin-bottom:6px;">Agent 状态矩阵</div>
+            <div id="dash-agents" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+          </div>
+          <!-- 第三层：CEO Gate 评分 -->
+          <div id="dash-gate-row" style="margin-bottom:12px; display:none;">
+            <div style="font-size:11px; color:#6e7681; margin-bottom:6px;">CEO Gate 评分</div>
+            <div id="dash-gate-summary" style="background:rgba(255,255,255,0.03); border-radius:8px; padding:10px 12px; font-size:12px;"></div>
+          </div>
+          <!-- 第四层：交付物摘要 -->
+          <div>
+            <div style="font-size:11px; color:#6e7681; margin-bottom:6px;">交付物状态</div>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+              <span style="font-size:12px; color:#c9d1d9;">📄 文档 <strong id="dash-doc-count" style="color:#3fb950;">0</strong></span>
+              <span style="font-size:12px; color:#c9d1d9;">🎨 图表 <strong id="dash-excalidraw-count" style="color:#3fb950;">0</strong></span>
+              <span style="font-size:12px; color:#c9d1d9;">💻 Demo <strong id="dash-demo-status" style="color:#6e7681;">等待中</strong></span>
+              <span style="font-size:12px; color:#c9d1d9;">🧠 RETRO <strong id="dash-retro-status" style="color:#6e7681;">等待中</strong></span>
+              <span style="font-size:12px; color:#c9d1d9;">🛡 审计 <strong id="dash-audit-status" style="color:#6e7681;">等待中</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 实时流式输出 · 桥接模式 -->
+    <div id="liveLog" style="display:none; max-width:1400px; margin: 0 auto var(--space-xl);">
+      <div style="background:#0d1117; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 18px; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.1);">
+          <div style="font-size:13px; color:#c9d1d9; font-family:monospace;">📡 Claude 实时输出流</div>
+          <div id="logStatus" style="font-size:12px; color:#3fb950;">⏳ 等待连接...</div>
+        </div>
+        <div id="liveLogBody" style="padding:14px 18px; max-height:380px; overflow-y:auto; font-family:'Courier New',monospace; font-size:12px; line-height:1.8; color:#c9d1d9; white-space:pre-wrap; word-break:break-all;"></div>
+      </div>
+    </div>
+
+    <!-- 主体 3 列 -->
+    <div class="res-main" id="resMain" style="display:none;">
+
+      <!-- 左 · 文档清单 -->
+      <div class="res-col">
+        <div class="res-col-head">
+          <h3>📄 文档清单</h3>
+          <span class="rc-count"><span id="docDone">0</span> / <span id="docTotal">0</span></span>
+        </div>
+        <ul class="doc-list" id="docList"></ul>
+      </div>
+
+      <!-- 中 · 9 层流水线 -->
+      <div class="res-col">
+        <div class="res-col-head">
+          <h3>🏗 9 层流水线</h3>
+          <span class="rc-count"><span id="pipeDone">0</span> / 9</span>
+        </div>
+        <div class="pipe-list" id="pipeList"></div>
+      </div>
+
+      <!-- 右 · 审查面板（运行中显示待审状态）-->
+      <div class="res-col">
+        <div class="res-col-head">
+          <h3>🔍 审查面板</h3>
+          <span class="rc-count" id="reviewCount">待审</span>
+        </div>
+        <div class="review-panel" id="reviewPanel">
+          <div class="review-row" style="opacity:0.5;">
+            <div class="rr-emoji">👩‍💼</div>
+            <div class="rr-info">
+              <div class="rr-role">产品总监</div>
+              <div class="rr-status">⏳ 等待 Claude 完成...</div>
+            </div>
+          </div>
+          <div class="review-row" style="opacity:0.5;">
+            <div class="rr-emoji">👨‍💻</div>
+            <div class="rr-info">
+              <div class="rr-role">技术总监</div>
+              <div class="rr-status">⏳ 等待 Claude 完成...</div>
+            </div>
+          </div>
+          <div class="review-row" style="opacity:0.5;">
+            <div class="rr-emoji">🎨</div>
+            <div class="rr-info">
+              <div class="rr-role">设计总监</div>
+              <div class="rr-status">⏳ 等待 Claude 完成...</div>
+            </div>
+          </div>
+          <div class="review-row" style="opacity:0.5;">
+            <div class="rr-emoji">🧪</div>
+            <div class="rr-info">
+              <div class="rr-role">QA 一致性审</div>
+              <div class="rr-status">⏳ 等待 Claude 完成...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 底部 · 导出 + 归档 + 回流 -->
+    <div class="res-footer" id="resFooter" style="display:none;">
+      <h3>✅ 交付 · 三件事</h3>
+      <p class="rf-sub">导出 · 归档 · 回流 · Peach Studio的 Living System 就是靠这三件持续进化</p>
+      <div class="res-footer-actions">
+        <div class="rf-action" onclick="exportZipPack()">
+          <div class="rfa-emoji">📦</div>
+          <div class="rfa-name">导出 ZIP 项目包</div>
+          <div class="rfa-desc">11 标准文件 + 1 excalidraw 流程图 · 所有浏览器可用</div>
+        </div>
+        <div class="rf-action" onclick="authObsidianAndArchive()" style="border-color: var(--peach); background: linear-gradient(135deg, #fff, #fff5ef);">
+          <div class="rfa-emoji">🗂</div>
+          <div class="rfa-name" style="color: var(--peach);">🆕 授权 Obsidian 自动归档</div>
+          <div class="rfa-desc">File System Access API · 一次授权永久写入 · Chrome/Edge</div>
+        </div>
+        <div class="rf-action" onclick="flowback()">
+          <div class="rfa-emoji">🔄</div>
+          <div class="rfa-name">反馈回流</div>
+          <div class="rfa-desc">好模板 / 好 Prompt / Badcase 回流知识库</div>
+        </div>
+      </div>
+      <div id="archiveStatus" style="margin-top: 14px; font-size: 12px; color: var(--ink-faint); text-align: center;"></div>
+    </div>
+
+    <!-- 反馈回流说明 -->
+    <div class="feedback-loop" id="feedbackLoop" style="display:none;">
+      <h3>🔄 回流机制 · 5 字总纲的"反馈"落点</h3>
+      <div class="fl-grid">
+        <div class="fl-item">
+          <h4>📚 新模板沉淀</h4>
+          <p>本次产出的文档 · 如果结构或内容优于 VELA 原模板 · 回流为 VELA v2 候选。</p>
+        </div>
+        <div class="fl-item">
+          <h4>💬 好 Prompt 入库</h4>
+          <p>表现好的 Prompt（少幻觉 / 更具体）· 自动入 13 Prompt 武器库。</p>
+        </div>
+        <div class="fl-item">
+          <h4>⚠️ Badcase 归类</h4>
+          <p>AI 生成错误 / 审查打回的案例 · 归类训练师 Badcase 库。</p>
+        </div>
+        <div class="fl-item">
+          <h4>🎨 Demo 样板</h4>
+          <p>Demo 结构好可复用 · 做成通用模板供下次 clone-and-modify。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="es-emoji">📦</div>
+      <h3>还没有任务结果</h3>
+      <p style="color: var(--ink-soft); margin: var(--space-md) 0;">请先从首页输入需求 · 跑完分析和协作 · 再来这里看结果。</p>
+      <a href="index.html" class="btn btn-primary">⬅ 回需求入口</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--paper-dark); margin-top: var(--space-3xl);">
+  <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);">
+    <div>
+      <p style="font-family: var(--font-serif); font-size: 18px;">🏢 Peach Studio</p>
+      <p style="color: var(--ink-faint); font-size: 14px; margin-top: var(--space-xs);">结果工作台 · v1.0 · 交付 + 回流闭环</p>
+    </div>
+    <div style="color: var(--ink-faint); font-size: 13px;">
+      <p>Living System · 每次产出都让系统更强</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/theme.js"></script>
+<script src="js/launcher.js"></script>
+<script src="js/peach_excalidraw.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+  (function() {
+    const BRIDGE = '';  // 相对路径，绕过 Clash 代理
+
+    // ─── 桥接模式 ───
+    const _url      = new URL(location.href);
+    const _runId    = _url.searchParams.get('run_id');
+    const _batchId  = _url.searchParams.get('batch_id');
+    const _phase    = _url.searchParams.get('phase') || 'analyze';
+    const _origMode = _url.searchParams.get('mode')  || 'lightning';
+
+    // 💾 刷新恢复：analyze 页面检查是否有已保存的 generate session
+    if (_phase === 'analyze' && _runId && !_batchId) {
+      try {
+        const savedUrl = localStorage.getItem('peach_gen_url_' + _runId);
+        if (savedUrl) {
+          // 自动跳回 generate 阶段
+          window.location.replace(savedUrl);
+        }
+      } catch(_) {}
+    }
+
+    // ── CKO蒸馏·全局可访问（批次/分析/演示三种模式共用）──
+    window.flowback = function() {
+      const status = document.getElementById('archiveStatus');
+      if (!status) return;
+      status.textContent = '⏳ CKO 蒸馏中...';
+      const ckoLaneH = document.getElementById('lane-h-cko');
+      const ckoLaneB = document.getElementById('lane-b-cko');
+      const ckoLaneS = document.getElementById('lane-s-cko');
+      if (ckoLaneH) ckoLaneH.className = 'agent-lane-header working';
+      if (ckoLaneB) { ckoLaneB.style.color = '#8b949e'; ckoLaneB.style.fontStyle = 'normal'; ckoLaneB.textContent = ''; }
+      if (ckoLaneS) ckoLaneS.textContent = '⏳';
+      fetch('/api/retro', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' })
+        .then(r => r.json())
+        .then(d => {
+          if (d.error) {
+            status.textContent = '⚠️ ' + d.error;
+            if (ckoLaneH) ckoLaneH.className = 'agent-lane-header';
+            if (ckoLaneS) ckoLaneS.textContent = '⚠️';
+            return;
+          }
+          const run_id = d.run_id;
+          status.innerHTML = '🔄 CKO 蒸馏运行中... <span id="retro-log" style="font-size:11px;color:var(--ink-faint);"></span>';
+          let lastText = '';
+          const es = new EventSource(BRIDGE + '/api/stream/' + run_id);
+          es.onmessage = e => {
+            try {
+              const obj = JSON.parse(e.data);
+              if (obj.type === 'assistant') {
+                for (const c of (obj.message?.content || [])) {
+                  if (c.type === 'text' && c.text.length > lastText.length) {
+                    const delta = c.text.slice(lastText.length);
+                    const logEl = document.getElementById('retro-log');
+                    if (logEl) logEl.textContent = c.text.slice(-80);
+                    if (ckoLaneB) { ckoLaneB.textContent += delta; ckoLaneB.scrollTop = ckoLaneB.scrollHeight; }
+                    lastText = c.text;
+                  }
+                }
+              }
+            } catch(_) {}
+          };
+          es.addEventListener('done', () => {
+            es.close();
+            status.innerHTML = '✅ CKO 蒸馏完成 · 建议已回写 · <a href="/api/stream/' + run_id + '" target="_blank" style="color:var(--peach);">查看完整建议</a>';
+            if (ckoLaneH) ckoLaneH.className = 'agent-lane-header done';
+            if (ckoLaneS) ckoLaneS.textContent = '✅';
+            if (typeof window._onCkoDone === 'function') window._onCkoDone();
+          });
+          es.onerror = () => {
+            es.close();
+            status.textContent = '❌ CKO 蒸馏失败（可手动重试）';
+            if (ckoLaneH) ckoLaneH.className = 'agent-lane-header';
+            if (ckoLaneS) ckoLaneS.textContent = '❌';
+            if (typeof window._onCkoDone === 'function') window._onCkoDone();
+          };
+        })
+        .catch(e => { status.textContent = '❌ ' + e.message; });
+    };
+
+    if (_batchId) {
+      try { _initBatchRun(_batchId, _url); }
+      catch(e) {
+        const ll = document.getElementById('liveLog');
+        if (ll) { ll.style.display = 'block'; ll.innerHTML = '<div style="color:#f85149;padding:24px;font-family:monospace;white-space:pre-wrap;background:#0d1117;border-radius:8px;">🔴 _initBatchRun 崩溃：\n' + e.message + '\n\n' + (e.stack||'') + '</div>'; }
+      }
+      return;
+    }
+    if (_runId)   { _initLiveRun(_runId, _url, _phase, _origMode); return; }
+
+    // ─── 演示模式：读 q / industry / mode 参数 ───
+    function getReq() {
+      const u = new URL(location.href);
+      const q = u.searchParams.get('q');
+      const industry = u.searchParams.get('industry');
+      const mode = u.searchParams.get('mode') || 'lightning';
+      if (q && industry) return { need: q, industry, mode };
+      try {
+        const c = JSON.parse(sessionStorage.getItem('peach-req') || 'null');
+        if (c && c.need) return c;
+      } catch(e) {}
+      return null;
+    }
+
+    const req = getReq();
+    if (!req) {
+      document.getElementById('emptyState').style.display = 'block';
+      return;
+    }
+
+    // 渲染任务概览
+    document.getElementById('taskOverview').style.display = 'grid';
+    document.getElementById('resMain').style.display = 'grid';
+    document.getElementById('resFooter').style.display = 'block';
+    document.getElementById('feedbackLoop').style.display = 'block';
+    document.getElementById('taskText').textContent = req.need;
+    document.getElementById('taskIndustry').textContent = `🏭 ${req.industry}`;
+    const modeCell = document.getElementById('taskMode');
+    if (req.mode === 'lightning') {
+      modeCell.textContent = '⚡ 闪电档 · 3 份固定 + 1 demo';
+      modeCell.className = 'tm-meta-item mode-lightning';
+    } else {
+      modeCell.textContent = '📦 标准档 · 按范围灵活（单份 30 分 · 阶段 1-1.5h · 全套 2-3h）';
+      modeCell.className = 'tm-meta-item mode-standard';
+    }
+    const d = new Date();
+    document.getElementById('taskTime').textContent = '⏱ ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0') + ' 完成';
+
+    // 文档清单数据
+    const LIGHTNING_DOCS = [
+      { name: '① Brief · 一句话定位 + 画像 + 北极星', status: 'done' },
+      { name: '② PRD Lite · 功能 + 5 态交互 + 反指标', status: 'done' },
+      { name: '③ AI 落地摘要 · 模型 + Prompt + 评测', status: 'done' },
+      { name: '🎨 Demo · 单文件 HTML 可跑', status: 'done' }
+    ];
+    const STANDARD_DOCS = [
+      { name: '① 用户画像 · 具体到一个人', status: 'done' },
+      { name: '② 竞品分析 · 3 家 × 5 维', status: 'done' },
+      { name: '③ 差异化 + 壁垒 + 优势', status: 'done' },
+      { name: '④ 功能方向 · RICE + KANO', status: 'done' },
+      { name: '⑤ 核心流程图 · BPMN 2.0', status: 'done' },
+      { name: '⑥ 北极星 + 反指标护栏', status: 'done' },
+      { name: '⑦ 技术路线 + 降级链路', status: 'done' },
+      { name: '⑧ 模型选型 · 三层决策', status: 'done' },
+      { name: '⑨ 训练评测 · 500×5×3', status: 'done' },
+      { name: '⑩ PRD 骨架 15 板块', status: 'done' },
+      { name: '🎨 Demo · 大厂级设计', status: 'done' }
+    ];
+    const docs = req.mode === 'lightning' ? LIGHTNING_DOCS : STANDARD_DOCS;
+
+    // 渲染文档清单
+    const docListEl = document.getElementById('docList');
+    docListEl.innerHTML = docs.map(d => `
+      <li class="${d.status}">
+        <div class="dl-icon">${d.status === 'done' ? '✓' : '🔄'}</div>
+        <div class="dl-text">${d.name}</div>
+        <span class="dl-status">${d.status === 'done' ? '完成' : '生成中'}</span>
+      </li>
+    `).join('');
+    document.getElementById('docDone').textContent = docs.filter(d => d.status === 'done').length;
+    document.getElementById('docTotal').textContent = docs.length;
+
+    // 9 层流水线数据
+    const PIPE_LAYERS = [
+      { num: 1, name: '需求入口', role: '老板输入需求 + 行业 + 模式', time: '2s', status: 'done' },
+      { num: 2, name: 'CEO 调度', role: '判行业 + 派任务 · 00_CEO / 快速CEO', time: '8s', status: 'done' },
+      { num: 3, name: 'PM 分析', role: '01_PM + 07_数据运营 六步分析', time: '25s', status: 'done' },
+      { num: 4, name: '行业专家召唤', role: '从 20 专家拉 1-2 个', time: '5s', status: 'done' },
+      { num: 5, name: 'AI 训练师', role: '04_AI训练师 + 03_算法 · 选型 + 评测', time: '22s', status: 'done' },
+      { num: 6, name: '技术 + 设计', role: '05/06/09/10 + 02/08 并发', time: '35s', status: 'done' },
+      { num: 7, name: '3 总监专业审', role: '11/12/13 · 并行 BLOCKING', time: '10s', status: 'done', highlight: 'sage' },
+      { num: 8, name: 'QA 一致性审', role: '跨线对齐 · 反"瞎编"', time: '6s', status: 'done', highlight: 'peach' },
+      { num: 9, name: '交付 + 回流', role: 'Obsidian 归档 + 知识库更新', time: '3s', status: 'done' }
+    ];
+    const pipeListEl = document.getElementById('pipeList');
+    pipeListEl.innerHTML = PIPE_LAYERS.map(p => `
+      <div class="pipe-layer ${p.status}${p.highlight ? ' highlight highlight-' + p.highlight : ''}">
+        <div class="pipe-num">${p.num}</div>
+        <div class="pipe-info">
+          <div class="pi-name">${p.name}</div>
+          <div class="pi-role">${p.role}</div>
+        </div>
+        <div class="pipe-time">${p.time}</div>
+      </div>
+    `).join('');
+    document.getElementById('pipeDone').textContent = PIPE_LAYERS.filter(p => p.status === 'done').length;
+
+    // 完成度环动画
+    const total = docs.length + 9 + 4; // 文档 + 流水线 + 4 审查
+    const done = docs.filter(d => d.status === 'done').length + 9 + 4;
+    const pct = Math.round(done / total * 100);
+    setTimeout(() => {
+      const dashArray = 377;
+      const offset = dashArray * (1 - pct / 100);
+      document.getElementById('ringFill').style.strokeDashoffset = offset;
+      document.getElementById('ringNum').textContent = pct;
+    }, 400);
+
+    // ═══ 生成 11 标准文件的内容 ═══
+    function generateProjectFiles() {
+      const dateStr = d.toISOString().slice(0, 10);
+      const folderName = `${dateStr}_某${req.industry}产品_${req.mode === 'lightning' ? '闪电' : '标准'}`;
+      const archive = `# 00_项目档案\n\n**启动时间**：${d.toISOString()}\n**档位**：${req.mode === 'lightning' ? '⚡ 闪电档' : '📦 标准档'}\n**行业**：${req.industry}\n**需求**：${req.need}\n\n## 员工分工\nCEO → PM + 数据 → 行业专家 → AI 训练师 → 技术+设计 → 3 总监 → QA → 归档\n\n## 起手 5 件事\n- ☑ 方向定位  - ☑ 局限机会  - ☑ 竞品含价格  - ☑ AI 用法 3 问  - ☑ 人机协同本质\n\n---\nPeach Studio · v1.0`;
+      const brief = `# 01_Brief · Product Brief\n\n> 基于 product-brief-模板.md · 800-1500 字\n\n## 1 产品定位\n[待 AI 基于需求生成：${req.need}]\n\n## 2 核心用户（3 类 · 60/30/10）\n## 3 核心功能（5 个 AI/传统标注）\n## 4 关键数据（市场/用户/竞品 + 来源）\n## 5 业务流程图 → 见 04_流程图.excalidraw\n## 6 北极星 + 3 KPI\n## 7 MVP（砍 70%）+ 3 风险 + Next Step\n\n---\n*Peach Studio · ${req.mode === 'lightning' ? '闪电档' : '标准档'}*`;
+      const prd = `# 02_PRD · 15 板块\n\n## 三阶段评审\n| Stage | 目标 | 签字 |\n|---|---|---|\n| Kickoff | 业务共识 | 业务 TL + PM |\n| Review | 无 BLOCKING | 全员+3 总监 |\n| 终审 | 资源 | 老板+法务 |\n\n## 交互逻辑 5 态\n正常/空/加载/首次/禁用\n\n## 边界异常 6 类\n网络/空/并发/权限/超限/5xx\n\n## 反指标 ≥ 3\nAI 幻觉率 / 合规拦截率 / 投诉率\n\n## 桃子 15 板块齐\nVELA 9 + 市场机会/商业模式/协作矩阵/数据飞轮/合规风险/成功复盘`;
+      return {
+        folderName,
+        files: {
+          '00_项目档案.md': archive,
+          '01_Brief.md': brief,
+          '02_PRD.md': prd,
+          '03_画像+旅程.md': '# 03_画像+旅程\n\n> VELA 07 + VELA 10\n\n[待填]',
+          '05_指标.md': '# 05_指标体系\n\n> VELA 16 · 北极星 + 反指标\n\n[待填]',
+          '06_技术方案.md': '# 06_技术方案\n\n> design-tech-brief 模板\n\n[待填]',
+          '07_模型选型.md': '# 07_模型选型\n\n> VELA 21 + SOP-01 · RAG 四门\n\n[待填]',
+          '08_API.md': '# 08_API\n\n> VELA 22\n\n[待填]',
+          '09_DB.md': '# 09_DB\n\n> VELA 23 · 4 级数据分级\n\n[待填]',
+          '10_评测集+Prompt.md': '# 10_评测集\n\n> SOP-02 500×5×3\n\n[待填]',
+          '11_合规.md': '# 11_合规\n\n> VELA 32 · 三法对照 + 对抗五层\n\n[待填]'
+        }
+      };
+    }
+
+    // ═══ 导出 ZIP 项目包 ═══
+    window.exportZipPack = function() {
+      if (typeof JSZip === 'undefined') { alert('❌ JSZip 未加载'); return; }
+      const status = document.getElementById('archiveStatus');
+      status.textContent = '⏳ 打包中...';
+      const { folderName, files } = generateProjectFiles();
+      const zip = new JSZip();
+      const folder = zip.folder(folderName);
+      Object.entries(files).forEach(([name, content]) => folder.file(name, content));
+      if (window.exportToExcalidrawJSON && window.PEACH_DIAGRAM_SAMPLES) {
+        folder.file('04_流程图.excalidraw', window.exportToExcalidrawJSON(window.PEACH_DIAGRAM_SAMPLES.productFlow));
+      }
+      zip.generateAsync({ type: 'blob' }).then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${folderName}.zip`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        status.innerHTML = `✅ <strong>${folderName}.zip 已下载</strong> · 解压拖进 Obsidian 项目/ 目录`;
+      });
+    };
+
+    // ═══ File System Access API · Obsidian 自动归档 ═══
+    function idbSaveHandle(handle) {
+      return new Promise(resolve => {
+        const req = indexedDB.open('peach-fs', 1);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('handles')) db.createObjectStore('handles');
+        };
+        req.onsuccess = e => {
+          const db = e.target.result;
+          const tx = db.transaction('handles', 'readwrite');
+          tx.objectStore('handles').put(handle, 'obsidian-root');
+          tx.oncomplete = () => resolve();
+        };
+        req.onerror = () => resolve();
+      });
+    }
+    function idbLoadHandle() {
+      return new Promise(resolve => {
+        const req = indexedDB.open('peach-fs', 1);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('handles')) db.createObjectStore('handles');
+        };
+        req.onsuccess = e => {
+          const db = e.target.result;
+          const tx = db.transaction('handles', 'readonly');
+          const getReq = tx.objectStore('handles').get('obsidian-root');
+          getReq.onsuccess = () => resolve(getReq.result || null);
+          getReq.onerror = () => resolve(null);
+        };
+        req.onerror = () => resolve(null);
+      });
+    }
+    async function verifyPermission(handle) {
+      const options = { mode: 'readwrite' };
+      if ((await handle.queryPermission(options)) === 'granted') return true;
+      if ((await handle.requestPermission(options)) === 'granted') return true;
+      return false;
+    }
+
+    window.authObsidianAndArchive = async function() {
+      const status = document.getElementById('archiveStatus');
+      if (!('showDirectoryPicker' in window)) {
+        status.innerHTML = '⚠️ 浏览器不支持 File System Access API · 请用 Chrome/Edge · 或点"导出 ZIP"';
+        return;
+      }
+      try {
+        let rootHandle = await idbLoadHandle();
+        if (rootHandle) {
+          const ok = await verifyPermission(rootHandle);
+          if (!ok) rootHandle = null;
+        }
+        if (!rootHandle) {
+          status.textContent = '⏳ 请选择 Obsidian 项目/ 根目录授权...';
+          rootHandle = await window.showDirectoryPicker({ mode: 'readwrite', startIn: 'documents' });
+          await idbSaveHandle(rootHandle);
+        }
+        status.textContent = '⏳ 正在写入 Obsidian...';
+        const { folderName, files } = generateProjectFiles();
+        const projectDir = await rootHandle.getDirectoryHandle(folderName, { create: true });
+        for (const [name, content] of Object.entries(files)) {
+          const fh = await projectDir.getFileHandle(name, { create: true });
+          const w = await fh.createWritable();
+          await w.write(content); await w.close();
+        }
+        if (window.exportToExcalidrawJSON && window.PEACH_DIAGRAM_SAMPLES) {
+          const fh = await projectDir.getFileHandle('04_流程图.excalidraw', { create: true });
+          const w = await fh.createWritable();
+          await w.write(window.exportToExcalidrawJSON(window.PEACH_DIAGRAM_SAMPLES.productFlow));
+          await w.close();
+        }
+        status.innerHTML = `✅ <strong style="color:var(--sage-dark);">已归档 ${folderName}</strong> · 打开 Obsidian 查看`;
+      } catch (e) {
+        if (e.name === 'AbortError') status.textContent = '⚠️ 已取消';
+        else status.textContent = '❌ 归档失败：' + e.message;
+      }
+    };
+
+    // 旧函数名兼容
+    window.exportMd = window.exportZipPack;
+    window.archiveObs = window.authObsidianAndArchive;
+
+    // ═══ 保留旧 exportMd 的 Markdown 导出 · 作为单文件下载 ═══
+    window.exportSingleMd = function() {
+      const content = [
+        `# Peach Studio产出包 · ${req.industry} 行业`,
+        ``,
+        `**需求**：${req.need}  `,
+        `**模式**：${req.mode === 'lightning' ? '⚡ 闪电档' : '📦 标准档'}  `,
+        `**生成时间**：${d.toISOString()}  `,
+        ``,
+        `---`,
+        ``,
+        `## 📄 文档清单`,
+        ``,
+        docs.map(item => `- [x] ${item.name}`).join('\n'),
+        ``,
+        `## 🏗 9 层流水线`,
+        ``,
+        PIPE_LAYERS.map(p => `${p.num}. **${p.name}** · ${p.role} · ${p.time}`).join('\n'),
+        ``,
+        `## 🔍 审查`,
+        ``,
+        `- ✅ 产品总监 · BLOCKING 清单 7 项全过`,
+        `- ✅ 技术总监 · 成本 / 降级 / 合规达标`,
+        `- ✅ 设计总监 · 视觉一致性达标`,
+        `- ✅ QA 一致性审 · 跨线对齐无冲突`,
+        ``,
+        `## 🔗 依据`,
+        ``,
+        `- VELA 34 份大厂模板`,
+        `- AI 产品经理知识库 64 份`,
+        `- 6 位训练师真实笔记（蔡雨洋 / 火箭兵 / 清华姐 / 胜超 / 嵩哥 / 政哥）`,
+        `- 20 个行业专家 · 8 项固定结构`,
+        `- 小普老师 Harness Engineering 设计哲学`,
+        ``,
+        `---`,
+        `Peach Studio · v1.0`
+      ].join('\n');
+
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Peach Studio_${req.industry}_${Date.now()}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    // 旧 archiveObs 占位已被 authObsidianAndArchive 替代（见上方）
+
+    // 演示模式 flowback → 已在全局定义，此处无需重复
+
+    // ── localStorage 历史回写 ──────────────────────────────────
+    function _updateHistory(runId, updates) {
+      try {
+        const hist = JSON.parse(localStorage.getItem('peach-history') || '[]');
+        const idx = hist.findIndex(h => h.id === runId || h.run_id === runId);
+        if (idx !== -1) {
+          Object.assign(hist[idx], updates);
+          localStorage.setItem('peach-history', JSON.stringify(hist));
+        }
+      } catch(e) {}
+    }
+
+    // ── 文件评分 ──────────────────────────────────────────────
+    window._fbVote = function(runId, filePath, rating, btn) {
+      fetch('/api/feedback', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ run_id: runId, file: filePath, rating: rating }),
+      });
+      btn.classList.add('voted');
+      btn.parentElement.querySelectorAll('button').forEach(b => {
+        if (b !== btn) b.style.opacity = '0.2';
+      });
+    };
+
+    // ── 一键保存 Demo 为样板 ──────────────────────────────────
+    window._saveDemoSample = async function(projectDir, filePath, btn) {
+      const origText = btn.textContent;
+      btn.disabled = true; btn.textContent = '⏳ 保存中...';
+      const desc = decodeURIComponent((new URL(location.href)).searchParams.get('q') || filePath);
+      try {
+        const r = await fetch('/api/brain/save_demo', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ project_dir: projectDir, desc: desc.slice(0,60) + ' · Demo样板' })
+        });
+        const d = await r.json();
+        if (d.ok) {
+          btn.style.background = 'rgba(45,122,90,0.1)';
+          btn.style.borderColor = '#2d7a5a';
+          btn.textContent = '✅ 已存样板';
+        } else {
+          btn.disabled = false; btn.textContent = '❌ 失败';
+        }
+      } catch(e) { btn.disabled = false; btn.textContent = origText; }
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    // ⚡ 批次模式 · 4 Agent 并行泳道
+    // ═══════════════════════════════════════════════════════════
+    function _initBatchRun(batchId, u) {
+      // ── 调试条：一旦出现可告诉我信息 ──
+      const _dbg = document.createElement('div');
+      _dbg.id = 'batch-debug-bar';
+      _dbg.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1a3a0a;border-top:1px solid rgba(100,200,80,0.3);padding:6px 14px;font-size:11px;font-family:monospace;color:#a8d58a;display:flex;gap:16px;align-items:center;';
+      _dbg.innerHTML = '<span>🟢 batch模式</span><span id="_dbg_mode">mode=?</span><span id="_dbg_isStd">isStd=?</span><span id="_dbg_runCount">runCount=?</span><span id="_dbg_err" style="color:#f85149;"></span>';
+      document.body.appendChild(_dbg);
+
+      const pendingAgents = parseInt(u.searchParams.get('pending_agents') || '0', 10);
+      const seqQueueKeys  = new Set((u.searchParams.get('sequential_queue') || '').split(',').filter(Boolean));
+      const p1Keys        = new Set((u.searchParams.get('p1_keys') || '').split(',').filter(Boolean));
+      const p1Wave2Keys   = new Set((u.searchParams.get('p1_wave2_keys') || '').split(',').filter(Boolean));
+      const projDir       = decodeURIComponent(u.searchParams.get('project_dir') || '');
+      const product       = decodeURIComponent(u.searchParams.get('q') || '');
+      const mode          = u.searchParams.get('mode') || 'lightning';
+      const isStd         = mode === 'standard';
+      const generateDemo  = u.searchParams.get('generate_demo') !== 'false';
+      const knownCompetitors = u.searchParams.get('known_competitors') || '';
+      const knownUsers       = u.searchParams.get('known_users') || '';
+      const knownExtra       = u.searchParams.get('known_extra') || '';
+
+      // ✅ 动态：自动读取所有 *_run URL 参数 → runMap（新增 agent 无需改前端）
+      const runMap = {};
+      u.searchParams.forEach((v, k) => {
+        if (k.endsWith('_run') && v) runMap[k.slice(0, -4)] = v;
+      });
+      let genCount   = Object.keys(runMap).length;
+      // totalCount 含 pending（CEO Gate 后才启动的 P3 agents）+ demo + reviewer + CKO
+      let totalCount = genCount + pendingAgents + 3;
+
+      // 更新调试条
+      { const m=document.getElementById('_dbg_mode'); if(m) m.textContent='mode='+mode; }
+      { const s=document.getElementById('_dbg_isStd'); if(s) s.textContent='isStd='+isStd; }
+      { const r=document.getElementById('_dbg_runCount'); if(r) r.textContent='runMap='+JSON.stringify(Object.keys(runMap)); }
+
+      // 显示 UI 区块
+      document.getElementById('taskOverview').style.display = 'grid';
+      document.getElementById('resMain').style.display      = 'grid';
+      document.getElementById('resFooter').style.display    = 'block';
+      document.getElementById('feedbackLoop').style.display = 'block';
+      document.getElementById('liveLog').style.display      = 'block';
+      document.getElementById('coordChain').style.display   = 'block';
+      document.getElementById('ceoDashboard').style.display = 'block';
+
+      // ── 恢复行业认知卡片（analyze→generate 跳转后从 sessionStorage 还原）──
+      (function _restoreCogCards() {
+        try {
+          const raw = sessionStorage.getItem('peach_cog_cards');
+          if (!raw) return;
+          const d = JSON.parse(raw);
+          if (!d) return;
+          // 用全局共享的 _parseCognitiveCards / _renderCognitiveCards（在 _initLiveRun 里定义）
+          // 这里直接内联渲染，不依赖那两个函数
+          const existing = document.querySelector('.cognitive-section');
+          if (existing) return; // 已渲染则跳过
+          // _renderCognitiveCards 在 _initLiveRun 作用域内，这里无法直接调用
+          // 用 CustomEvent 触发，_initLiveRun 监听（降级方案：直接存 HTML 快照）
+          const snapKey = 'peach_cog_html';
+          const snap = sessionStorage.getItem(snapKey);
+          if (snap) {
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = snap;
+            const liveLogEl = document.getElementById('liveLog');
+            if (liveLogEl) liveLogEl.parentElement.insertBefore(wrapper.firstChild, liveLogEl);
+          }
+        } catch(_) {}
+      })();
+
+      // ⚠️ 生成中防刷新：顶部警告条 + beforeunload 拦截
+      (function _setupRefreshGuard() {
+        const banner = document.createElement('div');
+        banner.id = 'no-refresh-banner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#2d4a1e,#1a3a0a);border-bottom:2px solid rgba(100,200,80,0.4);padding:8px 20px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-family:var(--font-body,monospace);';
+        banner.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;animation:pulse 1.5s infinite;">🟢</span>
+            <span style="color:#a8d58a;font-weight:600;">Agents 运行中 · 请勿刷新或关闭页面</span>
+            <span style="color:#6b8c5a;font-size:11px;">（刷新会断开进度流，已完成部分不丢）</span>
+          </div>
+          <button onclick="document.getElementById('no-refresh-banner').style.display='none'" style="background:none;border:none;color:#6b8c5a;cursor:pointer;font-size:16px;padding:0;">×</button>
+        `;
+        document.body.insertBefore(banner, document.body.firstChild);
+        document.body.style.marginTop = (document.body.style.marginTop || '0px');
+
+        const _unloadHandler = (e) => {
+          e.preventDefault();
+          e.returnValue = 'Agents 正在运行中，离开页面会断开进度流。确认离开吗？';
+          return e.returnValue;
+        };
+        window.addEventListener('beforeunload', _unloadHandler);
+        // 全部完成后撤销警告
+        window._removeRefreshGuard = () => {
+          window.removeEventListener('beforeunload', _unloadHandler);
+          const b = document.getElementById('no-refresh-banner');
+          if (b) { b.style.background = 'linear-gradient(90deg,#1a2d1a,#0d1f0d)'; b.querySelector('span:nth-child(2)').textContent = '✅ 全部完成 · 可以安全刷新'; b.querySelector('span:nth-child(3)').textContent = ''; }
+        };
+      })();
+
+      // CEO Dashboard · 初始化 Agent 矩阵 + 项目类型查询
+      (function _initDashboard() {
+        const agentMeta = [
+          // P1 顺序
+          {key:'market',emoji:'📊',name:'市场报告'},{key:'comp_deep_1',emoji:'🔬',name:'竞品#1'},
+          {key:'comp_deep_2',emoji:'🔬',name:'竞品#2'},{key:'comp_deep_3',emoji:'🔬',name:'竞品#3'},
+          {key:'comp_synthesis',emoji:'🎯',name:'竞品汇总'},{key:'swot',emoji:'📋',name:'SWOT'},
+          {key:'bp',emoji:'💼',name:'BP'},{key:'mrd',emoji:'📝',name:'MRD'},
+          {key:'brd',emoji:'📝',name:'BRD'},{key:'lixi',emoji:'📄',name:'立项'},
+          {key:'barrier',emoji:'🔒',name:'壁垒'},
+          // P1 legacy
+          {key:'user',emoji:'👤',name:'用研'},{key:'n34',emoji:'🧮',name:'N34'},
+          {key:'swot_bp',emoji:'📋',name:'SWOT+BP'},{key:'brd_mrd',emoji:'📝',name:'BRD+MRD'},
+          {key:'competitor_barrier',emoji:'🔍',name:'竞品壁垒'},{key:'competitor_deep',emoji:'🔬',name:'竞品深度×3'},
+          {key:'competitor_synthesis',emoji:'🎯',name:'竞品综合'},
+          // P2 顺序
+          {key:'user_research',emoji:'📊',name:'用户调研'},{key:'questionnaire',emoji:'📋',name:'问卷'},
+          {key:'user_interview',emoji:'🎤',name:'访谈'},{key:'user_persona',emoji:'👤',name:'用户画像'},
+          {key:'user_journey',emoji:'🗺',name:'旅程地图'},
+          // P2 legacy
+          {key:'charter',emoji:'📋',name:'立项'},{key:'user_survey',emoji:'📊',name:'问卷旅程'},
+          // P3 顺序
+          {key:'prd',emoji:'📄',name:'PRD'},{key:'mvp',emoji:'🎯',name:'MVP'},
+          {key:'roadmap',emoji:'🗓',name:'路线图'},{key:'feature_list',emoji:'📝',name:'功能清单'},
+          {key:'ia',emoji:'🗂',name:'IA'},{key:'business_flow',emoji:'🗺',name:'流程图'},
+          {key:'ai_select',emoji:'🤖',name:'AI选型'},
+          // P3 legacy
+          {key:'flow',emoji:'🗺',name:'流程图'},{key:'ui',emoji:'🎨',name:'UI'},
+          {key:'ia_feature',emoji:'🗂',name:'IA+功能'},
+          // P4 顺序
+          {key:'metrics',emoji:'📊',name:'数据指标'},{key:'proto',emoji:'✏️',name:'交互原型'},
+          {key:'ui_system',emoji:'🎨',name:'UI规范'},{key:'design_qa',emoji:'🔍',name:'设计走查'},
+          // P4 legacy
+          {key:'competitor',emoji:'🔍',name:'竞品'},{key:'tech',emoji:'⚙️',name:'技术'},
+          // P5 顺序
+          {key:'tech_report',emoji:'⚙️',name:'技术报告'},{key:'model_select',emoji:'🧠',name:'模型选型'},
+          {key:'compliance',emoji:'⚖️',name:'合规'},{key:'api_db',emoji:'🔌',name:'API+DB'},
+          {key:'embed_test',emoji:'📍',name:'埋点+测试'},{key:'ai_eval',emoji:'🧪',name:'AI评测'},
+          {key:'sop_tech',emoji:'📚',name:'技术SOP'},
+          // P6 / 公用
+          {key:'launch_ops',emoji:'🚀',name:'上线运营'},{key:'aso_retro',emoji:'📈',name:'ASO+复盘'},
+          {key:'archive',emoji:'🗄',name:'归档'},{key:'demo',emoji:'💻',name:'Demo'},
+          {key:'reviewer',emoji:'🛡',name:'审查'},{key:'cko',emoji:'🧠',name:'CKO'},
+        ];
+        const agentsDiv = document.getElementById('dash-agents');
+        // 标准档顺序模式：显示所有P1顺序 keys
+        const stdSeqKeys = new Set(['market','comp_deep_1','comp_deep_2','comp_deep_3','comp_synthesis','swot','bp','mrd','brd','lixi','barrier','user_research','questionnaire','user_interview','user_persona','user_journey']);
+        agentsDiv.innerHTML = agentMeta.map(a => {
+          const inMap = !!runMap[a.key] || a.key === 'demo' || a.key === 'reviewer' || a.key === 'cko' || (isStd && stdSeqKeys.has(a.key));
+          if (!inMap) return '';
+          return `<span id="dash-a-${a.key}" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:11px;background:rgba(255,166,87,0.08);color:#ffa657;border:1px solid rgba(255,166,87,0.2);">${a.emoji} ${a.name} <span id="dash-as-${a.key}">${isStd&&stdSeqKeys.has(a.key)?'🔒':'⏳'}</span></span>`;
+        }).join('');
+
+        // 查询项目类型（异步）
+        const qProduct = product || decodeURIComponent(u.searchParams.get('q') || '');
+        const qIndustry = decodeURIComponent(u.searchParams.get('industry') || '');
+        fetch(BRIDGE + '/api/project-type', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ product: qProduct, industry: qIndustry }),
+        }).then(r => r.json()).then(pt => {
+          if (pt && pt.id) {
+            document.getElementById('dash-type').textContent = pt.name || pt.id;
+            const riskColor = pt.ai_risk === 'high' ? '#f85149' : pt.ai_risk === 'low' ? '#3fb950' : '#ffa657';
+            document.getElementById('dash-end').innerHTML = `${pt.end_type || 'C'} 端 · <span style="color:${riskColor}">${pt.ai_risk || 'medium'} 风险</span>`;
+            document.getElementById('dash-model').textContent = pt.recommended_model || '—';
+            document.getElementById('dash-compliance').textContent = (pt.compliance_focus || []).join(' · ') || '—';
+            document.getElementById('dash-pt-badge').textContent = pt.name || pt.id;
+            // 北极星候选
+            const nsEl = document.getElementById('dash-north-star');
+            if (nsEl) nsEl.textContent = (pt.north_star_candidates || []).join(' · ') || '—';
+            // 自动匹配 Agent 组合
+            const pcEl = document.getElementById('dash-phase-combo');
+            if (pcEl) {
+              const phaseLabel = {'p1':'市场+用研+N34','p2':'立项','p3':'PRD+UI+路线图+流程','p4':'竞品+技术','p5':'合规'};
+              pcEl.textContent = (pt.phase_priority || []).map(p => phaseLabel[p] || p).join(' → ');
+            }
+            if (pt.model_hard_rule) {
+              document.getElementById('dash-model').style.color = '#f85149';
+              document.getElementById('dash-model').textContent += ' 🚨';
+              // 硬性规定 tooltip
+              document.getElementById('dash-model').title = pt.model_hard_rule;
+            }
+          }
+        }).catch(() => {});
+
+        // 监听 doneSet 变化更新 Dashboard Agent 状态（每2秒刷新）
+        window._dashInterval = setInterval(() => {
+          agentMeta.forEach(a => {
+            const el = document.getElementById('dash-as-' + a.key);
+            if (!el) return;
+            if (doneSet.has(a.key)) {
+              el.textContent = '✅';
+              const parent = el.parentElement;
+              if (parent) { parent.style.background='rgba(63,185,80,0.08)'; parent.style.color='#3fb950'; parent.style.borderColor='rgba(63,185,80,0.2)'; }
+            }
+          });
+          // 更新交付物计数
+          const doneKeys = [...doneSet];
+          document.getElementById('dash-doc-count').textContent = doneKeys.filter(k=>!['demo','cko','reviewer'].includes(k)).length;
+          if (doneSet.has('demo')) document.getElementById('dash-demo-status').textContent = '✅';
+          if (doneSet.has('cko')) document.getElementById('dash-retro-status').textContent = '✅';
+          if (doneSet.has('reviewer')) document.getElementById('dash-audit-status').textContent = '✅';
+          // Excalidraw count（估算：每个完成的agent约产1个图）
+          const diagCount = doneKeys.filter(k=>['prd','ui','flow','market','user','charter','roadmap','compliance','n34','competitor','tech'].includes(k)).length;
+          document.getElementById('dash-excalidraw-count').textContent = diagCount;
+          // 🔴🟡🟢🔵 交通灯状态
+          const trafficEl = document.getElementById('dash-traffic');
+          if (trafficEl) {
+            const errCount = agentMeta.filter(a => {
+              const s = document.getElementById('dash-as-' + a.key);
+              return s && s.textContent === '❌';
+            }).length;
+            if (doneSet.has('cko')) {
+              trafficEl.textContent = errCount > 0 ? '🔴' : '🟢';
+              trafficEl.title = errCount > 0 ? `${errCount} 个Agent出错，请检查` : '全部完成，审查通过';
+            } else if (doneSet.size > 0) {
+              trafficEl.textContent = errCount > 0 ? '🔴' : '🟡';
+              trafficEl.title = errCount > 0 ? `${errCount} 个Agent出错` : '生成中...';
+            }
+          }
+        }, 2000);
+      })();
+
+      // Gate 评分注入到 Dashboard
+      window._dashShowGate = function(total, detail, decision) {
+        const row = document.getElementById('dash-gate-row');
+        if (row) row.style.display = 'block';
+        const sum = document.getElementById('dash-gate-summary');
+        if (!sum) return;
+        const color = decision==='pass' ? '#3fb950' : decision==='redo' ? '#ffa657' : '#f85149';
+        sum.innerHTML = `<span style="font-weight:700;color:${color};">${decision==='pass'?'✅ 通过':decision==='redo'?'⚠️ 回炉':'🛑 终止'} · ${total}/500</span>
+          <span style="margin-left:12px;font-size:11px;color:#8b949e;">${Object.entries(detail).map(([k,v])=>`${k}:${v}`).join(' · ')}</span>`;
+      };
+
+      // 协调链初始状态：CEO+行业专家已完成，生成团队激活中
+      ['cn-ceo','cn-expert'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.opacity='1'; el.classList.add('done'); }
+      });
+      ['cn-pm','cn-ux','cn-flow'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.opacity='1'; el.classList.add('active'); }
+      });
+
+      document.getElementById('taskText').textContent = product;
+      document.getElementById('taskIndustry').textContent = '🏭 ' + (decodeURIComponent(u.searchParams.get('industry') || ''));
+      const modeLabel = isStd
+        ? `📦 标准档 · ${genCount} Agent 并行`
+        : `⚡ 闪电档 · ${genCount} Agent 并行`;
+      document.getElementById('taskMode').textContent = modeLabel;
+      document.getElementById('taskMode').className = 'tm-meta-item ' + (isStd ? 'mode-standard' : 'mode-lightning');
+      document.getElementById('taskTime').textContent = '⏱ 生成中...';
+
+      const stdDisplay = isStd ? '' : 'display:none;';
+      const ckoWait = `等待 Reviewer 审批完成后自动启动...`;
+      // 若用户关闭了Demo生成，隐藏demo lane
+      if (!generateDemo) {
+        const demoWrap = document.getElementById('demo-lane-wrap');
+        if (demoWrap) demoWrap.style.display = 'none';
+      }
+      // ✅ Agent 显示配置（单一真相源）—— 后端加新 agent 只需在此加一行
+      const AGENT_DISPLAY = {
+        'prd':                  {emoji:'📄', label:'PM · PRD'},
+        'ui':                   {emoji:'🎨', label:'UX · UI规格'},
+        'flow':                 {emoji:'🗺', label:'设计 · 流程图'},
+        'competitor':           {emoji:'🔍', label:'战略 · 竞品分析'},
+        'tech':                 {emoji:'⚙️', label:'技术 · 方案+选型'},
+        'market':               {emoji:'📊', label:'战略 · 市场报告+SWOT'},
+        'user':                 {emoji:'👤', label:'用研 · 用户画像+旅程'},
+        'n34':                  {emoji:'🧮', label:'N34 · AI赋能边界分析'},
+        'swot_bp':              {emoji:'📋', label:'战略 · SWOT+商业计划书BP'},
+        'brd_mrd':              {emoji:'📝', label:'战略 · BRD+MRD商业需求'},
+        'competitor_barrier':   {emoji:'🔍', label:'战略 · 竞品汇总+壁垒专题'},
+        'competitor_deep':      {emoji:'🔬', label:'战略 · 竞品深度体验报告×3'},
+        'competitor_synthesis': {emoji:'🎯', label:'战略 · 竞品综合对比+机会点'},
+        'charter':              {emoji:'📋', label:'立项 · 项目立项报告'},
+        'user_survey':          {emoji:'📊', label:'用研 · 问卷+访谈+旅程图'},
+        'roadmap':              {emoji:'🗓', label:'规划 · 路线图+指标'},
+        'ia_feature':           {emoji:'🗂', label:'规划 · IA+功能清单+数据指标'},
+        'design_qa':            {emoji:'🎨', label:'设计 · 走查+AI选型需求'},
+        'compliance':           {emoji:'⚖️', label:'合规 · AI合规+商业化'},
+        'api_db':               {emoji:'⚙️', label:'工程 · API+数据库设计'},
+        'embed_test':           {emoji:'📍', label:'工程 · 埋点+测试用例'},
+        'ai_eval':              {emoji:'🧪', label:'工程 · AI评测报告'},
+        'sop_tech':             {emoji:'📚', label:'工程 · 技术SOP'},
+        'launch_ops':           {emoji:'🚀', label:'运营 · 上线运营计划'},
+        'aso_retro':            {emoji:'📈', label:'运营 · ASO+复盘'},
+        'archive':              {emoji:'🗄', label:'归档 · 版本存档'},
+        'demo':                 {emoji:'💻', label:'Demo · 产品演示'},
+        'reviewer':             {emoji:'🛡', label:'Reviewer · 8层审批'},
+        'cko':                  {emoji:'🧠', label:'CKO · 知识提炼'},
+        'ceo_gate':             {emoji:'👑', label:'CEO Gate · 立项评审'},
+      };
+      // ✅ 自动创建 Lane 卡片 —— 后端任何新 agent 出现时自动补lane，不用改前端
+      const _ensureLane = (key) => {
+        if (document.getElementById('lane-h-' + key)) return;
+        const d = AGENT_DISPLAY[key] || {emoji:'🤖', label: key};
+        const lanesEl = document.querySelector('.agent-lanes');
+        if (!lanesEl) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'agent-lane';
+        wrap.innerHTML = `<div class="agent-lane-header working" id="lane-h-${key}">${d.emoji} ${d.label}<span id="lane-s-${key}">⏳</span></div><div class="agent-lane-body" id="lane-b-${key}"></div>`;
+        lanesEl.appendChild(wrap);
+        // 同步更新 Dashboard 小图标
+        const agentsDiv = document.getElementById('dash-agents');
+        if (agentsDiv && !document.getElementById('dash-a-' + key)) {
+          const sp = document.createElement('span');
+          sp.id = 'dash-a-' + key;
+          sp.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:11px;background:rgba(255,166,87,0.08);color:#ffa657;border:1px solid rgba(255,166,87,0.2);';
+          sp.innerHTML = `${d.emoji} ${d.label.split('·').pop().trim()} <span id="dash-as-${key}">⏳</span>`;
+          agentsDiv.appendChild(sp);
+        }
+      };
+
+      // Lane 状态辅助函数（顺序模式：区分排队中 vs CEO Gate 等待）
+      const _isSeqQueued  = (key) => isStd && !runMap[key] && seqQueueKeys.has(key);
+      const _isGatePend   = (key) => isStd && !runMap[key] && !seqQueueKeys.has(key);
+      const _laneClass    = (key) => (!runMap[key] && isStd) ? 'pending' : 'working';
+      const _laneStatus   = (key) => {
+        if (!isStd || runMap[key]) return '⏳';
+        return _isSeqQueued(key) ? '⏸ 排队中' : '⏳ 等待 CEO 打分';
+      };
+      const _laneBody     = (key) => {
+        if (!isStd || runMap[key]) return '';
+        if (_isSeqQueued(key)) return `<div style="color:#6e7681;font-style:italic;padding-top:16px;line-height:1.7;">
+          ⏸ <strong style="color:#58a6ff;">顺序排队中</strong> · 上一份文档完成后自动启动<br>
+          <span style="font-size:12px;">无需手动操作 · 每份文档会把前面的输出作为上下文喂给本 Agent</span>
+        </div>`;
+        return `<div style="color:#6e7681;font-style:italic;padding-top:16px;line-height:1.7;">
+          ⏳ <strong style="color:#ffa657;">等待 CEO Gate 打分解锁</strong><br>
+          <span style="font-size:12px;">P2 立项报告完成后，页面会自动弹出 <strong>5 道打分题</strong>（总分 500）。<br>
+          你打完分 ≥ 400 分后，本 Agent 自动启动，无需手动操作。</span>
+        </div>`;
+      };
+      const liveLogEl = document.getElementById('liveLog');
+      liveLogEl.innerHTML = `
+        <div style="padding:10px 18px 0; background:#0d1117; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:0 0 10px; border-bottom:1px solid rgba(255,255,255,0.1);">
+            <div style="font-size:13px;color:#c9d1d9;font-family:monospace;">${modeLabel} · 生成中</div>
+            <div id="batchStatus" style="font-size:12px;color:#ffa657;">🟡 运行中...</div>
+          </div>
+          <div class="agent-lanes" style="padding:10px 0;">
+            <div class="agent-lane">
+              <div class="agent-lane-header ${_laneClass('prd')}" id="lane-h-prd">📄 PM · PRD<span id="lane-s-prd">${_laneStatus('prd')}</span></div>
+              <div class="agent-lane-body" id="lane-b-prd">${_laneBody('prd')}</div>
+            </div>
+            <div class="agent-lane">
+              <div class="agent-lane-header ${_laneClass('ui')}" id="lane-h-ui">🎨 UX · UI规格<span id="lane-s-ui">${_laneStatus('ui')}</span></div>
+              <div class="agent-lane-body" id="lane-b-ui">${_laneBody('ui')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('flow')}" id="lane-h-flow">🗺 设计 · 流程图<span id="lane-s-flow">${_laneStatus('flow')}</span></div>
+              <div class="agent-lane-body" id="lane-b-flow">${_laneBody('flow')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('competitor')}" id="lane-h-competitor">🔍 战略 · 竞品分析<span id="lane-s-competitor">${_laneStatus('competitor')}</span></div>
+              <div class="agent-lane-body" id="lane-b-competitor">${_laneBody('competitor')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('tech')}" id="lane-h-tech">⚙️ 技术 · 方案+选型<span id="lane-s-tech">${_laneStatus('tech')}</span></div>
+              <div class="agent-lane-body" id="lane-b-tech">${_laneBody('tech')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header working" id="lane-h-market">📊 战略 · 市场报告+SWOT<span id="lane-s-market">⏳</span></div>
+              <div class="agent-lane-body" id="lane-b-market"></div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header working" id="lane-h-user">👤 用研 · 用户画像+旅程<span id="lane-s-user">⏳</span></div>
+              <div class="agent-lane-body" id="lane-b-user"></div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header working" id="lane-h-charter">📋 立项 · BRD+MRD<span id="lane-s-charter">⏳</span></div>
+              <div class="agent-lane-body" id="lane-b-charter"></div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('roadmap')}" id="lane-h-roadmap">🗓 规划 · 路线图+指标<span id="lane-s-roadmap">${_laneStatus('roadmap')}</span></div>
+              <div class="agent-lane-body" id="lane-b-roadmap">${_laneBody('roadmap')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('compliance')}" id="lane-h-compliance">⚖️ 合规 · AI合规+商业化<span id="lane-s-compliance">${_laneStatus('compliance')}</span></div>
+              <div class="agent-lane-body" id="lane-b-compliance">${_laneBody('compliance')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header working" id="lane-h-n34">🧮 N34 · AI赋能边界分析<span id="lane-s-n34">⏳</span></div>
+              <div class="agent-lane-body" id="lane-b-n34"></div>
+            </div>
+            <!-- P1 新增 -->
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('swot_bp')}" id="lane-h-swot_bp">📋 战略 · SWOT+商业计划书BP<span id="lane-s-swot_bp">${_laneStatus('swot_bp')}</span></div>
+              <div class="agent-lane-body" id="lane-b-swot_bp">${_laneBody('swot_bp')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('brd_mrd')}" id="lane-h-brd_mrd">📝 战略 · BRD+MRD商业需求<span id="lane-s-brd_mrd">${_laneStatus('brd_mrd')}</span></div>
+              <div class="agent-lane-body" id="lane-b-brd_mrd">${_laneBody('brd_mrd')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('competitor_barrier')}" id="lane-h-competitor_barrier">🔍 战略 · 竞品汇总+壁垒专题<span id="lane-s-competitor_barrier">${_laneStatus('competitor_barrier')}</span></div>
+              <div class="agent-lane-body" id="lane-b-competitor_barrier">${_laneBody('competitor_barrier')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('competitor_deep')}" id="lane-h-competitor_deep">🔬 战略 · 竞品深度体验报告×3<span id="lane-s-competitor_deep">${_laneStatus('competitor_deep')}</span></div>
+              <div class="agent-lane-body" id="lane-b-competitor_deep">${_laneBody('competitor_deep')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('competitor_synthesis')}" id="lane-h-competitor_synthesis">🎯 战略 · 竞品综合对比+机会点<span id="lane-s-competitor_synthesis">${_laneStatus('competitor_synthesis')}</span></div>
+              <div class="agent-lane-body" id="lane-b-competitor_synthesis">${_laneBody('competitor_synthesis')}</div>
+            </div>
+            <!-- P2 新增 -->
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('user_survey')}" id="lane-h-user_survey">📊 用研 · 问卷+访谈+旅程图<span id="lane-s-user_survey">${_laneStatus('user_survey')}</span></div>
+              <div class="agent-lane-body" id="lane-b-user_survey">${_laneBody('user_survey')}</div>
+            </div>
+            <!-- P3 新增 -->
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('ia_feature')}" id="lane-h-ia_feature">🗂 规划 · IA+功能清单+数据指标<span id="lane-s-ia_feature">${_laneStatus('ia_feature')}</span></div>
+              <div class="agent-lane-body" id="lane-b-ia_feature">${_laneBody('ia_feature')}</div>
+            </div>
+            <!-- P4 新增 -->
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('design_qa')}" id="lane-h-design_qa">🎨 设计 · 走查+AI选型需求<span id="lane-s-design_qa">${_laneStatus('design_qa')}</span></div>
+              <div class="agent-lane-body" id="lane-b-design_qa">${_laneBody('design_qa')}</div>
+            </div>
+            <!-- P5 新增 -->
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('api_db')}" id="lane-h-api_db">⚙️ 技术 · API接口+数据库设计<span id="lane-s-api_db">${_laneStatus('api_db')}</span></div>
+              <div class="agent-lane-body" id="lane-b-api_db">${_laneBody('api_db')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('embed_test')}" id="lane-h-embed_test">📍 技术 · 埋点需求+测试用例<span id="lane-s-embed_test">${_laneStatus('embed_test')}</span></div>
+              <div class="agent-lane-body" id="lane-b-embed_test">${_laneBody('embed_test')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('ai_eval')}" id="lane-h-ai_eval">🧪 技术 · AI评测+BadCase库<span id="lane-s-ai_eval">${_laneStatus('ai_eval')}</span></div>
+              <div class="agent-lane-body" id="lane-b-ai_eval">${_laneBody('ai_eval')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('sop_tech')}" id="lane-h-sop_tech">📚 技术 · 降级+安全+算法备案SOP<span id="lane-s-sop_tech">${_laneStatus('sop_tech')}</span></div>
+              <div class="agent-lane-body" id="lane-b-sop_tech">${_laneBody('sop_tech')}</div>
+            </div>
+            <!-- P6 新增 -->
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('launch_ops')}" id="lane-h-launch_ops">🚀 运营 · 使用手册+上线Checklist<span id="lane-s-launch_ops">${_laneStatus('launch_ops')}</span></div>
+              <div class="agent-lane-body" id="lane-b-launch_ops">${_laneBody('launch_ops')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('aso_retro')}" id="lane-h-aso_retro">📈 运营 · ASO+复盘+数据分析<span id="lane-s-aso_retro">${_laneStatus('aso_retro')}</span></div>
+              <div class="agent-lane-body" id="lane-b-aso_retro">${_laneBody('aso_retro')}</div>
+            </div>
+            <div class="agent-lane" style="${stdDisplay}">
+              <div class="agent-lane-header ${_laneClass('archive')}" id="lane-h-archive">🗄 运营 · 归档+变更日志+商业化<span id="lane-s-archive">${_laneStatus('archive')}</span></div>
+              <div class="agent-lane-body" id="lane-b-archive">${_laneBody('archive')}</div>
+            </div>
+            <div class="agent-lane" id="demo-lane-wrap">
+              <div class="agent-lane-header pending" id="lane-h-demo">💻 前端 · Demo<span id="lane-s-demo">⏳ 等待阶段完成</span></div>
+              <div class="agent-lane-body" id="lane-b-demo" style="color:#6e7681; font-style:italic; padding-top:20px;">选中的阶段全部完成后自动启动...</div>
+            </div>
+            <div class="agent-lane">
+              <div class="agent-lane-header pending" id="lane-h-reviewer">🛡 审查员 · 8层审批报告<span id="lane-s-reviewer">⏳ 等待生成完成</span></div>
+              <div class="agent-lane-body" id="lane-b-reviewer" style="color:#6e7681; font-style:italic; padding-top:20px;">等待所有 Agent 完成后自动启动...</div>
+            </div>
+            <!-- Reviewer P0 闸门警告（有P0失败时显示） -->
+            <div id="reviewer-gate-warning" style="display:none; margin:8px 0; padding:14px 16px; background:#fff5f5; border:1.5px solid #e57373; border-radius:10px;">
+              <div style="font-weight:600; color:#c62828; margin-bottom:8px;">🔴 Reviewer 发现 P0 问题 · CKO 已暂停</div>
+              <ul id="reviewer-gate-issues" style="margin:0 0 12px 16px; color:#b71c1c; font-size:13px; line-height:1.7;"></ul>
+              <div style="font-size:12px; color:#6e7681; margin-bottom:10px;">建议先让各 Agent 修改对应文档，再手动触发 CKO 蒸馏。</div>
+              <button onclick="_startCkoAgent()" style="background:#d16a4e; color:white; border:none; border-radius:6px; padding:7px 16px; cursor:pointer; font-size:13px;">忽略 P0 · 强制启动 CKO</button>
+            </div>
+            <!-- 🔧 BLOCK 手术台 · 精准定点重跑 -->
+            <div id="surgery-panel" style="display:none; margin:10px 0; padding:16px 18px; background:#fef3ee; border:2px solid #d16a4e; border-radius:12px;">
+              <div style="font-weight:700; color:#d16a4e; margin-bottom:10px; font-size:15px;">🔧 定点返工手术台</div>
+              <div style="font-size:12px; color:#6e7681; margin-bottom:12px;">以下是 Reviewer 打回的 P0 问题 · 点「重跑」自动带入反馈重新生成</div>
+              <div id="surgery-items" style="display:flex;flex-direction:column;gap:8px;"></div>
+              <div style="margin-top:12px;font-size:11px;color:#9e8e82;">重跑完成后建议手动触发 Reviewer 复核 · 或等待自动链路</div>
+            </div>
+            <div class="agent-lane">
+              <div class="agent-lane-header pending" id="lane-h-cko">🧠 CKO · 蒸馏回流<span id="lane-s-cko">⏳ 等待全部完成</span></div>
+              <div class="agent-lane-body" id="lane-b-cko" style="color:#6e7681; font-style:italic; padding-top:20px;">${ckoWait}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('docList').innerHTML =
+        `<li style="color:var(--ink-faint);padding:12px;list-style:none;">⏳ 等待 ${totalCount} 个 Agent 完成（含 Demo + Reviewer + CKO）...</li>`;
+      document.getElementById('docDone').textContent = '0';
+      document.getElementById('docTotal').textContent = String(totalCount);
+
+      window.exportZipPack = () => alert('文件已由 Agent 自动保存至：\n' + (projDir || '桃子obsidian/桃子资料/项目/'));
+      window.authObsidianAndArchive = window.exportZipPack;
+
+      // 进度环
+      let ringPct = 0;
+      const updateRing = pct => {
+        ringPct = Math.min(100, pct);
+        document.getElementById('ringFill').style.strokeDashoffset = 377 * (1 - ringPct / 100);
+        document.getElementById('ringNum').textContent = Math.round(ringPct);
+      };
+      let fakeTimer = setInterval(() => { if (ringPct < 80) updateRing(ringPct + 2); }, 6000);
+
+      const doneSet = new Set();
+      let demoRunId = null;
+
+      // ── 相间顺序：P1 全完成 → 并发启 P2（含上下文对齐）──────
+      // ── 阶段确认卡 ─────────────────────────────────────────────
+      const _phaseConfirmShown = new Set();
+      function _showPhaseConfirmCard(phase) {
+        if (_phaseConfirmShown.has(phase)) return;
+        _phaseConfirmShown.add(phase);
+
+        const cfg = {
+          p1: {
+            title: 'P1 市场洞察已完成 · 确认方向',
+            subtitle: '在进入用户研究前，有什么要补充？（遗漏竞品 / 你知道的真实数据 / 方向微调）',
+            placeholder: '例：还有一个竞品叫XX没分析到 / 我们已有2000用户，DAU约150 / 目标用户应该聚焦25-35岁',
+            btn: '✅ 确认，进入 P2 用户研究',
+            onConfirm: (notes) => {
+              if (seqQueueKeys.size > 0) {
+                _startNextPhase(notes);  // 有P2队列→启动P2
+              } else if (generateDemo) {
+                _startDemoAgent();       // 无P2但有Demo→启动Demo
+              }
+            },
+          },
+        };
+        const c = cfg[phase];
+        if (!c) return;
+
+        const card = document.createElement('div');
+        card.id = `phase-confirm-${phase}`;
+        card.style.cssText = 'margin:20px 0;padding:22px 24px;background:linear-gradient(135deg,#0f1a10,#0d1117);border:2px solid rgba(100,200,100,0.45);border-radius:14px;';
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <span style="font-size:20px;">🔔</span>
+            <div>
+              <div style="font-size:15px;font-weight:700;color:#e6f4ea;">${c.title}</div>
+              <div style="font-size:12px;color:#8b9e8d;margin-top:3px;">${c.subtitle}</div>
+            </div>
+          </div>
+          <textarea id="phase-notes-${phase}" rows="3" placeholder="${c.placeholder}"
+            style="width:100%;padding:10px 12px;background:#0d1117;border:1.5px solid rgba(100,200,100,0.3);border-radius:8px;color:#c9d1d9;font-size:13px;font-family:monospace;resize:vertical;box-sizing:border-box;outline:none;"
+            onfocus="this.style.borderColor='rgba(100,200,100,0.7)'"
+            onblur="this.style.borderColor='rgba(100,200,100,0.3)'"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+            <button onclick="_confirmPhase('${phase}')"
+              style="background:linear-gradient(135deg,#2d6a4f,#40916c);color:white;border:none;border-radius:9px;padding:10px 22px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);">
+              ${c.btn}
+            </button>
+          </div>`;
+
+        // 插到 agent-lanes 底部（用户此时已滚到底）
+        const lanesDiv = document.querySelector('.agent-lanes') || document.body;
+        lanesDiv.appendChild(card);
+        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+
+        window._phaseConfirmCallbacks = window._phaseConfirmCallbacks || {};
+        window._phaseConfirmCallbacks[phase] = c.onConfirm;
+      }
+
+      // ── 技术方案 · 模型选型确认卡 ────────────────────────────────
+      let _techConfirmShown = false;
+      function _showTechConfirmCard() {
+        if (_techConfirmShown) return;
+        _techConfirmShown = true;
+        const techBody = document.getElementById('lane-b-tech');
+        const techText = techBody ? techBody.innerText.substring(0, 400) : '';
+        // 简单提取推荐模型关键词
+        const modelMatch = techText.match(/(?:推荐|选型|模型)[：:]\s*([^\n]{0,80})/);
+        const modelHint = modelMatch ? modelMatch[1] : '见技术方案文档';
+
+        const card = document.createElement('div');
+        card.id = 'tech-confirm-card';
+        card.style.cssText = 'margin:20px 0;padding:22px 24px;background:linear-gradient(135deg,#0d1520,#0d1117);border:2px solid rgba(88,166,255,0.4);border-radius:14px;';
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <span style="font-size:20px;">⚙️</span>
+            <div>
+              <div style="font-size:15px;font-weight:700;color:#cae8ff;">技术方案已完成 · 确认模型选型</div>
+              <div style="font-size:12px;color:#6b8cad;margin-top:3px;">系统推荐方向：${modelHint}</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:#8b949e;margin-bottom:10px;">你确认这个选型吗？或者想调整为哪款模型？确认后写入项目决策记录，后续 API/数据库/测试 Agent 都会参考。</div>
+          <textarea id="tech-confirm-notes" rows="2" placeholder="例：确认用 Qwen2.5-72B · 向量库改用 Milvus · 不用 FAISS"
+            style="width:100%;padding:10px 12px;background:#0d1117;border:1.5px solid rgba(88,166,255,0.3);border-radius:8px;color:#c9d1d9;font-size:13px;font-family:monospace;resize:vertical;box-sizing:border-box;outline:none;"
+            onfocus="this.style.borderColor='rgba(88,166,255,0.7)'"
+            onblur="this.style.borderColor='rgba(88,166,255,0.3)'"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+            <button onclick="_confirmTechModel()"
+              style="background:linear-gradient(135deg,#1f4e8c,#2d6bb5);color:white;border:none;border-radius:9px;padding:10px 22px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);">
+              ✅ 确认选型，写入决策记录
+            </button>
+          </div>`;
+
+        const lanesDiv2 = document.querySelector('.agent-lanes') || document.body;
+        lanesDiv2.appendChild(card);
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      window._confirmTechModel = async function() {
+        const notes = (document.getElementById('tech-confirm-notes')?.value || '').trim();
+        const card = document.getElementById('tech-confirm-card');
+        if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+        // 保存到后端
+        try {
+          await fetch(BRIDGE + '/api/save-user-decision', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ batch_id: batchId, type: 'model_selection', notes })
+          });
+        } catch(e) {}
+        if (card) {
+          card.innerHTML = '<div style="color:#8b949e;font-size:13px;padding:4px;">✅ 选型已确认，写入 USER_DECISIONS.md</div>';
+          card.style.opacity = '1';
+        }
+      };
+
+      window._confirmPhase = function(phase) {
+        const notes = (document.getElementById(`phase-notes-${phase}`)?.value || '').trim();
+        const card = document.getElementById(`phase-confirm-${phase}`);
+        if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+        const cb = window._phaseConfirmCallbacks?.[phase];
+        if (cb) cb(notes);
+      };
+
+      let _p2Started = false;
+      async function _startNextPhase(userNotes) {
+        if (_p2Started) return;
+        _p2Started = true;
+        try {
+          const r = await fetch(BRIDGE + '/api/start-next-phase', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ batch_id: batchId, user_notes: userNotes || '' })
+          });
+          const d = await r.json();
+          if (d.done) return;
+          Object.entries(d.new_runs || {}).forEach(([k, rid]) => {
+            seqQueueKeys.delete(k);
+            const hEl = document.getElementById('lane-h-' + k);
+            const sEl = document.getElementById('lane-s-' + k);
+            const bEl = document.getElementById('lane-b-' + k);
+            if (hEl) hEl.className = 'agent-lane-header working';
+            if (sEl) sEl.textContent = '⏳';
+            if (bEl) bEl.innerHTML = '';
+            _connectAgent(k, rid);
+          });
+        } catch(e) { console.error('_startNextPhase error', e); }
+      }
+
+      // ── 变更日志存储（key → [{ts, feedback}]）──────────────
+      const _changelogs = {};
+
+      function _appendChangelog(key, feedback) {
+        if (!_changelogs[key]) _changelogs[key] = [];
+        const ts = new Date().toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+        _changelogs[key].push({ ts, feedback: feedback.slice(0, 80) + (feedback.length > 80 ? '…' : '') });
+        _renderChangelog(key);
+      }
+
+      function _renderChangelog(key) {
+        const el = document.getElementById('lr-cl-' + key);
+        if (!el) return;
+        const logs = _changelogs[key] || [];
+        if (!logs.length) { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+        const bodyEl = el.querySelector('.lr-changelog-body');
+        if (bodyEl) {
+          bodyEl.innerHTML = logs.map(l =>
+            `<div class="lr-cl-item"><span class="lr-cl-ts">${l.ts}</span>${l.feedback}</div>`
+          ).join('');
+        }
+        const hdEl = el.querySelector('.lr-changelog-hd span:first-child');
+        if (hdEl) hdEl.textContent = `📋 变更日志 · ${logs.length} 条`;
+      }
+
+      // ── 文件上传工具函数 ────────────────────────────────────
+      async function _uploadFile(file, statusEl) {
+        statusEl.className = 'lr-file-status';
+        statusEl.textContent = '上传中...';
+        const fd = new FormData();
+        fd.append('file', file);
+        try {
+          const r = await fetch(BRIDGE + '/api/upload-context', { method: 'POST', body: fd });
+          const d = await r.json();
+          if (d.text) {
+            statusEl.className = 'lr-file-status ok';
+            statusEl.textContent = `✓ ${file.name}（${d.chars} 字）`;
+            return d.text;
+          } else {
+            statusEl.className = 'lr-file-status err';
+            statusEl.textContent = `❌ 解析失败: ${d.error || '未知错误'}`;
+            return null;
+          }
+        } catch(e) {
+          statusEl.className = 'lr-file-status err';
+          statusEl.textContent = '❌ 上传失败，桥未启动？';
+          return null;
+        }
+      }
+
+      // ── 构建增强版修改栏 ────────────────────────────────────
+      function _buildReviseBar(key) {
+        const bar = document.createElement('div');
+        bar.className = 'lane-revise';
+        bar.id = 'lr-bar-' + key;
+        bar.innerHTML = `
+          <div class="lr-row">
+            <div class="lr-main">
+              <textarea class="lr-feedback" placeholder="对这份文档有修改意见？输入后点重写" rows="2"></textarea>
+              <div>
+                <span class="lr-extra-toggle" onclick="
+                  const p = this.closest('.lr-main').querySelector('.lr-extra-panel');
+                  p.classList.toggle('open');
+                  this.querySelector('span').textContent = p.classList.contains('open') ? '▴' : '▾';
+                ">📎 补充资料（会议记录/需求/意见）<span>▾</span></span>
+              </div>
+              <div class="lr-extra-panel">
+                <textarea class="lr-extra-text" placeholder="粘贴会议记录 / 算法新需求 / 领导意见…作为额外上下文喂给 Agent" rows="3"></textarea>
+                <label class="lr-upload-label">
+                  📤 上传文件 PDF / Word / txt
+                  <input type="file" accept=".pdf,.docx,.txt" style="display:none"
+                    onchange="(async(inp)=>{
+                      const statusEl = inp.closest('.lr-extra-panel').querySelector('.lr-file-status');
+                      const text = await _uploadFile(inp.files[0], statusEl);
+                      if(text) inp.dataset.extracted = text;
+                    })(this)">
+                </label>
+                <div class="lr-file-status"></div>
+              </div>
+              <div class="lr-changelog" id="lr-cl-${key}" style="display:none">
+                <div class="lr-changelog-hd" onclick="
+                  const b = this.nextElementSibling;
+                  b.classList.toggle('open');
+                  this.querySelector('span:last-child').textContent = b.classList.contains('open') ? '▴' : '▾';
+                ">
+                  <span>📋 变更日志 · 0 条</span><span>▾</span>
+                </div>
+                <div class="lr-changelog-body"></div>
+              </div>
+            </div>
+            <button class="lr-btn" onclick="
+              const main = this.closest('.lr-row').querySelector('.lr-main');
+              const fb = main.querySelector('.lr-feedback').value.trim();
+              if (!fb) { main.querySelector('.lr-feedback').focus(); return; }
+              const extra = main.querySelector('.lr-extra-text').value.trim();
+              const fileInp = main.querySelector('input[type=file]');
+              const fileText = fileInp?.dataset?.extracted || '';
+              let fullCtx = fb;
+              if (extra) fullCtx += '\n\n【补充资料】\n' + extra;
+              if (fileText) fullCtx += '\n\n【文件内容】\n' + fileText;
+              _reviseAgent('${key}', fullCtx, fb, this);
+            ">重写</button>
+          </div>`;
+        return bar;
+      }
+
+      async function _reviseAgent(key, fullContext, shortLabel, btn) {
+        btn.disabled = true; btn.textContent = '重写中...';
+        const bodyEl = document.getElementById('lane-b-' + key);
+        const hEl    = document.getElementById('lane-h-' + key);
+        const sEl    = document.getElementById('lane-s-' + key);
+        if (hEl) hEl.className = 'agent-lane-header working';
+        if (sEl) sEl.textContent = '⏳';
+        if (bodyEl) bodyEl.textContent = '';
+        doneSet.delete(key);
+        try {
+          const r = await fetch(BRIDGE + '/api/revise', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ batch_id: batchId, key, feedback: fullContext }),
+          });
+          const d = await r.json();
+          if (d.run_id) {
+            _appendChangelog(key, shortLabel);
+            _connectAgent(key, d.run_id);
+          } else {
+            if (hEl) hEl.className = 'agent-lane-header done';
+            if (sEl) sEl.textContent = '❌';
+          }
+        } catch(e) {
+          if (hEl) hEl.className = 'agent-lane-header done';
+          if (sEl) sEl.textContent = '❌';
+        }
+        btn.disabled = false; btn.textContent = '重写';
+      }
+
+      function markLaneDone(key) {
+        doneSet.add(key);
+        const h = document.getElementById('lane-h-' + key);
+        const s = document.getElementById('lane-s-' + key);
+        if (h) { h.className = 'agent-lane-header done'; }
+        if (s) { s.textContent = '✅'; }
+        // 注入增强版修改栏（demo/cko/reviewer不需要）
+        if (!['demo','cko','reviewer'].includes(key)) {
+          const bodyEl = document.getElementById('lane-b-' + key);
+          const laneEl = bodyEl ? bodyEl.parentElement : null;
+          if (laneEl && !laneEl.querySelector('.lane-revise')) {
+            laneEl.appendChild(_buildReviseBar(key));
+          }
+        }
+        // 相间顺序：P1 全部完成后 → 显示确认卡，等用户确认后再启动 P2
+        if (isStd && p1Keys.size > 0 && p1Keys.has(key)) {
+          const allP1Done = [...p1Keys].every(k => doneSet.has(k));
+          if (allP1Done) {
+            _showPhaseConfirmCard('p1');
+          }
+        }
+
+        // CEO Gate：自动触发，无需手动打分，前端只展示状态
+        if (key === 'charter' && !document.getElementById('ceo-gate-card')) {
+          const gateCard = document.createElement('div');
+          gateCard.id = 'ceo-gate-card';
+          gateCard.style.cssText = 'margin:16px 0;padding:14px 20px;background:linear-gradient(135deg,#1a1020,#0d1117);border:2px solid rgba(209,106,78,0.3);border-radius:12px;display:flex;align-items:center;gap:12px;';
+          gateCard.innerHTML = `<span style="font-size:18px;">🎯</span><div><div style="font-size:13px;font-weight:700;color:#ffa657;">CEO Gate · 等待 P2 全部完成后自动打分</div><div id="ceo-gate-status" style="font-size:12px;color:#8b949e;margin-top:3px;">P2 完成后 CEO 将自动对 5 维度评分，≥400/500 自动解锁 P3</div></div>`;
+          const lanesDiv = document.querySelector('.agent-lanes');
+          if (lanesDiv) lanesDiv.parentElement.insertBefore(gateCard, lanesDiv);
+        }
+        // ↑↑↑ 以下是原手动打分卡代码，已废弃，由 batchEs ceo_gate_* 事件替代
+        if (false) {
+          gateCard.style.cssText = 'margin:16px 0;padding:20px 24px;background:linear-gradient(135deg,#1a1020,#0d1117);border:2px solid rgba(209,106,78,0.5);border-radius:14px;';
+          gateCard.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+              <span style="font-size:20px;">🚨</span>
+              <div>
+                <div style="font-size:15px;font-weight:700;color:#ffa657;">CEO Gate · P2 验收打分</div>
+                <div style="font-size:12px;color:#8b949e;margin-top:2px;">5 题各 0-100 分 · 总分 500 · ≥400 进 P3 · &lt;400 回炉</div>
+              </div>
+            </div>
+            <div id="gate-questions" style="display:flex;flex-direction:column;gap:14px;margin-bottom:18px;">
+              ${[
+                ['q1','市场空间够大吗？（TAM/SAM 规模 + 增长潜力）'],
+                ['q2','竞品壁垒能打穿吗？（差异化切入角是否清晰）'],
+                ['q3','AI边界清不清？（N34 必须AI 30-40% 健康分布）'],
+                ['q4','用户画像和真痛点是否对齐？（具体人 + 高频场景）'],
+                ['q5','产品定位能一句话讲清楚吗？（北极星 + 差异化）']
+              ].map(([id,label],i) => `
+                <div class="gate-q">
+                  <div style="font-size:12px;color:#c9d1d9;margin-bottom:6px;"><strong style="color:#ffa657;">Q${i+1}</strong> ${label}</div>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <input type="range" id="gate-${id}" min="0" max="100" value="0" step="5"
+                      style="flex:1;accent-color:#d16a4e;"
+                      oninput="document.getElementById('gate-${id}-v').textContent=this.value;_calcGateTotal();" />
+                    <span id="gate-${id}-v" style="min-width:36px;text-align:right;font-size:14px;font-weight:700;color:#ffa657;">0</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+              <div style="font-size:16px;font-weight:700;">
+                总分：<span id="gate-total" style="color:#ffa657;font-size:22px;">0</span>
+                <span style="font-size:12px;color:#8b949e;"> / 500</span>
+                <span id="gate-verdict" style="font-size:12px;margin-left:8px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,0.05);color:#6e7681;">待评分</span>
+              </div>
+              <button id="gate-submit" onclick="_submitCeoGate()"
+                style="background:#d16a4e;color:white;border:none;border-radius:8px;padding:10px 28px;font-size:14px;font-weight:600;cursor:pointer;">
+                提交评分
+              </button>
+            </div>
+            <div id="gate-result" style="margin-top:14px;display:none;"></div>
+          `;
+          const lanesDiv = document.querySelector('.agent-lanes');
+          if (lanesDiv) lanesDiv.parentElement.insertBefore(gateCard, lanesDiv);
+          window._calcGateTotal = function() {
+            const qs = ['q1','q2','q3','q4','q5'];
+            const total = qs.reduce((s,q) => s + parseInt(document.getElementById('gate-'+q).value||0), 0);
+            document.getElementById('gate-total').textContent = total;
+            const v = document.getElementById('gate-verdict');
+            if (total >= 400) { v.textContent = '✅ 通过 · 进 P3'; v.style.color='#3fb950'; v.style.background='rgba(63,185,80,0.1)'; }
+            else if (total >= 300) { v.textContent = '⚠️ 回炉 · 需修订'; v.style.color='#ffa657'; v.style.background='rgba(255,166,87,0.1)'; }
+            else { v.textContent = '🛑 终止风险'; v.style.color='#f85149'; v.style.background='rgba(248,81,73,0.1)'; }
+          };
+          window._submitCeoGate = async function() {
+            const btn = document.getElementById('gate-submit');
+            const result = document.getElementById('gate-result');
+            btn.disabled = true; btn.textContent = '提交中...';
+            const scores = {};
+            ['q1','q2','q3','q4','q5'].forEach(q => {
+              scores[q] = parseInt(document.getElementById('gate-'+q).value||0);
+            });
+            try {
+              const r = await fetch(BRIDGE + '/api/gate', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ batch_id: batchId, scores }),
+              });
+              const d = await r.json();
+              result.style.display = 'block';
+              if (window._dashShowGate) window._dashShowGate(d.total, d.detail || {}, d.decision);
+              if (d.decision === 'pass') {
+                result.innerHTML = `<div style="padding:12px 16px;background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.3);border-radius:8px;color:#3fb950;font-weight:600;">✅ CEO Gate 通过（${d.total}/500）· 正在启动 P3 生成...</div>`;
+                btn.textContent = '✅ 已通过';
+                // 真实 CEO Gate：通过后调用 /api/advance-phase 启动 P3+P4+P5
+                try {
+                  const advR = await fetch(BRIDGE + '/api/advance-phase', {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ batch_id: batchId }),
+                  });
+                  const adv = await advR.json();
+                  if (adv.new_runs && Object.keys(adv.new_runs).length > 0) {
+                    Object.entries(adv.new_runs).forEach(([key, runId]) => {
+                      runMap[key] = runId;
+                      if (!genAgents.includes(key)) genAgents.push(key);
+                      genCount += 1;
+                      // 恢复 lane 为 working 状态
+                      const lh = document.getElementById('lane-h-' + key);
+                      const ls = document.getElementById('lane-s-' + key);
+                      const lb = document.getElementById('lane-b-' + key);
+                      if (lh) lh.className = 'agent-lane-header working';
+                      if (ls) ls.textContent = '⏳';
+                      if (lb) { lb.innerHTML = ''; lb.style.color = '#8b949e'; lb.style.fontStyle = 'normal'; }
+                      // 连接 SSE 流
+                      _connectAgent(key, runId);
+                    });
+                    result.innerHTML = `<div style="padding:12px 16px;background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.3);border-radius:8px;color:#3fb950;font-weight:600;">✅ CEO Gate 通过（${d.total}/500）· ${Object.keys(adv.new_runs).length} 个 P3 Agent 已启动</div>`;
+                  }
+                } catch(advErr) {
+                  result.innerHTML += `<div style="color:#f85149;font-size:12px;margin-top:6px;">⚠️ P3 启动失败：${advErr.message}（可手动刷新重试）</div>`;
+                }
+              } else if (d.decision === 'redo') {
+                result.innerHTML = `<div style="padding:12px 16px;background:rgba(255,166,87,0.1);border:1px solid rgba(255,166,87,0.3);border-radius:8px;color:#ffa657;font-weight:600;">⚠️ 回炉（${d.total}/500）· ${d.msg}</div>`;
+                btn.disabled = false; btn.textContent = '重新评分';
+              } else {
+                result.innerHTML = `<div style="padding:12px 16px;background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);border-radius:8px;color:#f85149;font-weight:600;">🛑 分数过低（${d.total}/500）· ${d.msg}</div>`;
+                btn.disabled = false; btn.textContent = '重新评分';
+              }
+            } catch(e) {
+              result.style.display = 'block';
+              result.innerHTML = `<div style="color:#f85149;">❌ 提交失败：${e.message}</div>`;
+              btn.disabled = false; btn.textContent = '重试';
+            }
+          };
+        } // end if(false) — 原手动打分卡已废弃
+
+        // 动态 genAgents：主生成 agent（排除 cko/reviewer P6 agent）+ demo
+        // genAgents 用 let 以便 CEO Gate 通过后追加 P3 agents
+        const p6Keys = ['cko','reviewer'];
+        const mainKeys = Object.keys(runMap).filter(k => !p6Keys.includes(k));
+        let genAgents = generateDemo ? [...mainKeys, 'demo'] : [...mainKeys];
+        const genDone = genAgents.filter(k => doneSet.has(k)).length;
+        const pct = (doneSet.size / totalCount) * 100;
+        updateRing(Math.min(95, pct));
+        // 主力 Agent + Demo 全部完成 → 启动 Reviewer（只触发一次）
+        if (genDone === genAgents.length && !doneSet.has('reviewer')) {
+          clearInterval(fakeTimer);
+          _fetchBatchFiles();
+          // 协调链：标记生成团队完成
+          ['cn-pm','cn-ux','cn-flow','cn-fe'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.classList.remove('active'); el.classList.add('done'); }
+          });
+          setTimeout(() => { _startReviewerAgent(); }, 800);
+        }
+        if (doneSet.has('cko')) {
+          updateRing(100);
+          document.getElementById('batchStatus').textContent = '✅ 全部完成（含审查+蒸馏）';
+          document.getElementById('taskTime').textContent = '✅ 完成';
+          if (window._dashInterval) { clearInterval(window._dashInterval); window._dashInterval = null; }
+          if (typeof window._removeRefreshGuard === 'function') window._removeRefreshGuard();
+        }
+      }
+
+      // CKO完成回调 — 由全局 flowback() 在 'done' 事件后调用
+      window._onCkoDone = () => {
+        if (!doneSet.has('cko')) {
+          doneSet.add('cko');
+          updateRing(100);
+          document.getElementById('batchStatus').textContent = '✅ 全部完成（含蒸馏）';
+          document.getElementById('taskTime').textContent = '✅ 完成';
+          if (typeof window._removeRefreshGuard === 'function') window._removeRefreshGuard();
+          // 协调链：CKO完成
+          const cnCko = document.getElementById('cn-cko');
+          if (cnCko) { cnCko.classList.remove('active'); cnCko.classList.add('done'); }
+        }
+      };
+
+      async function _fetchBatchFiles() {
+        try {
+          // 用任意一个 run_id 拿文件列表（project_dir 相同）
+          const rid = demoRunId || prdRun;
+          const r = await fetch('/api/files/' + rid);
+          const d = await r.json();
+          if (d.files && d.files.length > 0) {
+            document.getElementById('docList').innerHTML = d.files.map(f => {
+              const isDemo = /\.html?$/i.test(f.path);
+              const saveDemoBtn = isDemo && d.project_dir ? `
+                <button onclick="_saveDemoSample('${d.project_dir}','${f.path.replace(/'/g,"\\'")}',this)"
+                  style="background:transparent;border:1px solid rgba(45,122,90,0.4);color:#2d7a5a;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;"
+                  title="保存为 Demo 样板，下次生成时参考">
+                  💾 存样板
+                </button>` : '';
+              return `<li class="done">
+                <div class="dl-icon">✓</div>
+                <div class="dl-text">${f.path}</div>
+                <span class="dl-status" style="font-size:10px;">${(f.size/1024).toFixed(1)}KB</span>
+                ${saveDemoBtn}
+                <div class="dl-feedback">
+                  <button onclick="_fbVote('${rid}','${f.path}','up',this)" title="好">👍</button>
+                  <button onclick="_fbVote('${rid}','${f.path}','down',this)" title="差">👎</button>
+                </div>
+              </li>`;
+            }).join('');
+            document.getElementById('docDone').textContent = d.files.length;
+            document.getElementById('docTotal').textContent = d.files.length;
+          }
+          if (d.project_dir) {
+            document.getElementById('archiveStatus').innerHTML =
+              '✅ 文件已保存至：<strong style="color:var(--sage-dark);">' + d.project_dir + '</strong>';
+            // 回写历史：完成 + 文件数 + 目录
+            _updateHistory(prdRun, { status: 'done', project_dir: d.project_dir, file_count: d.files ? d.files.length : 0 });
+          }
+        } catch(e) {}
+      }
+
+      // 启动 Demo Agent（在 UI 完成后）
+      let _demoStarted = false;
+      async function _startDemoAgent() {
+        if (_demoStarted) return;
+        _demoStarted = true;
+        const h = document.getElementById('lane-h-demo');
+        const b = document.getElementById('lane-b-demo');
+        const s = document.getElementById('lane-s-demo');
+        if (h) h.className = 'agent-lane-header working';
+        if (b) { b.style.color = '#8b949e'; b.style.fontStyle = 'normal'; b.textContent = ''; }
+        if (s) s.textContent = '⏳';
+        // 协调链：激活前端工程师
+        const cnFe = document.getElementById('cn-fe');
+        if (cnFe) { cnFe.style.opacity='1'; cnFe.classList.remove('done'); cnFe.classList.add('active'); }
+        try {
+          const r = await fetch('/api/start-demo-agent', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ batch_id: batchId }),
+          });
+          const d = await r.json();
+          if (!d.run_id) return;
+          demoRunId = d.run_id;
+          _connectAgent('demo', d.run_id);
+        } catch(e) {
+          if (b) b.textContent = '❌ Demo Agent 启动失败';
+          doneSet.add('demo');  // 不卡全局完成
+        }
+      }
+
+      // 启动 Reviewer Agent（主力Agent+Demo全完成后自动触发）
+      // 🔧 手术台：拉取 P0 失败列表，展示定点重跑面板
+      async function _showSurgeryPanel(bid) {
+        try {
+          const r = await fetch(BRIDGE + '/api/audit-block-items/' + bid);
+          if (!r.ok) return;
+          const d = await r.json();
+          const panel = document.getElementById('surgery-panel');
+          const itemsEl = document.getElementById('surgery-items');
+          if (!panel || !itemsEl) return;
+          if (!d.p0_items || d.p0_items.length === 0) return;
+          itemsEl.innerHTML = d.p0_items.map(item => `
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:white;border:1px solid #f0d0c4;border-radius:8px;">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;color:#c62828;margin-bottom:4px;">❌ P0 · ${item.agent_key}</div>
+                <div style="font-size:13px;color:#2a2520;line-height:1.5;">${item.issue}</div>
+              </div>
+              <button onclick="_rerunAgent('${bid}','${item.agent_key}',this,\`${item.issue.replace(/`/g,"'")}\`)"
+                style="flex-shrink:0;background:#d16a4e;color:white;border:none;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600;white-space:nowrap;"
+                onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+                🔁 重跑
+              </button>
+            </div>`).join('');
+          panel.style.display = 'block';
+          panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch(_) {}
+      }
+
+      // 执行单个 Agent 精准重跑
+      async function _rerunAgent(bid, agentKey, btn, issueText) {
+        btn.disabled = true;
+        btn.textContent = '⏳ 重跑中...';
+        try {
+          const r = await fetch(BRIDGE + '/api/rerun-agent', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+              batch_id: bid,
+              agent_key: agentKey,
+              extra_context: issueText
+            })
+          });
+          const d = await r.json();
+          if (d.run_id) {
+            btn.textContent = '✅ 已提交';
+            btn.style.background = '#57ab5a';
+            runMap[agentKey] = d.run_id;
+            if (window._updatePhaseDocStatus) _updatePhaseDocStatus(agentKey, 'running');
+            _connectAgent(agentKey, d.run_id);
+            document.getElementById('batchStatus').textContent =
+              `🔁 ${agentKey} 重跑中...（携带Reviewer反馈）`;
+          } else {
+            btn.disabled = false;
+            btn.textContent = '🔁 重跑';
+          }
+        } catch(e) {
+          btn.disabled = false;
+          btn.textContent = '❌ 失败';
+        }
+      }
+
+      async function _startReviewerAgent() {
+        const h = document.getElementById('lane-h-reviewer');
+        const b = document.getElementById('lane-b-reviewer');
+        const s = document.getElementById('lane-s-reviewer');
+        if (h) h.className = 'agent-lane-header working';
+        if (b) { b.style.color = '#8b949e'; b.style.fontStyle = 'normal'; b.textContent = ''; }
+        if (s) s.textContent = '⏳';
+        document.getElementById('batchStatus').textContent = '🛡 Reviewer 8层审批中...';
+        document.getElementById('taskTime').textContent = '🛡 审查中...';
+        try {
+          const r = await fetch(BRIDGE + '/api/start-reviewer-agent', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ batch_id: batchId }),
+          });
+          const d = await r.json();
+          if (!d.run_id) {
+            if (b) b.textContent = '❌ Reviewer 启动失败';
+            doneSet.add('reviewer');
+            _startCkoAgent();
+            return;
+          }
+          _connectAgent('reviewer', d.run_id);
+        } catch(e) {
+          if (b) b.textContent = '❌ Reviewer Agent 启动失败';
+          doneSet.add('reviewer');
+          _startCkoAgent();  // 跳过reviewer，保证CKO能跑
+        }
+      }
+
+      // Reviewer P0 闸门：检查审批结果，有P0失败时拦截CKO
+      async function _checkReviewerThenCko() {
+        if (!batchId) { _startCkoAgent(); return; }
+        try {
+          const r = await fetch(BRIDGE + '/api/reviewer-verdict/' + batchId);
+          if (!r.ok) { _startCkoAgent(); return; }
+          const d = await r.json();
+          if (d.verdict === 'pending') {
+            // AUDIT_REPORT尚未生成（极端情况），直接放行
+            _startCkoAgent();
+            return;
+          }
+          if (d.verdict === 'FAIL' && d.p0_count > 0) {
+            // 有P0失败 → 显示警告、暂停CKO
+            const warn = document.getElementById('reviewer-gate-warning');
+            if (warn) {
+              warn.style.display = 'block';
+              const issues = document.getElementById('reviewer-gate-issues');
+              if (issues && d.p0_failures && d.p0_failures.length > 0) {
+                issues.innerHTML = d.p0_failures.map(f =>
+                  `<li>${f.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</li>`
+                ).join('');
+              }
+              warn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            document.getElementById('batchStatus').textContent = '🔴 Reviewer P0 失败 · CKO 暂停';
+          } else {
+            // PASS 或 CONDITIONAL → 自动启动CKO
+            _startCkoAgent();
+          }
+        } catch(e) {
+          _startCkoAgent(); // 网络异常不卡流程
+        }
+      }
+
+      // 启动 CKO Agent（Reviewer完成后自动触发）
+      async function _startCkoAgent() {
+        const h = document.getElementById('lane-h-cko');
+        const b = document.getElementById('lane-b-cko');
+        const s = document.getElementById('lane-s-cko');
+        if (h) h.className = 'agent-lane-header working';
+        if (b) { b.style.color = '#8b949e'; b.style.fontStyle = 'normal'; b.textContent = ''; }
+        if (s) s.textContent = '⏳';
+        document.getElementById('batchStatus').textContent = '🧠 CKO 蒸馏中...';
+        document.getElementById('taskTime').textContent = '🧠 蒸馏中...';
+        const cnCko = document.getElementById('cn-cko');
+        if (cnCko) { cnCko.style.opacity='1'; cnCko.classList.add('active'); }
+        try {
+          const r = await fetch(BRIDGE + '/api/start-cko-agent', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ batch_id: batchId }),
+          });
+          const d = await r.json();
+          if (!d.run_id) {
+            if (b) b.textContent = '❌ CKO 启动失败';
+            if (typeof window._onCkoDone === 'function') window._onCkoDone();
+            return;
+          }
+          _connectAgent('cko', d.run_id);
+        } catch(e) {
+          if (b) b.textContent = '❌ CKO Agent 启动失败';
+          if (typeof window._onCkoDone === 'function') window._onCkoDone();
+        }
+      }
+
+      // 连接一个 Agent 的 SSE 流
+      function _connectAgent(key, runId) {
+        const bodyEl = document.getElementById('lane-b-' + key);
+        let lastText = '', msgId = null;
+        const es = new EventSource(BRIDGE + '/api/stream/' + runId);
+        es.onmessage = e => {
+          try {
+            const obj = JSON.parse(e.data);
+            if (obj.type === 'assistant') {
+              const mid = obj.message?.id;
+              if (mid && mid !== msgId) { msgId = mid; lastText = ''; }
+              for (const c of (obj.message?.content || [])) {
+                if (c.type === 'text' && c.text.length > lastText.length) {
+                  if (bodyEl) {
+                    bodyEl.textContent += c.text.slice(lastText.length);
+                    bodyEl.scrollTop = bodyEl.scrollHeight;
+                  }
+                  lastText = c.text;
+                }
+              }
+            }
+          } catch(_) {}
+        };
+        es.addEventListener('done', () => {
+          es.close();
+          markLaneDone(key);
+          if (window._updatePhaseDocStatus) window._updatePhaseDocStatus(key, 'done');
+          if (key === 'ui' && generateDemo)  _startDemoAgent();
+          // 无UI阶段的Demo触发：只在没有P1确认卡拦截时才自动触发（P1确认卡会自己调_startDemoAgent）
+          if (generateDemo && !runMap['ui'] && p1Keys.size === 0 && Object.keys(runMap).every(k => doneSet.has(k))) _startDemoAgent();
+          if (key === 'tech') _showTechConfirmCard();        // tech完成→模型选型确认卡
+          if (key === 'reviewer') _checkReviewerThenCko();   // Reviewer完成→P0门→CKO
+        });
+        es.onerror = () => {
+          es.close();
+          const s = document.getElementById('lane-s-' + key);
+          if (s) s.textContent = '❌';
+          if (window._updatePhaseDocStatus) window._updatePhaseDocStatus(key, 'error');
+          doneSet.add(key);
+        };
+      }
+
+      // 启动所有并行 Agent（runMap 里有谁就连谁）
+      Object.entries(runMap).forEach(([key, rid]) => _connectAgent(key, rid));
+
+      // ── Wave2 自动发现：订阅批次事件流，Wave2 启动时自动连接新 Agent ──
+      if (_batchId && isStd) {
+        const batchEs = new EventSource(BRIDGE + '/api/batch-events/' + _batchId);
+        // ── CEO Gate 自动打分事件 ──
+        batchEs.addEventListener('ceo_gate_started', e => {
+          try {
+            const evt = JSON.parse(e.data);
+            const statusEl = document.getElementById('ceo-gate-status');
+            if (statusEl) statusEl.textContent = '🤔 CEO 正在自动评分中...（读取 P1+P2 全量文档，5 维打分）';
+            const card = document.getElementById('ceo-gate-card');
+            if (card) {
+              card.style.borderColor = 'rgba(209,106,78,0.7)';
+              // 注入流式输出区（lane-b-ceo_gate）
+              if (!document.getElementById('lane-b-ceo_gate')) {
+                const out = document.createElement('div');
+                out.id = 'lane-b-ceo_gate';
+                out.style.cssText = 'margin-top:10px;max-height:200px;overflow-y:auto;font-size:11px;color:#8b949e;white-space:pre-wrap;background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;';
+                card.appendChild(out);
+              }
+            }
+            document.getElementById('batchStatus').textContent = '🎯 CEO Gate 自动评分中...';
+            if (evt.run_id) _connectAgent('ceo_gate', evt.run_id);
+          } catch(_) {}
+        });
+        batchEs.addEventListener('ceo_gate_pass', e => {
+          try {
+            const evt = JSON.parse(e.data);
+            const score = evt.score || '—';
+            const forced = evt.forced ? '（连续2轮达标线，强制推进）' : '';
+            const statusEl = document.getElementById('ceo-gate-status');
+            if (statusEl) statusEl.innerHTML = `<span style="color:#3fb950;font-weight:700;">✅ CEO Gate 通过 ${score}/500 · P3 已自动解锁</span>${forced ? '<span style="color:#ffa657;font-size:11px;margin-left:6px;">'+forced+'</span>' : ''}`;
+            const card = document.getElementById('ceo-gate-card');
+            if (card) card.style.borderColor = 'rgba(63,185,80,0.5)';
+            document.getElementById('batchStatus').textContent = `✅ CEO Gate 通过（${score}/500）· P3 生产中...`;
+            if (window._dashShowGate) window._dashShowGate(score, {}, 'pass');
+          } catch(_) {}
+        });
+        batchEs.addEventListener('ceo_gate_redo', e => {
+          try {
+            const evt = JSON.parse(e.data);
+            const score = evt.score || '—';
+            const retry = evt.retry || 1;
+            const agents = (evt.agents || []).join(', ');
+            const statusEl = document.getElementById('ceo-gate-status');
+            if (statusEl) statusEl.innerHTML = `<span style="color:#ffa657;font-weight:700;">⚠️ 第 ${retry} 轮 REDO（${score}/500）· 返工 Agent：${agents}</span>`;
+            const card = document.getElementById('ceo-gate-card');
+            if (card) card.style.borderColor = 'rgba(255,166,87,0.7)';
+            document.getElementById('batchStatus').textContent = `⚠️ CEO Gate REDO（${score}/500）· 第 ${retry} 轮返工中...`;
+          } catch(_) {}
+        });
+        batchEs.addEventListener('ceo_gate_terminate', e => {
+          try {
+            const evt = JSON.parse(e.data);
+            const score = evt.score || '—';
+            const statusEl = document.getElementById('ceo-gate-status');
+            if (statusEl) statusEl.innerHTML = `<span style="color:#f85149;font-weight:700;">🛑 CEO Gate 终止（${score}/500）· 市场机会不足，链路已停止</span>`;
+            const card = document.getElementById('ceo-gate-card');
+            if (card) card.style.borderColor = 'rgba(248,81,73,0.7)';
+            document.getElementById('batchStatus').textContent = `🛑 CEO Gate 终止（${score}/500）· 建议重新选题`;
+          } catch(_) {}
+        });
+
+        batchEs.addEventListener('wave2_started', e => {
+          try {
+            const evt = JSON.parse(e.data);
+            const newRunIds = evt.run_ids || {};
+            Object.entries(newRunIds).forEach(([key, rid]) => {
+              if (rid && !runMap[key]) {
+                runMap[key] = rid;
+                genCount++;
+                totalCount = Object.keys(runMap).length + pendingAgents + 3;
+                updateRing(Math.round(doneSet.size / totalCount * 100));
+                // 更新阶段进度面板中 Wave2 Agent 的状态
+                _updatePhaseDocStatus(key, 'running');
+                _connectAgent(key, rid);
+              }
+            });
+          } catch(_) {}
+        });
+        // P2 自动启动事件
+        batchEs.addEventListener('auto_agent_started', e => {
+          try {
+            const evt = JSON.parse(e.data);
+            const key = evt.key; const rid = evt.run_id;
+            if (key && rid && !runMap[key]) {
+              runMap[key] = rid;
+              _ensureLane(key);          // ✅ 自动补 lane，后端加新 agent 无需改前端
+              _updatePhaseDocStatus(key, 'running');
+              _connectAgent(key, rid);
+            }
+          } catch(_) {}
+        });
+        // Reviewer 自动启动
+        batchEs.addEventListener('reviewer_auto_started', e => {
+          try {
+            const evt = JSON.parse(e.data);
+            if (evt.run_id && !runMap['reviewer']) {
+              runMap['reviewer'] = evt.run_id;
+              _updatePhaseDocStatus('reviewer', 'running');
+              document.getElementById('batchStatus').textContent = '🛡 Reviewer 8层审批中（自动触发）...';
+              _connectAgent('reviewer', evt.run_id);
+            }
+          } catch(_) {}
+        });
+        // CKO 自动启动
+        batchEs.addEventListener('cko_auto_started', e => {
+          try {
+            const evt = JSON.parse(e.data);
+            if (evt.run_id && !runMap['cko']) {
+              runMap['cko'] = evt.run_id;
+              _updatePhaseDocStatus('cko', 'running');
+              document.getElementById('batchStatus').textContent = '🧠 CKO 蒸馏中（自动触发）...';
+              const cnCko = document.getElementById('cn-cko');
+              if (cnCko) { cnCko.style.opacity='1'; cnCko.classList.add('active'); }
+              _connectAgent('cko', evt.run_id);
+            }
+          } catch(_) {}
+        });
+        // 链路被 BLOCK → 拉取 P0 失败列表，展示手术台
+        batchEs.addEventListener('chain_blocked', async () => {
+          document.getElementById('batchStatus').textContent = '🔴 Reviewer BLOCK · 链路已停止';
+          if (_batchId) await _showSurgeryPanel(_batchId);
+        });
+        // 全链完成 + Brain 更新提示
+        batchEs.addEventListener('full_chain_complete', () => {
+          document.getElementById('batchStatus').textContent = '✅ 全链完成 · P1→P2→审批→蒸馏全部完成';
+          batchEs.close();
+          clearInterval(_pollChain);
+        });
+        batchEs.addEventListener('brain_updated', () => {
+          const el = document.getElementById('batchStatus');
+          if (el) el.textContent += ' · 🧠 RETRO已回流Peach Brain';
+        });
+        // 重跑完成通知
+        batchEs.addEventListener('rerun_done', e => {
+          try {
+            const evt = JSON.parse(e.data);
+            document.getElementById('batchStatus').textContent =
+              `🔁 ${evt.key} 重跑完成 · 建议重新触发 Reviewer 复核`;
+          } catch(_) {}
+        });
+        batchEs.addEventListener('done', () => batchEs.close());
+
+        // ── P1 顺序执行事件 ────────────────────────────────────
+        batchEs.addEventListener('p1_seq_started', e => {
+          try { const ev=JSON.parse(e.data); document.getElementById('batchStatus').textContent=`🚀 P1 开始：${ev.total}份文档顺序生成`; } catch(_){}
+        });
+        batchEs.addEventListener('p1_doc_started', e => {
+          try {
+            const ev=JSON.parse(e.data);
+            _updatePhaseDocStatus(ev.key, 'running', ev.label);
+            document.getElementById('batchStatus').textContent=`▶ P1 (${ev.idx}/11) ${ev.label} 生成中...`;
+            const c=document.getElementById('phase-counter-p1'); if(c) c.textContent=`${ev.idx}/11`;
+          } catch(_){}
+        });
+        batchEs.addEventListener('p1_doc_done', e => {
+          try {
+            const ev=JSON.parse(e.data);
+            _updatePhaseDocStatus(ev.key, ev.review==='SKIP'?'error':'done', ev.label);
+            if(ev.review!=='SKIP'){doneSet.add(ev.key); updateRing(Math.round(doneSet.size/totalCount*100));}
+            document.getElementById('batchStatus').textContent=`✅ P1 (${ev.idx}/11) ${ev.label}${ev.review==='REWRITTEN'?' (已修复)':''}`;
+          } catch(_){}
+        });
+        batchEs.addEventListener('p1_doc_rewrite', e => {
+          try { const ev=JSON.parse(e.data); _updatePhaseDocStatus(ev.key,'rewrite',ev.label); document.getElementById('batchStatus').textContent=`🔄 P1 ${ev.label} 审查不通过·重写中...`; } catch(_){}
+        });
+        batchEs.addEventListener('p1_all_docs_done', () => {
+          document.getElementById('batchStatus').textContent='🏁 P1 11份文档全部完成，准备门控审查...';
+          const c=document.getElementById('phase-counter-p1'); if(c) c.textContent='11/11 ✅';
+        });
+        batchEs.addEventListener('p1_gate_started', () => {
+          document.getElementById('batchStatus').textContent='🎯 P1门控：CEO + 高级PM联合审查中（5个维度）...';
+        });
+        batchEs.addEventListener('p1_gate_done', e => {
+          try {
+            const ev=JSON.parse(e.data);
+            const label={'PASS':'✅通过','PASS_WITH_WARNING':'⚠️带警告通过','PASS_FORCED':'⚡强制通过','RETRY':'🔄修复后通过'}[ev.result]||ev.result;
+            document.getElementById('batchStatus').textContent=`P1门控 ${label} · 自动推进P2用户研究...`;
+          } catch(_){}
+        });
+        batchEs.addEventListener('p1_gate_fail', e => {
+          try { const ev=JSON.parse(e.data); document.getElementById('batchStatus').textContent=`❌ P1门控不通过（薄弱: ${ev.weak_docs}）· 自动修复中...`; } catch(_){}
+        });
+        batchEs.addEventListener('p1_fix_started', () => { document.getElementById('batchStatus').textContent='🔧 P1自动修复薄弱文档中...'; });
+        batchEs.addEventListener('p1_fix_done', () => { document.getElementById('batchStatus').textContent='✅ P1修复完成，重新门控审查...'; });
+
+        // ── P2-P6 通用顺序执行事件 ─────────────────────────────
+        const _phaseLabels = {p2:'用户研究',p3:'产品规划',p4:'设计体验',p5:'技术开发',p6:'上线运营'};
+        const _phaseTotals = {p2:5,p3:7,p4:4,p5:7,p6:5};
+        ['p2','p3','p4','p5','p6'].forEach(ph => {
+          const phName = _phaseLabels[ph]||ph.toUpperCase();
+          const total  = _phaseTotals[ph]||'?';
+          batchEs.addEventListener(`${ph}_auto_started`, () => {
+            document.getElementById('batchStatus').textContent=`🚀 P${ph[1]} ${phName} 自动启动...`;
+            // 确保该阶段面板可见（若首次出现）
+            const div=document.getElementById(`phase-div-${ph}`);
+            if(div) div.style.display='block';
+          });
+          batchEs.addEventListener(`${ph}_seq_started`, e => {
+            try { const ev=JSON.parse(e.data); document.getElementById('batchStatus').textContent=`📝 P${ph[1]} ${phName} 开始：${ev.total||total}份文档顺序生成`; } catch(_){}
+          });
+          batchEs.addEventListener(`${ph}_doc_started`, e => {
+            try {
+              const ev=JSON.parse(e.data);
+              _updatePhaseDocStatus(ev.key, 'running', ev.label);
+              document.getElementById('batchStatus').textContent=`▶ P${ph[1]} (${ev.idx}/${ev.total||total}) ${ev.label} 生成中...`;
+              const c=document.getElementById(`phase-counter-${ph}`); if(c) c.textContent=`${ev.idx}/${ev.total||total}`;
+            } catch(_){}
+          });
+          batchEs.addEventListener(`${ph}_doc_done`, e => {
+            try {
+              const ev=JSON.parse(e.data);
+              _updatePhaseDocStatus(ev.key, ev.review==='SKIP'?'error':'done', ev.label);
+              if(ev.review!=='SKIP'){doneSet.add(ev.key); updateRing(Math.round(doneSet.size/totalCount*100));}
+              document.getElementById('batchStatus').textContent=`✅ P${ph[1]} (${ev.idx}/${ev.total||total}) ${ev.label}${ev.review==='REWRITTEN'?' (已修复)':''}`;
+            } catch(_){}
+          });
+          batchEs.addEventListener(`${ph}_doc_rewrite`, e => {
+            try { const ev=JSON.parse(e.data); _updatePhaseDocStatus(ev.key,'rewrite',ev.label); document.getElementById('batchStatus').textContent=`🔄 P${ph[1]} ${ev.label} 重写中...`; } catch(_){}
+          });
+          batchEs.addEventListener(`${ph}_all_docs_done`, () => {
+            document.getElementById('batchStatus').textContent=`🏁 P${ph[1]} ${phName} 全部完成`;
+            const c=document.getElementById(`phase-counter-${ph}`); if(c) c.textContent=`${total}/${total} ✅`;
+          });
+        });
+        // P2 agents_launched（旧并发事件兼容）
+        batchEs.addEventListener('p2_agents_launched', e => {
+          try {
+            const ev=JSON.parse(e.data);
+            Object.entries(ev.run_ids||{}).forEach(([key,rid]) => {
+              if(rid&&!runMap[key]){ runMap[key]=rid; _updatePhaseDocStatus(key,'running'); _connectAgent(key,rid); }
+            });
+          } catch(_){}
+        });
+
+        // 兜底：5秒轮询 batch-status，防止 SSE 事件丢失，直到全链完成
+        let _chainDone = false;
+        const _pollChain = setInterval(async () => {
+          if (_chainDone) { clearInterval(_pollChain); return; }
+          try {
+            const r = await fetch(BRIDGE + '/api/batch-status/' + _batchId);
+            const d = await r.json();
+            if (d.run_ids) {
+              Object.entries(d.run_ids).forEach(([key, rid]) => {
+                if (rid && !runMap[key]) {
+                  runMap[key] = rid;
+                  _updatePhaseDocStatus(key, 'running');
+                  _connectAgent(key, rid);
+                }
+              });
+            }
+            // 当 Reviewer+CKO 都完成且无等待队列时认为全链结束
+            if (!d.wave2_pending && !d.queue_count && d.run_ids?.reviewer && d.run_ids?.cko) {
+              _chainDone = true; clearInterval(_pollChain);
+            }
+          } catch(_) {}
+        }, 5000);
+      }
+
+      // ── 阶段文档进度面板（P1-P6 各阶段文档清单） ──
+      (function _buildPhaseDocPanel() {
+        // 闪电档不显示此面板（只产3件套+Demo）
+        if (!isStd) return;
+        // P1 v2 顺序模式（11份文档）还是旧 wave 模式
+        const p1SeqV2 = isStd || p1Keys.size > 0;
+
+        const PHASE_DOCS = {
+          p1: {
+            label: 'P1 · 市场洞察（11份）',
+            seq: [
+              {key:'market',         label:'📊 市场数据报告'},
+              {key:'comp_deep_1',    label:'🔬 竞品深度报告 #1'},
+              {key:'comp_deep_2',    label:'🔬 竞品深度报告 #2'},
+              {key:'comp_deep_3',    label:'🔬 竞品深度报告 #3'},
+              {key:'comp_synthesis', label:'🎯 竞品汇总对比报告'},
+              {key:'swot',           label:'📋 SWOT分析'},
+              {key:'bp',             label:'💼 商业计划书BP'},
+              {key:'mrd',            label:'📝 MRD市场需求汇总'},
+              {key:'brd',            label:'📝 BRD商业需求文档'},
+              {key:'lixi',           label:'📄 项目立项报告'},
+              {key:'barrier',        label:'🔒 壁垒方向专题'},
+            ],
+            wave1: [
+              {key:'market',             label:'📊 市场报告'},
+              {key:'user',               label:'👤 用户画像'},
+              {key:'competitor_barrier', label:'🔍 P1竞品格局'},
+            ],
+            wave2: [
+              {key:'n34',                  label:'🧮 N34 AI赋能边界'},
+              {key:'swot_bp',              label:'📋 SWOT+商业计划书BP'},
+              {key:'brd_mrd',              label:'📝 BRD+MRD'},
+              {key:'competitor_deep',      label:'🔬 竞品深度报告×3'},
+            ],
+            wave3: [
+              {key:'competitor_synthesis', label:'🎯 竞品综合对比+机会点'},
+            ],
+          },
+          p2: {
+            label: 'P2 · 用户研究（5份）',
+            seq: [
+              {key:'user_research',  label:'📊 用户调研报告'},
+              {key:'questionnaire',  label:'📋 问卷设计与数据报告'},
+              {key:'user_interview', label:'🎤 用户访谈记录'},
+              {key:'user_persona',   label:'👤 用户画像文档'},
+              {key:'user_journey',   label:'🗺 用户旅程地图'},
+            ],
+            wave1: [
+              {key:'charter',     label:'📋 项目立项报告'},
+              {key:'user_survey', label:'📊 用户调研+旅程'},
+            ],
+          },
+          p3: {
+            label: 'P3 · 产品规划（7份）',
+            seq: [
+              {key:'prd',           label:'📄 PRD产品需求文档'},
+              {key:'mvp',           label:'🎯 MVP最小可行方案'},
+              {key:'roadmap',       label:'🗓 产品路线图Roadmap'},
+              {key:'feature_list',  label:'📝 功能清单FeatureList'},
+              {key:'ia',            label:'🗂 信息架构图IA'},
+              {key:'business_flow', label:'🗺 业务流程图'},
+              {key:'ai_select',     label:'🤖 AI选型需求单'},
+            ],
+            wave1: [
+              {key:'prd',        label:'📄 PRD产品需求'},
+              {key:'flow',       label:'🗺 业务流程图'},
+              {key:'roadmap',    label:'🗓 路线图+指标'},
+              {key:'ui',         label:'🎨 UI规格'},
+              {key:'ia_feature', label:'🗂 IA+功能清单+数据'},
+            ],
+          },
+          p4: {
+            label: 'P4 · 设计体验（4份）',
+            seq: [
+              {key:'metrics',    label:'📊 数据指标体系'},
+              {key:'proto',      label:'✏️ 交互原型文档'},
+              {key:'ui_system',  label:'🎨 UI设计规范DesignSystem'},
+              {key:'design_qa',  label:'🔍 设计走查清单'},
+            ],
+            wave1: [
+              {key:'competitor', label:'🔍 竞品深度×3+对比'},
+              {key:'tech',       label:'⚙️ 技术方案+选型'},
+              {key:'design_qa',  label:'🎨 设计走查+AI选型'},
+            ],
+          },
+          p5: {
+            label: 'P5 · 技术开发（7份）',
+            seq: [
+              {key:'tech_report',  label:'⚙️ 技术报告'},
+              {key:'model_select', label:'🧠 模型选型评估'},
+              {key:'compliance',   label:'⚖️ AI合规与隐私'},
+              {key:'api_db',       label:'🔌 API接口+数据库设计'},
+              {key:'embed_test',   label:'📍 埋点需求+测试用例'},
+              {key:'ai_eval',      label:'🧪 AI评测报告'},
+              {key:'sop_tech',     label:'📚 技术安全SOP'},
+            ],
+            wave1: [
+              {key:'compliance', label:'⚖️ AI合规+隐私'},
+              {key:'api_db',     label:'🔌 API+数据库'},
+              {key:'embed_test', label:'📍 埋点+测试'},
+              {key:'ai_eval',    label:'🧪 AI评测报告'},
+              {key:'sop_tech',   label:'📚 安全SOP'},
+            ],
+          },
+          p6: {
+            label: 'P6 · 上线运营与迭代（8份）',
+            seq: [
+              {key:'user_manual',      label:'📖 产品使用手册'},
+              {key:'launch_checklist', label:'✅ 上线CheckList'},
+              {key:'monetization',     label:'💰 商业化与定价方案'},
+              {key:'ops_strategy',     label:'📣 运营策略文档'},
+              {key:'aso_materials',    label:'📱 ASO应用商店材料'},
+              {key:'retro_report',     label:'📊 项目汇报复盘材料'},
+              {key:'reviewer',         label:'🛡 质量审查报告'},
+              {key:'cko',              label:'✨ CKO知识蒸馏'},
+            ],
+            wave1: [
+              {key:'user_manual',      label:'📖 产品使用手册'},
+              {key:'launch_checklist', label:'✅ 上线CheckList'},
+              {key:'monetization',     label:'💰 商业化与定价方案'},
+              {key:'ops_strategy',     label:'📣 运营策略文档'},
+              {key:'aso_materials',    label:'📱 ASO应用商店材料'},
+              {key:'retro_report',     label:'📊 项目汇报复盘材料'},
+              {key:'reviewer',         label:'🛡 质量审查报告'},
+              {key:'cko',              label:'✨ CKO知识蒸馏'},
+            ],
+          },
+        };
+
+        // 判断当前跑了哪些 phase
+        const activePhases = new Set();
+        // 标准档顺序模式：P1-P6 全部展示（后续阶段初始状态为"等待中"）
+        if (p1SeqV2) { activePhases.add('p1'); activePhases.add('p2'); activePhases.add('p3'); activePhases.add('p4'); activePhases.add('p5'); activePhases.add('p6'); }
+        Object.keys(runMap).forEach(k => {
+          for (const [ph, cfg] of Object.entries(PHASE_DOCS)) {
+            const legacyAgents = [...(cfg.wave1||[]), ...(cfg.wave2||[]), ...(cfg.wave3||[])];
+            const seqAgents = cfg.seq || [];
+            if ([...legacyAgents,...seqAgents].some(a => a.key === k)) { activePhases.add(ph); break; }
+          }
+        });
+        p1Wave2Keys.forEach(() => activePhases.add('p1'));
+
+        const container = document.createElement('div');
+        container.id = 'phase-doc-panel';
+        container.style.cssText = 'margin:16px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--paper);';
+
+        const header = document.createElement('div');
+        header.style.cssText = 'padding:10px 16px;background:linear-gradient(90deg,var(--sage-light,#e8eed8),var(--paper));border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;';
+        header.innerHTML = '<span style="font-size:13px;font-weight:600;color:var(--ink);">📋 文档生产进度</span><span id="phase-panel-toggle" style="font-size:11px;color:var(--ink-faint);">▲ 折叠</span>';
+        container.appendChild(header);
+
+        const body = document.createElement('div');
+        body.id = 'phase-doc-body';
+        body.style.cssText = 'padding:12px 16px;display:grid;gap:8px;';
+
+        header.onclick = () => {
+          const expanded = body.style.display !== 'none';
+          body.style.display = expanded ? 'none' : 'grid';
+          document.getElementById('phase-panel-toggle').textContent = expanded ? '▼ 展开' : '▲ 折叠';
+        };
+
+        for (const [ph, cfg] of Object.entries(PHASE_DOCS)) {
+          if (!activePhases.has(ph)) continue;
+          const phaseDiv = document.createElement('div');
+          phaseDiv.id = `phase-div-${ph}`;
+          phaseDiv.style.cssText = 'border:1px solid var(--border);border-radius:8px;overflow:hidden;';
+          phaseDiv.innerHTML = `<div style="padding:6px 12px;background:var(--sage-light,#f0f4e0);font-size:12px;font-weight:600;color:var(--ink);display:flex;justify-content:space-between;"><span>${cfg.label}</span><span id="phase-counter-${ph}" style="font-weight:400;color:var(--ink-faint);"></span></div>`;
+          const agentList = document.createElement('div');
+          agentList.id = `phase-list-${ph}`;
+          agentList.style.cssText = 'padding:6px 12px;display:grid;gap:4px;';
+
+          // 顺序模式用 seq，旧模式用 wave1+wave2
+          const useSeq = p1SeqV2 && cfg.seq && cfg.seq.length > 0;
+          const agents = useSeq
+            ? cfg.seq.map(a=>({...a,seq:true}))
+            : [...(cfg.wave1||[]).map(a=>({...a,wave:1})), ...(cfg.wave2||[]).map(a=>({...a,wave:2}))];
+
+          agents.forEach(agent => {
+            const row = document.createElement('div');
+            row.id = `phase-doc-row-${agent.key}`;
+            row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:12px;padding:2px 0;';
+            const hasRun = !!runMap[agent.key];
+            const icon = useSeq ? '🔒' : (hasRun ? '⏳' : (agent.wave===2 ? '🔒' : '⏳'));
+            const tag = !useSeq && agent.wave===2
+              ? '<span style="font-size:10px;color:var(--ink-faint);background:rgba(0,0,0,0.05);border-radius:3px;padding:0 4px;">Wave2</span>'
+              : '';
+            row.innerHTML = `<span id="phase-doc-icon-${agent.key}" style="min-width:16px;">${icon}</span><span style="color:var(--ink);flex:1;">${agent.label}${tag}</span>`;
+            agentList.appendChild(row);
+          });
+          phaseDiv.appendChild(agentList);
+          body.appendChild(phaseDiv);
+        }
+        container.appendChild(body);
+
+        const coordEl = document.getElementById('coordChain');
+        if (coordEl) coordEl.parentElement.insertBefore(container, coordEl);
+
+        // 暴露给全局：支持动态新增行
+        window._updatePhaseDocStatus = (key, status, label) => {
+          let icon = document.getElementById('phase-doc-icon-' + key);
+          if (!icon) {
+            // 动态创建行（新 agent key 未在面板里）
+            const body = document.getElementById('phase-doc-body');
+            if (body) {
+              const row = document.createElement('div');
+              row.id = `phase-doc-row-${key}`;
+              row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:12px;padding:2px 0;';
+              row.innerHTML = `<span id="phase-doc-icon-${key}" style="min-width:16px;">🔒</span><span style="color:var(--ink);flex:1;">${label||key}</span>`;
+              body.appendChild(row);
+              icon = document.getElementById('phase-doc-icon-' + key);
+            }
+          }
+          if (!icon) return;
+          if (status === 'running') icon.textContent = '⏳';
+          else if (status === 'done') icon.textContent = '✅';
+          else if (status === 'error') icon.textContent = '❌';
+          else if (status === 'rewrite') icon.textContent = '🔄';
+          else if (status === 'pending') icon.textContent = '🔒';
+        };
+        // 初始化：已在 runMap 的 key → ⏳
+        Object.keys(runMap).forEach(k => window._updatePhaseDocStatus(k, 'running'));
+      })();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // 桥接模式 · 两阶段流式接收
+    // 阶段1：analyze → 展示六步分析 → 确认按钮
+    // 阶段2：generate → 展示文件生成进度
+    // ═══════════════════════════════════════════════════════
+    function _initLiveRun(runId, u, phase, origMode) {
+      // ── 调试条 ──
+      const _dbg = document.createElement('div');
+      _dbg.id = 'live-debug-bar';
+      _dbg.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1a3a0a;border-top:1px solid rgba(100,200,80,0.3);padding:6px 14px;font-size:11px;font-family:monospace;color:#a8d58a;display:flex;gap:16px;align-items:center;';
+      _dbg.innerHTML = `<span>🟢 live模式</span><span>phase=${phase}</span><span>mode=${origMode}</span><span>runId=${(runId||'').substring(0,8)}</span><span id="_live_dbg" style="margin-left:auto;color:#ffa657;">analyze 进行中...</span>`;
+      document.body.appendChild(_dbg);
+
+      phase    = phase    || 'analyze';
+      origMode = origMode || 'lightning';
+      const mode     = origMode;
+      const industry = decodeURIComponent(u.searchParams.get('industry') || '未知行业');
+      const product  = decodeURIComponent(u.searchParams.get('q') || u.searchParams.get('product') || '正在生成...');
+      const projDir  = decodeURIComponent(u.searchParams.get('project_dir') || '');
+
+      // 显示 UI 区块
+      document.getElementById('taskOverview').style.display = 'grid';
+      document.getElementById('resMain').style.display      = 'grid';
+      document.getElementById('resFooter').style.display    = 'block';
+      document.getElementById('feedbackLoop').style.display = 'block';
+      document.getElementById('liveLog').style.display      = 'block';
+      document.getElementById('coordChain').style.display   = 'block';
+
+      // 协调链：分析阶段激活CEO+行业专家
+      if (phase === 'analyze') {
+        ['cn-ceo','cn-expert'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.style.opacity='1'; el.classList.add('active'); }
+        });
+      }
+
+      document.getElementById('taskText').textContent = product;
+      document.getElementById('taskIndustry').textContent = '🏭 ' + industry;
+      const modeEl = document.getElementById('taskMode');
+      if (phase === 'analyze') {
+        modeEl.textContent = '🧠 行业认知识别中...';
+        modeEl.className = 'tm-meta-item mode-lightning';
+      } else if (mode === 'lightning') {
+        modeEl.textContent = '⚡ 闪电档 · PRD + UI规格 + Demo';
+        modeEl.className = 'tm-meta-item mode-lightning';
+      } else {
+        modeEl.textContent = '📦 标准档 · 12 阶段全套';
+        modeEl.className = 'tm-meta-item mode-standard';
+      }
+      if (phase === 'analyze') {
+        // 7步进度ticker
+        const _steps = [
+          '⏱ 正在识别行业信号...',
+          '⏱ 正在调度行业专家...',
+          '⏱ 正在拆解细分赛道...',
+          '⏱ 正在生成机会与风险...',
+          '⏱ 正在推理 AI 架构...',
+          '⏱ 正在生成产品切口...',
+          '⏱ 正在回流行业神经库...',
+        ];
+        let _stepIdx = 0;
+        document.getElementById('taskTime').textContent = _steps[0];
+        window._stepTicker = setInterval(() => {
+          _stepIdx = (_stepIdx + 1) % _steps.length;
+          document.getElementById('taskTime').textContent = _steps[_stepIdx];
+        }, 4000);
+      } else {
+        document.getElementById('taskTime').textContent = '⏱ 生成中...';
+      }
+
+      // 文档清单初始化
+      document.getElementById('docList').innerHTML =
+        '<li style="color:var(--ink-faint); padding:12px; list-style:none;">⏳ 等待 Claude 生成文件...</li>';
+      document.getElementById('docDone').textContent = '0';
+      document.getElementById('docTotal').textContent = '?';
+
+      // 流水线（全部 pending 状态，逐步推进）
+      const PIPE = [
+        {n:1,name:'需求入口',    role:'老板输入需求 + 行业 + 档位'},
+        {n:2,name:'CEO 调度',    role:'判行业 + 派任务 · 00_CEO'},
+        {n:3,name:'PM 分析',     role:'六步分析 · 01_PM + 07_数据'},
+        {n:4,name:'行业专家',    role:'20 专家拉 1-2 个'},
+        {n:5,name:'AI 训练师',   role:'04_AI 训练师 · 选型 + 评测'},
+        {n:6,name:'技术 + 设计', role:'05/06/08/09 并发产出'},
+        {n:7,name:'3 总监审',    role:'产品/技术/设计 BLOCKING'},
+        {n:8,name:'QA 一致性',   role:'跨线对齐 · 反"瞎编"'},
+        {n:9,name:'交付 + 回流', role:'Obsidian 归档 + 知识库更新'},
+      ];
+      const pipeEl = document.getElementById('pipeList');
+      pipeEl.innerHTML = PIPE.map(p => `
+        <div class="pipe-layer" id="pipe-${p.n}">
+          <div class="pipe-num">${p.n}</div>
+          <div class="pipe-info">
+            <div class="pi-name">${p.name}</div>
+            <div class="pi-role">${p.role}</div>
+          </div>
+          <div class="pipe-time" id="pipe-t-${p.n}">⏳</div>
+        </div>
+      `).join('');
+      document.getElementById('pipeDone').textContent = '0';
+
+      // 进度环辅助
+      let ringPct = 0;
+      function updateRing(pct) {
+        ringPct = Math.min(100, pct);
+        document.getElementById('ringFill').style.strokeDashoffset = 377 * (1 - ringPct / 100);
+        document.getElementById('ringNum').textContent = Math.round(ringPct);
+      }
+
+      // 假进度（每 8 秒 +3%，上限 85%）
+      let fakeTimer = setInterval(() => { if (ringPct < 85) updateRing(ringPct + 3); }, 8000);
+
+      // 流水线假推进（每 20 秒推一层）
+      let pipeIdx = 0;
+      let pipeTimer = setInterval(() => {
+        if (pipeIdx < PIPE.length) {
+          const el = document.getElementById('pipe-' + PIPE[pipeIdx].n);
+          if (el) { el.classList.add('done'); document.getElementById('pipe-t-' + PIPE[pipeIdx].n).textContent = '✓'; }
+          document.getElementById('pipeDone').textContent = pipeIdx + 1;
+          pipeIdx++;
+        } else clearInterval(pipeTimer);
+      }, 20000);
+
+      // 导出/归档按钮存根（文件已由 Claude 自动保存）
+      window.exportZipPack = () => alert('文件已由 Claude 自动保存至 Obsidian。\n路径：' + (projDir || '桃子obsidian/桃子资料/项目/'));
+      window.authObsidianAndArchive = window.exportZipPack;
+      window.flowback = () => alert('🔄 反馈回流机制（v2 规划）\n- 好 Prompt → 回流武器库\n- BadCase → 训练师库\n- 模板优化 → VELA v2 候选');
+
+      // ─── SSE 接收 ───
+      const logBody = document.getElementById('liveLogBody');
+      let lastText = '', currentMsgId = null, _cogCardsRendered = false;
+
+      function appendLog(text, color) {
+        const span = document.createElement('span');
+        if (color) span.style.color = color;
+        span.textContent = text;
+        logBody.appendChild(span);
+        logBody.scrollTop = logBody.scrollHeight;
+      }
+
+      // ── 行业认知卡片 解析 + 渲染（提前到 SSE scope，流式检测可用）──
+      function _parseCognitiveCards(text) {
+        // 优先：标记包裹
+        try {
+          const m = text.match(/<!-- COGNITIVE_CARDS_JSON_START -->([\s\S]*?)<!-- COGNITIVE_CARDS_JSON_END -->/);
+          if (m) {
+            let raw = m[1].trim();
+            // 去掉模型经常多输出的 ```json ... ``` 包裹
+            raw = raw.replace(/^```(?:json)?\s*/m, '').replace(/\s*```\s*$/m, '').trim();
+            return JSON.parse(raw);
+          }
+        } catch(e) {}
+        // 兜底：找包含 keyword_signals 或 industry_map 的最大 JSON 块
+        try {
+          const blocks = text.match(/\{[\s\S]{200,}\}/g) || [];
+          for (const b of blocks.reverse()) {
+            try {
+              const obj = JSON.parse(b);
+              if (obj.keyword_signals || obj.industry_map || obj.cognitive_summary) return obj;
+            } catch(_) {}
+          }
+        } catch(e) {}
+        return null;
+      }
+
+      function _renderCognitiveCards(d) {
+        const section = document.createElement('div');
+        section.className = 'cognitive-section';
+
+        // ── 行业认知摘要条 ──
+        if (d.cognitive_summary) {
+          const s = d.cognitive_summary;
+          const bar = document.createElement('div');
+          bar.className = 'cognitive-summary-bar';
+          bar.innerHTML = `
+            <div class="csb-head">
+              <h4>🧠 行业认知摘要</h4>
+              <span style="font-size:11px;color:var(--ink-faint);">点击折叠</span>
+            </div>
+            <div class="csb-grid" id="csb-body">
+              <div class="csb-item"><strong>行业/赛道</strong><span>${s.industry || '—'} · ${s.sub_domain || '—'}</span></div>
+              <div class="csb-item"><strong>机会点</strong><span>${s.opportunity_short || '—'}</span></div>
+              <div class="csb-item"><strong>主要风险</strong><span>${s.risk_short || '—'}</span></div>
+              <div class="csb-item"><strong>MVP切口</strong><span>${s.mvp_cut || '—'}</span></div>
+              <div class="csb-item"><strong>核心指标</strong><span>${s.north_star || '—'}</span></div>
+            </div>
+            ${d.cognitive_summary.backflow_assets && d.cognitive_summary.backflow_assets.length ? `
+            <div class="csb-assets">
+              <strong>可回流资产：</strong>
+              ${d.cognitive_summary.backflow_assets.map(a => `<span class="cog-tag">${a}</span>`).join('')}
+            </div>` : ''}
+          `;
+          bar.onclick = () => {
+            const body = bar.querySelector('#csb-body');
+            if (body) body.style.display = body.style.display === 'none' ? 'grid' : 'none';
+          };
+          section.appendChild(bar);
+        }
+
+        // ── 6张认知卡片 ──
+        section.innerHTML += '<h3 style="margin-top:16px;">🗺 行业认知拆解 · 6 张卡片</h3>';
+        const grid = document.createElement('div');
+        grid.className = 'cognitive-grid';
+
+        // 卡1：行业地图
+        if (d.industry_map) {
+          const m = d.industry_map;
+          grid.innerHTML += `<div class="cog-card">
+            <div class="cog-card-head"><span class="cog-card-emoji">🗺</span><span class="cog-card-title">行业地图</span></div>
+            <div class="cog-card-body">
+              <div style="margin-bottom:8px;">
+                <span class="cog-tag primary">${m.industry || '—'}</span>
+                <span class="cog-tag primary">${m.sub_domain || '—'}</span>
+                <span class="cog-tag">${m.stage || '—'}</span>
+              </div>
+              <div style="color:var(--ink-faint);font-size:11px;margin-bottom:4px;">典型场景</div>
+              <div>${m.business_scene || '—'}</div>
+              ${m.product_forms && m.product_forms.length ? `
+              <div style="margin-top:8px;color:var(--ink-faint);font-size:11px;">产品形态</div>
+              <div>${m.product_forms.map(f=>`<span class="cog-tag">${f}</span>`).join('')}</div>` : ''}
+            </div>
+          </div>`;
+        }
+
+        // 卡2：关键词信号
+        if (d.keyword_signals && d.keyword_signals.length) {
+          const rows = d.keyword_signals.map(k => `
+            <tr>
+              <td><strong>${k.keyword}</strong></td>
+              <td style="color:var(--ink-faint)">${k.deep || k.surface}</td>
+            </tr>
+          `).join('');
+          grid.innerHTML += `<div class="cog-card">
+            <div class="cog-card-head"><span class="cog-card-emoji">🔍</span><span class="cog-card-title">关键词信号</span></div>
+            <div class="cog-card-body">
+              <table><thead><tr><th>关键词</th><th>深层信号</th></tr></thead><tbody>${rows}</tbody></table>
+            </div>
+          </div>`;
+        }
+
+        // 卡3：机会洞察
+        if (d.opportunity) {
+          const o = d.opportunity;
+          const items = [
+            {label:'市场',val:o.market},
+            {label:'用户',val:o.user},
+            {label:'技术',val:o.tech},
+            {label:'商业',val:o.business},
+            {label:'组织',val:o.org},
+          ].filter(x=>x.val);
+          grid.innerHTML += `<div class="cog-card">
+            <div class="cog-card-head"><span class="cog-card-emoji">💡</span><span class="cog-card-title">机会洞察</span></div>
+            <div class="cog-card-body">
+              ${items.map(x=>`<div style="display:flex;gap:8px;margin-bottom:6px;">
+                <span class="cog-tag op" style="flex-shrink:0;">${x.label}</span>
+                <span>${x.val}</span>
+              </div>`).join('')}
+            </div>
+          </div>`;
+        }
+
+        // 卡4：风险信号
+        if (d.risks && d.risks.length) {
+          grid.innerHTML += `<div class="cog-card">
+            <div class="cog-card-head"><span class="cog-card-emoji">⚠️</span><span class="cog-card-title">风险信号</span></div>
+            <div class="cog-card-body">
+              ${d.risks.map(r=>`<div class="risk-item">
+                <strong>${r.type || r.desc.slice(0,12)}</strong>
+                ${r.desc}
+                ${r.solution ? `<div style="color:var(--sage-dark);margin-top:3px;font-size:11px;">→ ${r.solution}</div>` : ''}
+              </div>`).join('')}
+            </div>
+          </div>`;
+        }
+
+        // 卡5：业务链路
+        if (d.business_chain) {
+          const c = d.business_chain;
+          grid.innerHTML += `<div class="cog-card">
+            <div class="cog-card-head"><span class="cog-card-emoji">🔗</span><span class="cog-card-title">业务链路</span></div>
+            <div class="cog-card-body">
+              <table><tbody>
+                <tr><td style="color:var(--ink-faint);width:56px;">用户</td><td>${c.user||'—'}</td></tr>
+                <tr><td style="color:var(--ink-faint);">付费方</td><td>${c.payer||c.customer||'—'}</td></tr>
+                <tr><td style="color:var(--ink-faint);">核心流程</td><td>${c.flow||'—'}</td></tr>
+                <tr><td style="color:var(--ink-faint);">AI介入</td><td><span class="cog-tag primary">${c.ai_entry||'—'}</span></td></tr>
+                <tr><td style="color:var(--ink-faint);">价值点</td><td>${c.value_point||'—'}</td></tr>
+              </tbody></table>
+            </div>
+          </div>`;
+        }
+
+        // 卡6：AI架构推理
+        if (d.ai_architecture) {
+          const a = d.ai_architecture;
+          grid.innerHTML += `<div class="cog-card">
+            <div class="cog-card-head"><span class="cog-card-emoji">🤖</span><span class="cog-card-title">AI架构推理</span></div>
+            <div class="cog-card-body">
+              <div style="margin-bottom:8px;">
+                ${a.capabilities && a.capabilities.map ? a.capabilities.map(c=>`<span class="cog-tag primary">${c}</span>`).join('') : ''}
+              </div>
+              <div style="font-size:12px;margin-bottom:6px;"><strong>推荐架构：</strong>${a.architecture||'—'}</div>
+              <div style="font-size:11px;color:var(--peach);"><strong>⚠ 不建议：</strong>${a.not_recommended||'—'}</div>
+              <div style="font-size:11px;color:var(--ink-faint);margin-top:4px;">
+                实时性：${a.latency||'—'} · 数据敏感度：${a.sensitivity||'—'}
+              </div>
+            </div>
+          </div>`;
+        }
+
+        // 卡7：产品切口
+        if (d.cognitive_summary) {
+          const s = d.cognitive_summary;
+          grid.innerHTML += `<div class="cog-card" style="border-top:2px solid var(--peach);">
+            <div class="cog-card-head"><span class="cog-card-emoji">🎯</span><span class="cog-card-title">产品切口</span></div>
+            <div class="cog-card-body">
+              <div style="margin-bottom:8px;padding:8px 10px;background:linear-gradient(135deg,rgba(209,106,78,0.06),rgba(154,168,137,0.06));border-radius:6px;">
+                <div style="font-size:11px;color:var(--ink-faint);margin-bottom:3px;">MVP切口</div>
+                <div style="font-size:13px;color:var(--ink);font-weight:500;">${s.mvp_cut||'—'}</div>
+              </div>
+              <div style="margin-bottom:8px;">
+                <div style="font-size:11px;color:var(--ink-faint);margin-bottom:4px;">核心指标</div>
+                <span class="cog-tag primary">${s.north_star||'—'}</span>
+              </div>
+              ${s.backflow_assets && s.backflow_assets.length ? `<div>
+                <div style="font-size:11px;color:var(--ink-faint);margin-bottom:4px;">回流神经库资产</div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">${s.backflow_assets.map(a=>`<span class="cog-tag" style="font-size:11px;">🔁 ${a}</span>`).join('')}</div>
+              </div>` : ''}
+            </div>
+          </div>`;
+        }
+
+        section.appendChild(grid);
+        // 插入到 liveLog 区域之前
+        const liveLogEl = document.getElementById('liveLog');
+        liveLogEl.parentElement.insertBefore(section, liveLogEl);
+
+        // 持久化到 sessionStorage，batch 阶段跳转后可恢复（存 JSON + HTML 快照）
+        try { sessionStorage.setItem('peach_cog_cards', JSON.stringify(d)); } catch(_) {}
+        try { sessionStorage.setItem('peach_cog_html', section.outerHTML); } catch(_) {}
+      }
+
+      const es = new EventSource(BRIDGE + '/api/stream/' + runId);
+
+      es.addEventListener('hello', e => {
+        appendLog('[桃子桥 已连接] run_id=' + JSON.parse(e.data).run_id + '\n', '#3fb950');
+        document.getElementById('logStatus').textContent = '🟢 已连接';
+      });
+
+      es.addEventListener('ping', () => {
+        document.getElementById('logStatus').textContent = '⏳ 运行中...';
+      });
+
+      es.addEventListener('done', async () => {
+        clearInterval(fakeTimer); clearInterval(pipeTimer);
+        es.close();
+        updateRing(phase === 'analyze' ? 30 : 100);
+
+        if (phase === 'analyze') {
+          // ── 分析阶段完成：展示确认按钮 ──
+          document.getElementById('logStatus').textContent = '✅ 分析完成';
+          if (window._stepTicker) { clearInterval(window._stepTicker); window._stepTicker = null; }
+          document.getElementById('taskTime').textContent = '✅ 分析完成';
+          // 协调链：CEO+行业专家分析完成
+          ['cn-ceo','cn-expert'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.classList.remove('active'); el.classList.add('done'); }
+          });
+          appendLog('\n[✅ 六步分析完成 · 等待老板确认]\n', '#3fb950');
+          // 历史记录：分析完成，等待确认
+          _updateHistory(runId, { status: 'analyzing' });
+
+          // 提取分析文字（log 里的全部文字）
+          let analysisText = logBody.textContent || logBody.innerText || '';
+
+          // 卡片在流式阶段已渲染时跳过重复渲染
+          if (!_cogCardsRendered) {
+            const _cogCards = _parseCognitiveCards(analysisText);
+            if (_cogCards) { _renderCognitiveCards(_cogCards); _cogCardsRendered = true; }
+          }
+
+          // 🔒 终极兜底：不管流式有没有捕到，done 后必从桥端 API 拉一次卡片数据
+          if (!_cogCardsRendered) {
+            try {
+              const _cr = await fetch(BRIDGE + '/api/analyze_cards/' + runId);
+              if (_cr.ok) {
+                const _cd = await _cr.json();
+                if (_cd.cards && !_cogCardsRendered) {
+                  _renderCognitiveCards(_cd.cards);
+                  _cogCardsRendered = true;
+                }
+              }
+            } catch(_) {}
+          }
+
+          // 收集修订和彩蛋
+          let refineHistory = [];   // [{q, a}] 每轮追问
+          let eggApprovals  = [];   // ['意外机会', '隐藏风险', '差异化壁垒'] 老板纳入的
+
+          // 构建最终分析文本（原文 + 修订记录 + 已纳入彩蛋标注）
+          function _buildFinalAnalysis() {
+            const parts = [analysisText];
+            if (refineHistory.length > 0) {
+              parts.push('\n\n## 🔧 修订记录（老板已在对话中确认 · 以此为准）');
+              refineHistory.forEach(r => {
+                parts.push('\n问：' + r.q + '\n答：' + r.a);
+              });
+            }
+            if (eggApprovals.length > 0) {
+              parts.push('\n\n## 💡 彩蛋已纳入（老板确认 · 生成文档时务必在对应章节体现）');
+              eggApprovals.forEach(e => parts.push('\n- ' + e));
+            }
+            return parts.join('');
+          }
+
+          // 同步更新确认按钮文字
+          function _updateConfirmBtn() {
+            const btn = document.getElementById('btn-confirm-gen');
+            if (!btn) return;
+            const parts = [];
+            if (refineHistory.length > 0) parts.push(refineHistory.length + '条修订');
+            if (eggApprovals.length > 0)  parts.push(eggApprovals.length  + '条彩蛋');
+            btn.textContent = parts.length > 0
+              ? '✅ 确认方向 · 含 ' + parts.join(' + ') + ' · 开始生成'
+              : '✅ 确认方向 · 开始生成';
+          }
+
+          // 在日志下方插入确认区
+          const confirmDiv = document.createElement('div');
+          confirmDiv.id = 'confirm-zone';
+          confirmDiv.style.cssText = 'margin-top:16px;padding:16px 20px;background:linear-gradient(135deg,#f0fff8,#e8f7f0);border:2px solid #4caf82;border-radius:12px;text-align:center;';
+          confirmDiv.innerHTML = `
+            <div style="font-size:15px;font-weight:600;color:#2d7a5a;margin-bottom:12px;">
+              🎯 方向分析完成 · 请确认后生成文档
+            </div>
+            <div style="font-size:13px;color:#555;margin-bottom:16px;">
+              ${mode === 'lightning' ? '⚡ 闪电档 · 将生成：PRD + UI规格 + 业务流程图 + Demo' : '📦 标准档 · 将生成完整 VELA 方案包'}
+            </div>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+              <button id="btn-confirm-gen" style="background:#2d7a5a;color:white;border:none;border-radius:8px;padding:12px 32px;font-size:15px;cursor:pointer;font-weight:600;">
+                ✅ 确认方向 · 开始生成
+              </button>
+              <button onclick="history.back()" style="background:transparent;color:#888;border:1.5px solid #ccc;border-radius:8px;padding:12px 24px;font-size:14px;cursor:pointer;">
+                ↩ 返回修改需求
+              </button>
+            </div>
+            <div id="gen-status" style="margin-top:12px;font-size:13px;color:#888;"></div>
+          `;
+          logBody.parentElement.appendChild(confirmDiv);
+
+          // ── 彩蛋纳入区（分析 done 后即展示）──────────────────
+          // 从分析文本里提取各彩蛋类别的实际内容（最多120字）
+          function _extractEggContent(text, keyword) {
+            const pats = [
+              // 专项：① **意外机会**：xxx（分析咒语标准格式）
+              new RegExp(`[①②③][^\\n]*\\*\\*${keyword}\\*\\*[：:]\\s*([^\\n]{15,250})`, 'i'),
+              // 专项：**意外机会**：xxx（无序号）
+              new RegExp(`\\*\\*${keyword}\\*\\*[：:]\\s*([^\\n]{15,250})`, 'i'),
+              // 匹配 ## 意外机会 等标题后的正文块
+              new RegExp(`#{1,4}[^\\n]*${keyword}[^\\n]*\\n+([\\s\\S]{20,300}?)(?=\\n#{1,4}|\\n\\n---|\$)`, 'i'),
+              // 匹配 意外机会：xxxx 单行格式（中英文冒号）
+              new RegExp(`${keyword}[：:]\\s*([^\\n]{15,200})`, 'i'),
+              // 兜底：找到关键词往后取一段
+              new RegExp(`${keyword}.{0,10}[\\n：:]([\\s\\S]{15,150})`, 'i'),
+            ];
+            for (const pat of pats) {
+              const m = text.match(pat);
+              if (m && m[1]) {
+                const cleaned = m[1]
+                  .replace(/[#*`>]/g, '')      // 去markdown符号
+                  .replace(/\n+/g, ' ')         // 换行→空格
+                  .replace(/\s{2,}/g, ' ')      // 多空格合并
+                  .trim()
+                  .slice(0, 120);
+                if (cleaned.length > 10) return cleaned;
+              }
+            }
+            return '（请在上方分析文本中查看详情）';
+          }
+
+          const eggContents = {
+            '意外机会': _extractEggContent(analysisText, '意外机会'),
+            '隐藏风险': _extractEggContent(analysisText, '隐藏风险'),
+            '差异化壁垒': _extractEggContent(analysisText, '差异化壁垒'),
+          };
+
+          const eggDiv = document.createElement('div');
+          eggDiv.style.cssText = 'margin-top:12px;padding:14px 16px;background:#161b22;border:1px solid rgba(255,166,87,0.2);border-radius:10px;';
+          eggDiv.innerHTML = `
+            <div style="font-size:12px;color:#ffa657;margin-bottom:12px;font-weight:600;">
+              💡 彩蛋发现 · 觉得不错？点"纳入"将彩蛋写进文档
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;" id="egg-rows">
+              <div class="egg-row" data-egg="意外机会" style="display:flex;flex-direction:column;gap:4px;padding:10px 12px;background:rgba(255,166,87,0.05);border-radius:8px;border:1px solid rgba(255,166,87,0.12);">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:12px;color:#ffa657;font-weight:600;">① 意外机会</span>
+                  <button class="egg-btn" onclick="_eggToggle(this,'意外机会')">纳入方案 →</button>
+                </div>
+                <div style="font-size:12px;color:#c9d1d9;line-height:1.6;padding-right:8px;" id="egg-desc-意外机会">${eggContents['意外机会']}</div>
+              </div>
+              <div class="egg-row" data-egg="隐藏风险" style="display:flex;flex-direction:column;gap:4px;padding:10px 12px;background:rgba(255,100,80,0.05);border-radius:8px;border:1px solid rgba(255,100,80,0.12);">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:12px;color:#ff7b72;font-weight:600;">② 隐藏风险</span>
+                  <button class="egg-btn" onclick="_eggToggle(this,'隐藏风险')">纳入方案 →</button>
+                </div>
+                <div style="font-size:12px;color:#c9d1d9;line-height:1.6;padding-right:8px;" id="egg-desc-隐藏风险">${eggContents['隐藏风险']}</div>
+              </div>
+              <div class="egg-row" data-egg="差异化壁垒" style="display:flex;flex-direction:column;gap:4px;padding:10px 12px;background:rgba(154,168,137,0.05);border-radius:8px;border:1px solid rgba(154,168,137,0.15);">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:12px;color:#9aa889;font-weight:600;">③ 差异化壁垒</span>
+                  <button class="egg-btn" onclick="_eggToggle(this,'差异化壁垒')">纳入方案 →</button>
+                </div>
+                <div style="font-size:12px;color:#c9d1d9;line-height:1.6;padding-right:8px;" id="egg-desc-差异化壁垒">${eggContents['差异化壁垒']}</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#6e7681;margin-top:10px;">
+              已纳入 <span id="egg-count" style="color:#ffa657;font-weight:600;">0</span> 条 · 确认时自动附带进文档生成指令
+            </div>
+          `;
+          logBody.parentElement.appendChild(eggDiv);
+
+          window._eggToggle = function(btn, eggName) {
+            const idx = eggApprovals.indexOf(eggName);
+            if (idx === -1) {
+              eggApprovals.push(eggName);
+              btn.textContent = '✅ 已纳入';
+              btn.style.background = 'rgba(79,196,127,0.3)';
+              btn.style.color = '#3fb950';
+              btn.style.borderColor = '#3fb950';
+            } else {
+              eggApprovals.splice(idx, 1);
+              btn.textContent = '纳入方案 →';
+              btn.style.background = '';
+              btn.style.color = '';
+              btn.style.borderColor = '';
+            }
+            document.getElementById('egg-count').textContent = eggApprovals.length;
+            _updateConfirmBtn();
+          };
+
+          document.getElementById('btn-confirm-gen').onclick = async () => {
+            const btn = document.getElementById('btn-confirm-gen');
+            const genStatus = document.getElementById('gen-status');
+            btn.disabled = true;
+            btn.textContent = '⏳ 正在启动生成...';
+            genStatus.textContent = '';
+            { const d=document.getElementById('_live_dbg'); if(d) d.textContent='点确认 → 调 /api/generate...'; }
+            // 协调链：确认→CEO+行业专家完成，生成团队激活
+            ['cn-ceo','cn-expert'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) { el.classList.remove('active'); el.classList.add('done'); }
+            });
+            ['cn-pm','cn-ux','cn-flow'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) { el.style.opacity='1'; el.classList.remove('done'); el.classList.add('active'); }
+            });
+            try {
+              const resp = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ analyze_run_id: runId, analysis_text: _buildFinalAnalysis() }),
+              });
+              if (!resp.ok) {
+                genStatus.textContent = '❌ 启动失败 HTTP ' + resp.status;
+                btn.disabled = false; btn.textContent = '✅ 确认方向 · 开始生成';
+                return;
+              }
+              const d = await resp.json();
+              if (d.error) { genStatus.textContent = '❌ ' + d.error; btn.disabled = false; btn.textContent = '✅ 确认方向 · 开始生成'; return; }
+              const newParams = new URLSearchParams(location.search);
+              newParams.set('phase', 'generate');
+              newParams.set('mode', mode);
+              if (d.project_dir) newParams.set('project_dir', d.project_dir);
+              if (d.batch_id) {
+                // ⚡ 动态 batch：只传实际存在的 run_id（P3+ 等 CEO Gate 后再传）
+                newParams.set('batch_id', d.batch_id);
+                // pending_agents：P3 Agent 数量，前端用于预设 totalCount
+                if (d.pending_agents) newParams.set('pending_agents', String(d.pending_agents));
+                // P1确认卡 + P2顺序队列所需参数
+                if (d.p1_keys?.length)        newParams.set('p1_keys', d.p1_keys.join(','));
+                if (d.p1_wave2_keys?.length)  newParams.set('p1_wave2_keys', d.p1_wave2_keys.join(','));
+                if (d.sequential_queue?.length) newParams.set('sequential_queue', d.sequential_queue.join(','));
+                // ✅ 动态：自动透传后端返回的所有 *_run，新 agent 无需改前端
+                Object.keys(d).forEach(k => {
+                  if (k.endsWith('_run') && d[k]) newParams.set(k, d[k]);
+                });
+                newParams.delete('run_id');
+                // 历史回写（动态：把所有 *_run 回写，无需维护列表）
+                const _hist = { status: 'generating', project_dir: d.project_dir || '', batch_id: d.batch_id };
+                Object.keys(d).forEach(k => { if (k.endsWith('_run')) _hist[k] = d[k] || ''; });
+                _updateHistory(runId, _hist);
+              } else {
+                // 📦 标准档 · 单进程
+                newParams.set('run_id', d.run_id);
+                newParams.delete('batch_id');
+                _updateHistory(runId, { status: 'generating', project_dir: d.project_dir || '' });
+              }
+              // 💾 持久化 generate URL，刷新后可恢复
+              try { localStorage.setItem('peach_gen_url_' + runId, 'results.html?' + newParams.toString()); } catch(_) {}
+              { const _ld=document.getElementById('_live_dbg'); if(_ld) { _ld.style.color='#3fb950'; _ld.textContent='✅ 跳转 → batch_id='+(newParams.get('batch_id')||'(无!)')+' mode='+newParams.get('mode'); } }
+              window.location.href = 'results.html?' + newParams.toString();
+            } catch(e) {
+              genStatus.textContent = '❌ 连接失败 · ' + e.message;
+              btn.disabled = false; btn.textContent = '✅ 确认方向 · 开始生成';
+            }
+          };
+
+          // ── Refine 对话框（确认前可以追问）──
+          const refineDiv = document.createElement('div');
+          refineDiv.className = 'refine-chat';
+          refineDiv.innerHTML = `
+            <div style="font-size:12px;color:#8b949e;margin-bottom:8px;">
+              💬 对分析有疑问？直接问 · 不需要返回重来
+            </div>
+            <div id="refine-history" class="refine-history"></div>
+            <div class="refine-input-row">
+              <input id="refine-input" class="refine-input" placeholder="例如：步骤③北极星能改成日活吗？" />
+              <button id="refine-send" class="refine-send">发送</button>
+            </div>
+          `;
+          logBody.parentElement.appendChild(refineDiv);
+
+          let _refineRunId = null, _refineLastText = '';
+          document.getElementById('refine-send').onclick = async () => {
+            const input = document.getElementById('refine-input');
+            const q = input.value.trim();
+            if (!q) return;
+            input.value = '';
+            const hist = document.getElementById('refine-history');
+            hist.innerHTML += `<div class="refine-msg-user">👤 ${q}</div>`;
+            hist.innerHTML += `<div id="refine-resp-${Date.now()}" class="refine-msg-claude">⏳ 思考中...</div>`;
+            hist.scrollTop = hist.scrollHeight;
+            try {
+              const r = await fetch('/api/refine', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ question: q, analysis_text: analysisText, analyze_run_id: runId }),
+              });
+              const rd = await r.json();
+              if (rd.run_id) {
+                _refineRunId = rd.run_id; _refineLastText = '';
+                const respEl = hist.lastElementChild;
+                respEl.textContent = '';
+                const res = new EventSource(BRIDGE + '/api/stream/' + rd.run_id);
+                res.onmessage = e => {
+                  try {
+                    const obj = JSON.parse(e.data);
+                    if (obj.type === 'assistant') {
+                      for (const c of (obj.message?.content || [])) {
+                        if (c.type === 'text' && c.text.length > _refineLastText.length) {
+                          respEl.textContent += c.text.slice(_refineLastText.length);
+                          _refineLastText = c.text;
+                          hist.scrollTop = hist.scrollHeight;
+                        }
+                      }
+                    }
+                  } catch(_) {}
+                };
+                res.addEventListener('done', () => {
+                  res.close();
+                  // 把这轮 Q&A 存入 refineHistory，同步更新确认按钮
+                  refineHistory.push({ q, a: _refineLastText });
+                  _updateConfirmBtn();
+                });
+              }
+            } catch(e) { hist.lastElementChild.textContent = '❌ ' + e.message; }
+          };
+          document.getElementById('refine-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) document.getElementById('refine-send').click();
+          });
+
+        } else {
+          // ── 生成阶段完成 ──
+          for (let i = pipeIdx; i < PIPE.length; i++) {
+            const el = document.getElementById('pipe-' + PIPE[i].n);
+            if (el) { el.classList.add('done'); document.getElementById('pipe-t-' + PIPE[i].n).textContent = '✓'; }
+          }
+          document.getElementById('pipeDone').textContent = PIPE.length;
+          document.getElementById('logStatus').textContent = '✅ 已完成';
+          document.getElementById('taskTime').textContent = '✅ 完成';
+          appendLog('\n[✅ 文件生成完成]\n', '#3fb950');
+
+          // 拉取真实文件列表
+          try {
+            const r = await fetch('/api/files/' + runId);
+            const d = await r.json();
+            if (d.files && d.files.length > 0) {
+              const _curRunId = runId;
+              const _pd = d.project_dir || '';
+              document.getElementById('docList').innerHTML = d.files.map(f => {
+                const isDemo = /\.html?$/i.test(f.path);
+                const saveDemoBtn = isDemo && _pd ? `
+                  <button onclick="_saveDemoSample('${_pd}','${f.path.replace(/'/g,"\\'")}',this)"
+                    style="background:transparent;border:1px solid rgba(45,122,90,0.4);color:#2d7a5a;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;"
+                    title="保存为 Demo 样板">💾 存样板</button>` : '';
+                return `<li class="done">
+                  <div class="dl-icon">✓</div>
+                  <div class="dl-text">${f.path}</div>
+                  <span class="dl-status" style="font-size:10px;">${(f.size/1024).toFixed(1)}KB</span>
+                  ${saveDemoBtn}
+                  <div class="dl-feedback">
+                    <button onclick="_fbVote('${_curRunId}','${f.path}','up',this)" title="好">👍</button>
+                    <button onclick="_fbVote('${_curRunId}','${f.path}','down',this)" title="差">👎</button>
+                  </div>
+                </li>`;
+              }).join('');
+              document.getElementById('docDone').textContent = d.files.length;
+              document.getElementById('docTotal').textContent = d.files.length;
+            }
+            if (d.project_dir) {
+              appendLog('\n[📁 输出目录] ' + d.project_dir + '\n', '#79c0ff');
+              document.getElementById('archiveStatus').innerHTML =
+                '✅ 文件已保存至：<strong style="color:var(--sage-dark);">' + d.project_dir + '</strong> · 打开 Obsidian 查看';
+              // 回写历史：完成 + 文件数 + 目录
+              _updateHistory(runId, { status: 'done', project_dir: d.project_dir, file_count: d.files ? d.files.length : 0 });
+            }
+          } catch(err) {
+            appendLog('\n[⚠️ 获取文件列表失败] ' + err.message + '\n', '#ffa657');
+          }
+        }
+      });
+
+      // 普通消息：解析 stream-json
+      es.onmessage = e => {
+        const raw = e.data.trim();
+        if (!raw) return;
+        try {
+          const obj = JSON.parse(raw);
+          if (obj.type === 'assistant') {
+            const msgId = obj.message && obj.message.id;
+            if (msgId && msgId !== currentMsgId) { currentMsgId = msgId; lastText = ''; }
+            const content = (obj.message && obj.message.content) || [];
+            for (const c of content) {
+              if (c.type === 'text' && c.text && c.text.length > lastText.length) {
+                appendLog(c.text.slice(lastText.length));
+                lastText = c.text;
+                // ⚡ 流式卡片：有标记立即渲染，无标记等 JSON 块超过 500 字符再兜底
+                if (!_cogCardsRendered) {
+                  const hasEnd = lastText.includes('<!-- COGNITIVE_CARDS_JSON_END -->');
+                  const hasFallback = !hasEnd && lastText.includes('keyword_signals') && lastText.length > 500;
+                  if (hasEnd || hasFallback) {
+                    const _d = _parseCognitiveCards(lastText);
+                    if (_d) { _renderCognitiveCards(_d); _cogCardsRendered = true; }
+                  }
+                }
+              }
+            }
+          } else if (obj.type === 'user') {
+            currentMsgId = null; lastText = '';
+          }
+        } catch(_) {}
+      };
+
+      es.onerror = () => {
+        clearInterval(fakeTimer); clearInterval(pipeTimer);
+        document.getElementById('logStatus').textContent = '❌ 连接失败 · 请确认桥已启动';
+        es.close();
+      };
+    }
+
+  })();
+</script>
+</body>
+</html>

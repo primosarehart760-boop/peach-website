@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 分析工作台 · Peach Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/launcher.css">
+  <style>
+    /* ========== Tab 2 · 分析工作台 专用样式（v1.0 · 2026-04-23） ========== */
+
+    body { background: var(--paper); }
+
+    /* 导航下拉（和 index 一致） */
+    .nav-links { flex-wrap: wrap; }
+    .nav-more-wrap { position: relative; }
+    .nav-more-trigger {
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: 14px;
+      color: var(--ink-soft); padding: 0;
+    }
+    .nav-more-trigger:hover { color: var(--peach); }
+    .nav-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: white; border: 1px solid var(--paper-dark);
+      border-radius: var(--radius-md); padding: 6px 0; min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      opacity: 0; pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 200;
+    }
+    .nav-more-wrap:hover .nav-dropdown,
+    .nav-more-wrap:focus-within .nav-dropdown {
+      opacity: 1; pointer-events: auto; transform: translateY(0);
+    }
+    .nav-dropdown a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; color: var(--ink-soft);
+      text-decoration: none; font-size: 14px;
+    }
+    .nav-dropdown a:hover { background: var(--paper); color: var(--peach); }
+
+    /* 页面顶部 padding */
+    .workspace-page { padding: var(--space-2xl) 0 80px; }
+
+    /* 需求概览卡 · 深色显眼 */
+    .brief-card {
+      max-width: 1080px; margin: 0 auto var(--space-2xl);
+      padding: var(--space-lg) var(--space-xl);
+      background: #1f1a14; color: #f4ede0;
+      border-radius: 16px;
+      display: flex; align-items: center; gap: var(--space-lg);
+      flex-wrap: wrap;
+      box-shadow: 0 12px 28px rgba(31,26,20,0.18);
+    }
+    .brief-card .bc-icon {
+      width: 54px; height: 54px; border-radius: 50%;
+      background: var(--peach); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    .brief-card .bc-main { flex: 1; min-width: 240px; }
+    .brief-card .bc-label {
+      font-family: var(--font-hand);
+      color: var(--peach); font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .brief-card .bc-text {
+      font-family: var(--font-serif);
+      font-size: 22px; line-height: 1.3;
+      font-style: italic;
+    }
+    .brief-card .bc-meta {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      margin-top: 8px; font-size: 12px;
+      color: rgba(244,237,224,0.7);
+    }
+    .brief-card .bc-meta-item {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px;
+      background: rgba(244,237,224,0.08);
+      border-radius: 6px;
+    }
+    .brief-card .bc-meta-item.mode-lightning { background: rgba(209,106,78,0.25); color: #ffd4c5; }
+    .brief-card .bc-meta-item.mode-standard { background: rgba(154,168,137,0.25); color: #d4e0c7; }
+    .brief-card .bc-actions {
+      display: flex; gap: 8px; flex-shrink: 0;
+    }
+    .brief-card .bc-btn {
+      padding: 8px 14px; font-size: 12px;
+      background: rgba(244,237,224,0.1);
+      border: 1px solid rgba(244,237,224,0.25);
+      border-radius: 8px;
+      color: #f4ede0;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.18s;
+    }
+    .brief-card .bc-btn:hover { background: rgba(244,237,224,0.2); }
+
+    /* 10 件套进度条（标准档专属） */
+    .kit-progress {
+      max-width: 1080px; margin: 0 auto var(--space-xl);
+      padding: var(--space-lg);
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 14px;
+    }
+    .kit-progress h4 {
+      font-family: var(--font-serif); font-size: 16px;
+      margin-bottom: var(--space-sm);
+      display: flex; justify-content: space-between;
+      align-items: center;
+    }
+    .kit-progress .kp-count {
+      font-family: var(--font-hand);
+      color: var(--peach);
+      font-size: 18px;
+    }
+    .kit-bar {
+      height: 8px; background: var(--paper);
+      border-radius: 4px; overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+    .kit-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--sage), var(--peach));
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .kit-items {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .kit-item {
+      padding: 8px 10px;
+      background: var(--paper-light);
+      border: 1px solid var(--paper-dark);
+      border-radius: 8px;
+      font-size: 12px;
+      display: flex; align-items: center; gap: 6px;
+      color: var(--ink-faint);
+      transition: all 0.2s;
+    }
+    .kit-item .ki-status { font-size: 14px; }
+    .kit-item.working { border-color: var(--peach); background: #fff5ef; color: var(--ink-soft); }
+    .kit-item.done { border-color: var(--sage); background: #f0faf2; color: var(--ink); }
+
+    /* 6 步分析流水线（主体） */
+    .pipeline-container {
+      max-width: 1080px; margin: 0 auto;
+    }
+    .pipeline-title {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: var(--space-lg);
+    }
+    .pipeline-title h2 {
+      font-family: var(--font-serif);
+      font-size: 28px; margin: 0;
+    }
+    .pipeline-title .pt-badge {
+      padding: 4px 10px;
+      background: var(--peach); color: white;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+    }
+
+    /* Step 卡 */
+    .step {
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 14px;
+      padding: var(--space-lg);
+      margin-bottom: var(--space-md);
+      transition: all 0.25s;
+      position: relative;
+    }
+    .step.pending { opacity: 0.55; }
+    .step.running {
+      border-color: var(--peach);
+      box-shadow: 0 4px 16px rgba(209,106,78,0.12);
+    }
+    .step.done {
+      border-color: var(--sage);
+      background: linear-gradient(180deg, white, #fafff6);
+    }
+
+    .step-head {
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .step-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--paper);
+      border: 2px solid var(--paper-dark);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-serif);
+      font-weight: 600; color: var(--ink-faint);
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .step.running .step-num { background: var(--peach); color: white; border-color: var(--peach); animation: pulse 1.4s infinite; }
+    .step.done .step-num { background: var(--sage); color: white; border-color: var(--sage); }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .step-title {
+      flex: 1;
+      font-family: var(--font-serif);
+      font-size: 20px;
+      color: var(--ink);
+    }
+    .step-status {
+      font-size: 13px;
+      color: var(--ink-faint);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .step.running .step-status { color: var(--peach); }
+    .step.done .step-status { color: var(--sage-dark); }
+
+    .step-expand {
+      width: 28px; height: 28px;
+      border-radius: 50%; border: none;
+      background: var(--paper);
+      cursor: pointer;
+      font-size: 14px; color: var(--ink-soft);
+      transition: transform 0.3s;
+    }
+    .step.open .step-expand { transform: rotate(180deg); }
+
+    /* Step 展开内容 */
+    .step-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease-out, margin 0.4s;
+    }
+    .step.open .step-body {
+      max-height: 2000px;
+      margin-top: var(--space-md);
+    }
+    .step-content {
+      padding: var(--space-md);
+      background: var(--paper);
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--ink-soft);
+    }
+    .step-content p { margin-bottom: 10px; }
+    .step-content strong { color: var(--ink); font-weight: 600; }
+    .step-content ul { list-style: none; padding: 0; }
+    .step-content ul li {
+      padding: 4px 0 4px 20px; position: relative;
+    }
+    .step-content ul li::before {
+      content: '→';
+      position: absolute; left: 0;
+      color: var(--peach);
+    }
+
+    /* 依据感栏 */
+    .evidence-box {
+      margin-top: var(--space-md);
+      padding: var(--space-sm) var(--space-md);
+      background: rgba(154,168,137,0.08);
+      border: 1px dashed rgba(154,168,137,0.4);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--ink-faint);
+    }
+    .evidence-box .eb-title {
+      font-family: var(--font-serif);
+      color: var(--sage-dark);
+      margin-bottom: 4px;
+    }
+    .evidence-box ul { list-style: none; padding: 0; }
+    .evidence-box ul li { padding: 2px 0 2px 16px; position: relative; line-height: 1.6; }
+    .evidence-box ul li::before {
+      content: '·';
+      position: absolute; left: 4px;
+      color: var(--sage);
+    }
+
+    /* Step 操作 */
+    .step-ops {
+      display: flex; gap: 8px; margin-top: var(--space-sm);
+    }
+    .step-op-btn {
+      padding: 5px 12px; font-size: 12px;
+      background: var(--paper-light);
+      border: 1px solid var(--paper-dark);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--ink-soft);
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .step-op-btn:hover { border-color: var(--peach); color: var(--peach); }
+
+    /* 下一步行动区 */
+    .next-actions {
+      max-width: 1080px; margin: var(--space-2xl) auto 0;
+      padding: var(--space-xl);
+      background: linear-gradient(135deg, var(--paper-light), #fff5ef);
+      border: 2px dashed var(--peach);
+      border-radius: 16px;
+      text-align: center;
+    }
+    .next-actions h3 {
+      font-family: var(--font-serif); font-size: 24px;
+      margin-bottom: var(--space-sm);
+    }
+    .next-actions .na-hint {
+      color: var(--ink-soft); font-size: 14px;
+      margin-bottom: var(--space-lg);
+    }
+    .next-actions .na-buttons {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    }
+
+    /* 空状态 · 直接访问没参数 */
+    .empty-state {
+      max-width: 640px; margin: 80px auto;
+      padding: var(--space-2xl);
+      background: white;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 16px;
+      text-align: center;
+    }
+    .empty-state .es-emoji { font-size: 56px; margin-bottom: var(--space-md); }
+
+    /* 响应式 */
+    @media (max-width: 800px) {
+      .kit-items { grid-template-columns: repeat(3, 1fr); }
+      .brief-card { flex-direction: column; align-items: flex-start; }
+      .brief-card .bc-actions { margin-top: 12px; }
+    }
+    @media (max-width: 500px) {
+      .kit-items { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 导航（和 index 统一） -->
+<nav class="nav">
+  <div class="container nav-content">
+    <a href="index.html" class="nav-logo"><span class="emoji">🏢</span>Peach Studio</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">🎯 需求入口</a>
+      <a href="methodology.html" class="nav-link">📚 方法论</a>
+      <a href="workspace.html" class="nav-link active">📊 分析工作台</a>
+      <a href="collaboration.html" class="nav-link">🤝 协作台</a>
+      <a href="industries.html" class="nav-link">🏭 行业库</a>
+      <a href="results.html" class="nav-link">📦 结果工作台</a>
+      <div class="nav-more-wrap">
+        <button class="nav-more-trigger" aria-haspopup="true">更多 ▾</button>
+        <div class="nav-dropdown">
+          <a href="docs.html">📖 资产层</a>
+          <a href="cases.html">📂 案例库</a>
+          <a href="team.html">👥 团队</a>
+          <a href="office.html">🎬 办公室</a>
+        </div>
+      </div>
+      <div class="theme-switcher">
+        <button class="theme-btn active" data-theme="editorial" title="Editorial Peach">🍑</button>
+        <button class="theme-btn" data-theme="airbnb" title="Airbnb">🏠</button>
+        <button class="theme-btn" data-theme="linear" title="Linear">⚡</button>
+        <button class="theme-btn" data-theme="pinterest" title="Pinterest">📌</button>
+        <button class="theme-btn" data-theme="stripe" title="Stripe">💳</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- 🆕 v1.1 · CEO 6 步路由 + Gate 5 问（2026-04-23 阶段 4 注入） -->
+<section id="peach-workspace-v11"></section>
+<script src="js/peach_workspace_v11.js"></script>
+
+<div class="workspace-page">
+  <div class="container wide">
+
+    <!-- 需求概览卡（有参数时显示） -->
+    <div class="brief-card" id="briefCard" style="display:none;">
+      <div class="bc-icon">📝</div>
+      <div class="bc-main">
+        <p class="bc-label">你要做的产品</p>
+        <div class="bc-text" id="bcText">—</div>
+        <div class="bc-meta">
+          <span class="bc-meta-item" id="bcIndustry">🏭 —</span>
+          <span class="bc-meta-item" id="bcMode">⚡ —</span>
+          <span class="bc-meta-item" id="bcTimer">⏱ —</span>
+        </div>
+      </div>
+      <div class="bc-actions">
+        <button class="bc-btn" onclick="location.href='index.html'">↻ 重新输入</button>
+        <button class="bc-btn" id="pauseBtn">⏸ 暂停</button>
+      </div>
+    </div>
+
+    <!-- 10 件套进度条（标准档专属） -->
+    <div class="kit-progress" id="kitProgress" style="display:none;">
+      <h4>
+        <span>🎯 方案包 10 件套完成度</span>
+        <span class="kp-count"><span id="kpDone">0</span> / 10</span>
+      </h4>
+      <div class="kit-bar"><div class="kit-bar-fill" id="kpFill"></div></div>
+      <div class="kit-items" id="kitItems">
+        <!-- JS 填充 -->
+      </div>
+    </div>
+
+    <!-- 6 步分析流水线 -->
+    <div class="pipeline-container" id="pipelineContainer" style="display:none;">
+      <div class="pipeline-title">
+        <h2>🔬 六步分析</h2>
+        <span class="pt-badge" id="pipelineBadge">进行中</span>
+      </div>
+
+      <!-- Step 1 · 用户画像 -->
+      <div class="step pending" data-step="1" id="step1">
+        <div class="step-head" onclick="toggleStep(1)">
+          <div class="step-num">1</div>
+          <div class="step-title">用户画像 · 具体到一个人</div>
+          <div class="step-status" id="step1Status">⏳ 等待</div>
+          <button class="step-expand">▼</button>
+        </div>
+        <div class="step-body">
+          <div class="step-content" id="step1Content">—</div>
+          <div class="evidence-box" id="step1Evidence"></div>
+          <div class="step-ops">
+            <button class="step-op-btn" onclick="rerunStep(1)">↻ 重跑</button>
+            <button class="step-op-btn" onclick="editStep(1)">✍ 人工修改</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 · 产品定位 -->
+      <div class="step pending" data-step="2" id="step2">
+        <div class="step-head" onclick="toggleStep(2)">
+          <div class="step-num">2</div>
+          <div class="step-title">产品定位 · 一句话 + "不是什么"</div>
+          <div class="step-status" id="step2Status">⏳ 等待</div>
+          <button class="step-expand">▼</button>
+        </div>
+        <div class="step-body">
+          <div class="step-content" id="step2Content">—</div>
+          <div class="evidence-box" id="step2Evidence"></div>
+          <div class="step-ops">
+            <button class="step-op-btn" onclick="rerunStep(2)">↻ 重跑</button>
+            <button class="step-op-btn" onclick="editStep(2)">✍ 人工修改</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 · 北极星指标 -->
+      <div class="step pending" data-step="3" id="step3">
+        <div class="step-head" onclick="toggleStep(3)">
+          <div class="step-num">3</div>
+          <div class="step-title">北极星指标 · 3 候选选 1 · 辅助 3 维（健康 / 深度 / 商业）</div>
+          <div class="step-status" id="step3Status">⏳ 等待</div>
+          <button class="step-expand">▼</button>
+        </div>
+        <div class="step-body">
+          <div class="step-content" id="step3Content">—</div>
+          <div class="evidence-box" id="step3Evidence"></div>
+          <div class="step-ops">
+            <button class="step-op-btn" onclick="rerunStep(3)">↻ 重跑</button>
+            <button class="step-op-btn" onclick="editStep(3)">✍ 人工修改</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 · 数据获取 -->
+      <div class="step pending" data-step="4" id="step4">
+        <div class="step-head" onclick="toggleStep(4)">
+          <div class="step-num">4</div>
+          <div class="step-title">数据获取 · 4 层（冷启动 / MVP / 增长 / 规模）+ 合规</div>
+          <div class="step-status" id="step4Status">⏳ 等待</div>
+          <button class="step-expand">▼</button>
+        </div>
+        <div class="step-body">
+          <div class="step-content" id="step4Content">—</div>
+          <div class="evidence-box" id="step4Evidence"></div>
+          <div class="step-ops">
+            <button class="step-op-btn" onclick="rerunStep(4)">↻ 重跑</button>
+            <button class="step-op-btn" onclick="editStep(4)">✍ 人工修改</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 · 竞品深扫 -->
+      <div class="step pending" data-step="5" id="step5">
+        <div class="step-head" onclick="toggleStep(5)">
+          <div class="step-num">5</div>
+          <div class="step-title">竞品深扫 · 8 家 × 5 维 · 找"真空带"</div>
+          <div class="step-status" id="step5Status">⏳ 等待</div>
+          <button class="step-expand">▼</button>
+        </div>
+        <div class="step-body">
+          <div class="step-content" id="step5Content">—</div>
+          <div class="evidence-box" id="step5Evidence"></div>
+          <div class="step-ops">
+            <button class="step-op-btn" onclick="rerunStep(5)">↻ 重跑</button>
+            <button class="step-op-btn" onclick="editStep(5)">✍ 人工修改</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 · 壁垒推导 -->
+      <div class="step pending" data-step="6" id="step6">
+        <div class="step-head" onclick="toggleStep(6)">
+          <div class="step-num">6</div>
+          <div class="step-title">壁垒推导 · 差异化 3 条 + 壁垒 3 层 + 优势 5 条</div>
+          <div class="step-status" id="step6Status">⏳ 等待</div>
+          <button class="step-expand">▼</button>
+        </div>
+        <div class="step-body">
+          <div class="step-content" id="step6Content">—</div>
+          <div class="evidence-box" id="step6Evidence"></div>
+          <div class="step-ops">
+            <button class="step-op-btn" onclick="rerunStep(6)">↻ 重跑</button>
+            <button class="step-op-btn" onclick="editStep(6)">✍ 人工修改</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CEO 拍板 Gate -->
+      <div class="next-actions" id="nextActions" style="display:none;">
+        <h3>✅ 六步分析完成 · 等待 CEO 拍板</h3>
+        <p class="na-hint">六步已产出 · 请老板审阅后拍板 · 通过后生成 → <strong>信息架构图 IA</strong> + <strong>PRD 快速版</strong></p>
+        <div style="background:white;border:1.5px solid var(--paper-dark);border-radius:12px;padding:18px 20px;margin:16px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+          <div>
+            <div style="color:var(--peach);font-family:var(--font-hand);margin-bottom:6px;">拍板通过 → 立即产出</div>
+            <div>📐 <strong>信息架构图 IA</strong> — 页面地图 + 导航结构</div>
+            <div style="margin-top:6px;">📄 <strong>PRD 快速版</strong> — 15 板块核心功能文档</div>
+          </div>
+          <div>
+            <div style="color:var(--ink-soft);font-family:var(--font-hand);margin-bottom:6px;">不通过 → 回炉修改</div>
+            <div>↩ 点击上方步骤 → 人工修改 → 重新提交</div>
+          </div>
+        </div>
+        <div class="na-buttons">
+          <button class="btn btn-primary" id="ceoGateBtn" onclick="ceoApprove()">🎯 老板拍板 · 确认通过</button>
+          <a href="results.html" class="btn btn-secondary">📦 查看已有产出</a>
+        </div>
+      </div>
+
+      <!-- CEO 通过后显示 -->
+      <div id="afterGate" style="display:none;margin-top:20px;padding:24px;background:linear-gradient(135deg,rgba(154,168,137,0.08),rgba(209,106,78,0.05));border:2px solid var(--sage);border-radius:16px;text-align:center;">
+        <div style="font-family:var(--font-serif);font-size:24px;color:var(--sage-deep,#7a8868);margin-bottom:8px;">✅ 拍板通过</div>
+        <p style="color:var(--ink-soft);font-size:14px;margin-bottom:16px;">正在生成 IA + PRD 快速版 · 约 60 秒</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <div id="iaStatus" style="padding:10px 20px;background:white;border-radius:10px;border:1.5px solid var(--paper-dark);font-size:13px;">📐 IA 信息架构图 · 生成中…</div>
+          <div id="prdStatus" style="padding:10px 20px;background:white;border-radius:10px;border:1.5px solid var(--paper-dark);font-size:13px;">📄 PRD 快速版 · 等待中…</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 空状态（直接访问 workspace.html 无参数时） -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="es-emoji">📭</div>
+      <h3>还没有需求哦</h3>
+      <p style="color: var(--ink-soft); margin: var(--space-md) 0;">请先从首页输入你要做的产品 · 选行业和模式 · 再回来看分析。</p>
+      <a href="index.html" class="btn btn-primary">⬅ 回需求入口</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--paper-dark); margin-top: var(--space-3xl);">
+  <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);">
+    <div>
+      <p style="font-family: var(--font-serif); font-size: 18px;">🏢 Peach Studio</p>
+      <p style="color: var(--ink-faint); font-size: 14px; margin-top: var(--space-xs);">分析工作台 · v1.0 · 第一层分析引擎</p>
+    </div>
+    <div style="color: var(--ink-faint); font-size: 13px;">
+      <p>六步分析 · 依据感显示 · 资产激活</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/theme.js"></script>
+<script src="js/launcher.js"></script>
+<script>
+  /* ========== Tab 2 · 分析工作台 逻辑 ========== */
+
+  (function() {
+
+    // ─── 1. 读取参数 ─────────────────────────
+    function getReqParams() {
+      const u = new URL(location.href);
+      const q = u.searchParams.get('q');
+      const industry = u.searchParams.get('industry');
+      const mode = u.searchParams.get('mode') || 'lightning';
+      if (q && industry) return { need: q, industry, mode };
+      // fallback · sessionStorage
+      try {
+        const cached = JSON.parse(sessionStorage.getItem('peach-req') || 'null');
+        if (cached && cached.need) return cached;
+      } catch(e) {}
+      return null;
+    }
+
+    const req = getReqParams();
+    if (!req) {
+      document.getElementById('emptyState').style.display = 'block';
+      return;
+    }
+
+    // 渲染需求概览卡
+    document.getElementById('briefCard').style.display = 'flex';
+    document.getElementById('pipelineContainer').style.display = 'block';
+    document.getElementById('bcText').textContent = req.need;
+    document.getElementById('bcIndustry').textContent = `🏭 ${req.industry} 行业`;
+    const modeCell = document.getElementById('bcMode');
+    if (req.mode === 'lightning') {
+      modeCell.textContent = '⚡ 闪电档 · 3 份固定文档';
+      modeCell.className = 'bc-meta-item mode-lightning';
+    } else {
+      modeCell.textContent = '📦 标准档 · 按范围灵活';
+      modeCell.className = 'bc-meta-item mode-standard';
+    }
+
+    // 倒计时器
+    let timerStart = Date.now();
+    // 闪电档 120 秒硬闸门 · 标准档按"单份范围"参考 2700 秒（45 分钟）· 全套自行延长
+    const timeLimit = req.mode === 'lightning' ? 120 : 2700;
+    const timerEl = document.getElementById('bcTimer');
+    setInterval(() => {
+      const elapsed = Math.floor((Date.now() - timerStart) / 1000);
+      const remain = timeLimit - elapsed;
+      if (remain > 0) {
+        const m = Math.floor(remain / 60);
+        const s = remain % 60;
+        timerEl.textContent = `⏱ 剩余 ${m > 0 ? m + '分' : ''}${s}秒`;
+        if (remain < 30 && req.mode === 'lightning') timerEl.style.color = '#ff8a6a';
+      } else {
+        timerEl.textContent = '⏱ 闸门已到 · 请检查';
+        timerEl.style.color = '#ff6a4a';
+      }
+    }, 1000);
+
+    // ─── 2. 10 件套（标准档专属） ──────────────
+    const KIT_ITEMS = [
+      '用户画像', '竞品分析', '差异化定位', '功能方向 + 优先级', '核心流程图',
+      '北极星 + 反指标', '技术路线 + 降级', '模型选型三层', '训练评测', 'PRD 骨架 15 板块'
+    ];
+    if (req.mode === 'standard') {
+      const kp = document.getElementById('kitProgress');
+      kp.style.display = 'block';
+      const kitItemsEl = document.getElementById('kitItems');
+      KIT_ITEMS.forEach((name, i) => {
+        const d = document.createElement('div');
+        d.className = 'kit-item';
+        d.id = `kit-${i}`;
+        d.innerHTML = `<span class="ki-status">⏳</span> ${i + 1}. ${name}`;
+        kitItemsEl.appendChild(d);
+      });
+    }
+
+    function setKitStatus(idx, status) {
+      if (req.mode !== 'standard') return;
+      const el = document.getElementById(`kit-${idx}`);
+      if (!el) return;
+      el.className = 'kit-item ' + status;
+      const icon = status === 'done' ? '✅' : (status === 'working' ? '🔄' : '⏳');
+      el.querySelector('.ki-status').textContent = icon;
+      // 更新总进度
+      const done = document.querySelectorAll('.kit-item.done').length;
+      document.getElementById('kpDone').textContent = done;
+      document.getElementById('kpFill').style.width = (done / 10 * 100) + '%';
+    }
+
+    // ─── 3. 行业模板 · 六步铁律标准（用户画像/核心定位/北极星/数据获取/竞品深扫/壁垒推导）
+    const INDUSTRY_TEMPLATES = {
+      '金融': {
+        画像: {
+          text: `<strong>林建国 · 38 岁 · 某股份制银行信贷审核员</strong>
+<p>日均审核 80 单消费贷 · 每单 45 分钟 · 晚 8 点还在查征信报告 · 老婆抱怨周末不陪娃。</p>
+<p>一日场景：早 8:30 到岗 → 9:00-12:00 第一批 15 单 → 12:30 午餐 15 分钟 → 14:00-18:00 第二批 25 单 → 18:00-20:00 加班查疑难件 → 回家。</p>
+<p><strong>核心痛点：</strong></p>
+<ul><li>征信报告字段分散在 8 个接口 · 人工交叉比对费时</li><li>反欺诈规则 200+ 条 · 容易漏判</li><li>上级每周抽查 5% · 错一次扣 500 元</li></ul>`,
+          evidence: ['VELA 07_用户画像 · JTBD + 一日场景叙事', '金融专家 · 消费金融信贷链路 · 等保三级', '蔡雨洋训练师笔记 · 人效指标设计']
+        },
+        定位: {
+          text: `<p><strong>一句话定位：</strong>为银行信贷审核员提供 AI 辅助审核系统 · 把 45 分钟/单 压到 4 分钟 · 误拒率从 15% 降到 2-4%。</p>
+<p><strong>不是什么：</strong></p>
+<ul><li>不是替代审核员 · 是给审核员"外挂大脑"</li><li>不是全自动批贷 · 人工保留终审权</li><li>不是反欺诈系统 · 是审核效率工具</li></ul>
+<p style="margin-top:8px;font-size:12px;color:var(--ink-soft)">跟错位竞品划清界限：传统风控 SaaS = 规则引擎 / AI 原生新玩家 = 精准度低 / 我们 = 审核员增强工具（有人在环）</p>`,
+          evidence: ['VELA 02_竞品 + VELA 04_立项 · 一句话定位公式', '小普方法论 · 定位含"不是什么" + 跟锚位竞品划清界限']
+        },
+        北极星: {
+          text: `<p><strong>3 候选北极星：</strong></p>
+<ul>
+<li>候选 A：<strong>单件审核平均耗时 AHT</strong> — 45 分钟 → ≤ 5 分钟 · 最直接衡量核心价值</li>
+<li>候选 B：<strong>审核员日均处理件数 TPD</strong> — 80 单 → 150 单 · 衡量产能</li>
+<li>候选 C：<strong>AI 辅助采纳率 AAR</strong> — 目标 ≥ 80% · 衡量系统信任度</li>
+</ul>
+<p><strong>✅ 选 AHT</strong>：耗时最直接 · 审核员每天感受 · 可精确测量 · 和老板 KPI 挂钩</p>
+<p><strong>辅助 3 维护栏：</strong></p>
+<ul><li>🏥 健康：误拒率 ≤ 4% · AI 幻觉率 ≤ 0.5% · 审核员弃用率 ≤ 5%</li><li>📊 深度：标注回流量/周 · Badcase 修复率/双周</li><li>💰 商业：POC 转正式合同率 · 银行扩编审核员 NPS</li></ul>`,
+          evidence: ['VELA 16_指标体系 · 北极星 3 候选选法', '金融专家 · 信贷效率量化', 'AI 训练师 · 蔡雨洋笔记 · 人效指标']
+        },
+        数据: {
+          text: `<p><strong>4 层数据获取策略：</strong></p>
+<ul>
+<li>🌱 <strong>冷启动</strong>：合作银行 3 个月历史审核数据（脱敏）· 1 万件 · 作初期训练集 + 建基准评测集</li>
+<li>📦 <strong>MVP</strong>：5 家 POC 银行真实流水 · 审核员实时打标 · 周回流 1000 件 · 双周迭代</li>
+<li>📈 <strong>增长</strong>：标注飞轮启动 · Badcase 每双周迭代 · 模型版本化管理 · RAG 知识库扩展</li>
+<li>🏗 <strong>规模</strong>：审核员集体智慧沉淀 → 跨银行迁移学习 → 行业知识图谱</li>
+</ul>
+<p><strong>合规要点：</strong>金融数据等保三级 · 脱敏加密 + 不出境 · 审计日志保留 5 年 · 网信办算法备案</p>`,
+          evidence: ['VELA 21_模型选型 · RAG 四门决策', '金融行业 · 等保三级数据流', 'AI 训练师 · 火箭兵笔记 · 评测集设计']
+        },
+        竞品: {
+          text: `<p><strong>8 家竞品 × 5 维（效果/合规/成本/交付速度/生态）：</strong></p>
+<table style="font-size:12px;width:100%;border-collapse:collapse;line-height:1.6;">
+<tr style="background:var(--paper-dark);font-weight:600"><td style="padding:5px 8px">竞品</td><td>效果</td><td>合规</td><td>成本</td><td>交付</td><td>生态</td></tr>
+<tr><td style="padding:5px 8px">马上科技 RSAA</td><td>8</td><td>9</td><td>5</td><td>7</td><td>8</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">同盾科技</td><td>7</td><td>9</td><td>6</td><td>6</td><td>8</td></tr>
+<tr><td style="padding:5px 8px">百融云创</td><td>7</td><td>8</td><td>6</td><td>7</td><td>7</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">平安科技</td><td>8</td><td>9</td><td>4</td><td>6</td><td>9</td></tr>
+<tr><td style="padding:5px 8px">通联支付</td><td>5</td><td>8</td><td>8</td><td>8</td><td>5</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">AI 原生新玩家</td><td>6</td><td>4</td><td>9</td><td>9</td><td>4</td></tr>
+<tr><td style="padding:5px 8px">通用 LLM 接入</td><td>6</td><td>3</td><td>9</td><td>9</td><td>3</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">银行自建方案</td><td>5</td><td>10</td><td>2</td><td>3</td><td>6</td></tr>
+</table>
+<p style="margin-top:10px"><strong>🎯 真空带</strong>：效果≥7 + 合规≥8 + 成本≥6 + 交付≥7 → 目前无玩家全满足 → 我们切入点：<strong>合规前提下高效果 · 中成本 · 快交付</strong></p>
+<p style="font-size:12px;color:var(--ink-soft)">价格锚点：SaaS订阅 ¥3000/审核员/月 · vs 传统项目制 ¥50-200万/项 · vs 自建 ROI 3年以上</p>`,
+          evidence: ['VELA 02_竞品深度体验 · 8 家 × 5 维矩阵', '金融行业知识库 · 风控 SaaS 格局', '小普铁律 · 竞品分析必含价格锚点']
+        },
+        壁垒: {
+          text: `<p><strong>3 条差异化：</strong></p>
+<ul><li>① 专注银行审核场景 · 深度定制 8 接口打通 · 不做通用信贷 SaaS</li><li>② 国产 Qwen 72B + 微调 · 等保三级 + 算法备案 · 数据 100% 不出境</li><li>③ 审核员标注回流机制 · 双周 Badcase 飞轮 · 模型持续进化</li></ul>
+<p><strong>3 层壁垒：</strong></p>
+<ul><li>🧠 数据壁垒：金融 Badcase 库 1.5 万条 · 持续扩展 · 新玩家无法快速复制</li><li>🔒 合规壁垒：等保三级 + 网信办算法备案 · 新玩家 6 个月起步</li><li>🤝 关系壁垒：股份制银行背书 · 头部客户陪跑证明</li></ul>
+<p><strong>5 条优势：</strong>① 审核链路完整 · ② 境外模型合规 · ③ 降级链路齐备 · ④ POC 3 周启动 · ⑤ 3 年成本摊薄完备</p>`,
+          evidence: ['VELA 05_SWOT + VELA 03_BP · 差异/壁垒/优势三件套', '金融专家 · 等保 + 算法备案合规路径', 'AI 训练师 · 清华姐笔记 · 数据飞轮']
+        }
+      },
+
+      '医疗': {
+        画像: {
+          text: `<strong>张晓红 · 32 岁 · 三甲医院全科门诊护士</strong>
+<p>日均接诊分诊 120+ 位患者 · 常见咨询 60% 高度重复（流感、皮疹、轻度外伤）· 分诊错误会被患者投诉和扣绩效。</p>
+<p>一日场景：7:50 交班 → 8:00-11:30 分诊洪峰 → 午餐 20 分钟 → 14:00-17:30 复诊高峰 → 下班前整理分诊单。</p>
+<p><strong>核心痛点：</strong></p>
+<ul><li>常见病种分诊规则多 · 新护士记不全</li><li>患者自诉主观 · 需要反复确认</li><li>HIPAA / 个保法 · 数据不能出院内系统</li></ul>`,
+          evidence: ['VELA 07_用户画像 · 一日场景叙事', '医疗专家 · HIPAA · AI 不替代医生 · 患者隐私', 'AI 训练师 · 清华姐笔记 · 医疗垂类评测']
+        },
+        定位: {
+          text: `<p><strong>一句话定位：</strong>为三甲医院门诊护士提供 AI 辅助分诊助手 · 把常见病分诊决策时间从 5 分钟压到 1 分钟 · 分诊准确率从 85% 提到 95%+。</p>
+<p><strong>不是什么：</strong></p>
+<ul><li>不是替代医生诊断 · 只做分诊辅助</li><li>不是给患者直接用 · 是给医护用的内部工具</li><li>不给出诊疗建议 · 只给分诊建议 + 合规声明</li></ul>
+<p style="font-size:12px;color:var(--ink-soft)">跟错位竞品划清：传统 HIS 厂商 = 流程工具 / AI 诊断公司 = 替代医生 / 我们 = 护士分诊辅助（HITL）</p>`,
+          evidence: ['VELA 02_竞品 · 一句话定位', '医疗专家 · AI 不替代医生 · 分诊 vs 诊疗边界', '小普方法论 · 定位含"不是什么"']
+        },
+        北极星: {
+          text: `<p><strong>3 候选北极星：</strong></p>
+<ul>
+<li>候选 A：<strong>分诊决策平均时间 MTT</strong> — 5 分钟 → ≤ 1 分钟 · 最直接量化效率</li>
+<li>候选 B：<strong>分诊准确率 TAR</strong> — 85% → 95%+ · 衡量质量</li>
+<li>候选 C：<strong>护士日均分诊量 NDT</strong> — 120 单 → 200 单 · 衡量产能</li>
+</ul>
+<p><strong>✅ 选 MTT</strong>：时间最直观 · 护士每单感受 · 可精确测量</p>
+<p><strong>辅助 3 维护栏：</strong></p>
+<ul><li>🏥 健康：分诊错误率 ≤ 1% · AI 幻觉率 ≤ 0.3% · 患者投诉率 ≤ 3‰</li><li>📊 深度：护士标注回流量/周 · 医学委员会审核通过率</li><li>💰 商业：医院续约率 · 覆盖科室数</li></ul>`,
+          evidence: ['VELA 16_指标体系 · 北极星 3 候选选法', '医疗专家 · 分诊错误 vs 诊疗错误分级', 'VELA 32_AI 合规 · 医疗专项']
+        },
+        数据: {
+          text: `<p><strong>4 层数据获取策略：</strong></p>
+<ul>
+<li>🌱 <strong>冷启动</strong>：合作三甲 2 年历史分诊单（脱敏）· 5 万例 · 含症状描述 + 最终科室 · 作训练集</li>
+<li>📦 <strong>MVP</strong>：5 家三甲门诊护士实时使用 · 护士打标分诊建议好坏 · 周回流 2000 例</li>
+<li>📈 <strong>增长</strong>：Badcase 双周迭代 · 医学委员会季度审查 · RAG 医学知识库扩充</li>
+<li>🏗 <strong>规模</strong>：跨科室迁移学习 · 专科分诊子模型 · 国家卫健委标准对齐</li>
+</ul>
+<p><strong>合规要点：</strong>院内私有化部署 · 患者数据 100% 不出院 · HIPAA + 个保法 · 使用前告知同意</p>`,
+          evidence: ['VELA 21_模型选型 · RAG 四门决策', '医疗行业 · HIS 数据脱敏规范', 'AI 训练师 · 火箭兵笔记 · 医疗垂类评测']
+        },
+        竞品: {
+          text: `<p><strong>8 家竞品 × 5 维（效果/合规/成本/交付/生态）：</strong></p>
+<table style="font-size:12px;width:100%;border-collapse:collapse;line-height:1.6;">
+<tr style="background:var(--paper-dark);font-weight:600"><td style="padding:5px 8px">竞品</td><td>效果</td><td>合规</td><td>成本</td><td>交付</td><td>生态</td></tr>
+<tr><td style="padding:5px 8px">东软医疗 HIS</td><td>5</td><td>10</td><td>4</td><td>5</td><td>9</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">医渡云</td><td>8</td><td>7</td><td>5</td><td>7</td><td>7</td></tr>
+<tr><td style="padding:5px 8px">推想科技</td><td>8</td><td>7</td><td>5</td><td>7</td><td>6</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">腾讯觅影</td><td>7</td><td>8</td><td>6</td><td>6</td><td>8</td></tr>
+<tr><td style="padding:5px 8px">平安好医生</td><td>6</td><td>8</td><td>7</td><td>8</td><td>7</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">通用 LLM 接入</td><td>6</td><td>3</td><td>9</td><td>9</td><td>3</td></tr>
+<tr><td style="padding:5px 8px">医院自建方案</td><td>5</td><td>10</td><td>2</td><td>3</td><td>5</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">丁香园问诊</td><td>7</td><td>7</td><td>7</td><td>8</td><td>8</td></tr>
+</table>
+<p style="margin-top:10px"><strong>🎯 真空带</strong>：效果≥7 + 合规≥8 + 成本≥6 → <strong>只做护士分诊辅助 · 不碰诊疗 · 私有化合规 · 成本可控</strong></p>
+<p style="font-size:12px;color:var(--ink-soft)">价格锚点：¥20-50万/院/年 · vs 东软 HIS ¥100万+/院 · vs 自建 ¥200万+ · vs 通用 LLM ¥0但合规 0 分</p>`,
+          evidence: ['VELA 02_竞品深度体验 · 8 家 × 5 维', '医疗行业知识库 · AI 医疗格局', '小普铁律 · 竞品分析必含价格']
+        },
+        壁垒: {
+          text: `<p><strong>3 条差异化：</strong></p>
+<ul><li>① 只做分诊辅助 · 不碰诊疗 · 合规边界极清 · 医生在环（HITL）</li><li>② 院内本地部署 · Qwen 72B · 患者数据 100% 不出院</li><li>③ 三甲背书 · HIPAA + 个保法双合规认证</li></ul>
+<p><strong>3 层壁垒：</strong></p>
+<ul><li>🧠 数据壁垒：医学 Badcase 库 5 万例 · 持续扩展</li><li>🔒 合规壁垒：HIPAA + 个保法 + 医学委员会审核 · 新玩家难速建</li><li>🤝 关系壁垒：三甲医院合作 · 科主任背书</li></ul>
+<p><strong>5 条优势：</strong>① 分诊垂直深 · ② 私有化部署 · ③ HITL 人在环 · ④ 合规护栏完整 · ⑤ 护士迭代闭环</p>`,
+          evidence: ['VELA 05_SWOT · 差异 + 壁垒', '医疗专家 · 诊疗边界 · HIPAA', 'AI 训练师 · 胜超笔记 · 医疗私有化部署']
+        }
+      },
+
+      '教育': {
+        画像: {
+          text: `<strong>王佳 · 24 岁 · 外企行政 · 备考 BEC 高级</strong>
+<p>白天在外企做行政 · 晚上 19:00-22:00 自学考证 · 工作 2 年攒了 ¥8000 考证预算 · 想外派新加坡。</p>
+<p>一日场景：早 8:30 通勤听英文播客 → 白天工作 · 午休 1 节课 → 晚 19:00-22:00 自学 3 小时（听力 / 写作 / 口语）→ 周末面授 4 小时。</p>
+<p><strong>核心痛点：</strong></p>
+<ul><li>口语没人陪练 · 不敢在人多的地方开口 · 社恐式学习</li><li>写作批改慢 · 线下老师 3-5 天才改一次</li><li>线下课贵 · ¥8000 预算只够 8 节 1v1 外教课</li></ul>`,
+          evidence: ['VELA 07_用户画像 · JTBD + 一日场景', '教育专家 · 成人考证 · 社恐式学习需求', 'AI 训练师 · 火箭兵笔记 · 口语评测维度']
+        },
+        定位: {
+          text: `<p><strong>一句话定位：</strong>为成人英语考证学员提供 24/7 AI 口语陪练 · 月付 ¥99 · 替代 80% 的 1v1 外教陪练需求。</p>
+<p><strong>不是什么：</strong></p>
+<ul><li>不是做 K12（合规复杂 · 算法推荐监管）</li><li>不是全科语言 AI · 只做口语陪练垂类</li><li>不替代外教 · 是外教前的陪练场 + 口语评分器</li></ul>
+<p style="font-size:12px;color:var(--ink-soft)">跟错位竞品划清：录播课 = 被动学习 / 1v1 外教 = 贵且难约 / 我们 = 主动陪练 · 按需随时</p>`,
+          evidence: ['VELA 02 · 定位 + 竞品', '教育专家 · 成人考证 vs K12 合规差异', '小普方法论 · 定位含"不是什么"']
+        },
+        北极星: {
+          text: `<p><strong>3 候选北极星：</strong></p>
+<ul>
+<li>候选 A：<strong>周活用户平均口语练习时长 WADD</strong> — 目标 ≥ 90 分钟/周 · 衡量核心价值交付</li>
+<li>候选 B：<strong>月付费用户续费率 MRR</strong> — 目标 ≥ 85% · 衡量价值感知</li>
+<li>候选 C：<strong>口语评分提升率 OSI</strong> — 3 个月提升 ≥ 0.5 分（雅思） · 衡量真实效果</li>
+</ul>
+<p><strong>✅ 选 WADD</strong>：练习时长直接衡量用户是否真在用 · 高时长 = 高粘性 = 高续费</p>
+<p><strong>辅助 3 维护栏：</strong></p>
+<ul><li>🏥 健康：口语穿帮率 ≤ 0.5% · 取消率 ≤ 10%/月 · 申诉率 ≤ 2%</li><li>📊 深度：学员对话 Badcase 归类量 · Prompt 迭代周期</li><li>💰 商业：月付 ¥99 · 月流水目标 ¥500 万</li></ul>`,
+          evidence: ['VELA 16_指标体系 · 北极星 3 候选选法', '教育专家 · 学员粘性指标', 'AI 训练师 · 穿帮率硬门槛']
+        },
+        数据: {
+          text: `<p><strong>4 层数据获取策略：</strong></p>
+<ul>
+<li>🌱 <strong>冷启动</strong>：BEC/雅思真题口语题库（公开版）· 3 位外教录制 1000+ 段标准答案 · 作 Few-shot 数据</li>
+<li>📦 <strong>MVP</strong>：首批 1000 学员对话录音 · 外教打标 AI 评分好坏 · 月回流 5 万段</li>
+<li>📈 <strong>增长</strong>：学员对话 → Badcase 归类 → Prompt 双周迭代 · 外教评分锚点更新</li>
+<li>🏗 <strong>规模</strong>：考试标准对齐数据库（BEC C1 / 雅思 7.0 评分细则）· 多口音适配模型</li>
+</ul>
+<p><strong>合规要点：</strong>成人教育数据相对宽松 · 录音需告知同意 · 18 岁门槛 · 不承诺考试结果</p>`,
+          evidence: ['VELA 21_模型选型 · 语音方向', '教育行业知识库 · 成人考证合规', 'AI 训练师 · 蔡雨洋笔记 · 评测集设计']
+        },
+        竞品: {
+          text: `<p><strong>8 家竞品 × 5 维（效果/成本/便利/可扩展/数据能力）：</strong></p>
+<table style="font-size:12px;width:100%;border-collapse:collapse;line-height:1.6;">
+<tr style="background:var(--paper-dark);font-weight:600"><td style="padding:5px 8px">竞品</td><td>效果</td><td>成本</td><td>便利</td><td>可扩展</td><td>数据力</td></tr>
+<tr><td style="padding:5px 8px">线下 1v1 外教</td><td>9</td><td>2</td><td>3</td><td>2</td><td>4</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">英语流利说</td><td>7</td><td>8</td><td>9</td><td>9</td><td>8</td></tr>
+<tr><td style="padding:5px 8px">多邻国 Duolingo</td><td>6</td><td>9</td><td>9</td><td>9</td><td>9</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">新东方在线</td><td>7</td><td>5</td><td>7</td><td>8</td><td>6</td></tr>
+<tr><td style="padding:5px 8px">iTalki 平台</td><td>9</td><td>4</td><td>6</td><td>5</td><td>5</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">EF 英孚</td><td>7</td><td>3</td><td>6</td><td>7</td><td>6</td></tr>
+<tr><td style="padding:5px 8px">录播课（网易等）</td><td>5</td><td>9</td><td>8</td><td>9</td><td>5</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">ChatGPT 自练</td><td>7</td><td>8</td><td>8</td><td>9</td><td>5</td></tr>
+</table>
+<p style="margin-top:10px"><strong>🎯 真空带</strong>：效果≥7 + 成本≥7 + 便利≥8 + 考试标准对齐 → 目前无玩家 · 我们切入：<strong>垂直 BEC/雅思口语 · AI 评分锚点对齐 · ¥99/月</strong></p>
+<p style="font-size:12px;color:var(--ink-soft)">价格锚点：1v1外教 ¥150/节 · 英孚 ¥400/月 · 我们 ¥99/月 · 中间锚点切入</p>`,
+          evidence: ['VELA 02_竞品深度体验 · 8 家 × 5 维', '教育行业知识库 · 成人考证格局', '小普铁律 · 竞品分析必含价格']
+        },
+        壁垒: {
+          text: `<p><strong>3 条差异化：</strong></p>
+<ul><li>① 垂直 BEC/雅思/托福 · 不做 K12 · 合规轻 · 考试标准锚点对齐</li><li>② 真人语音克隆 3 种外教人设 · 打破"AI 感"冰冷</li><li>③ ¥99/月 · 价格是 1v1 外教 1/15 · 替代 80% 需求</li></ul>
+<p><strong>3 层壁垒：</strong></p>
+<ul><li>🧠 数据壁垒：BEC/雅思题库 + 口语穿帮检测库 · 持续扩展</li><li>📋 标准壁垒：考试评分锚点对齐 · 新玩家需要外教合作才能建</li><li>🤝 关系壁垒：学员口碑 + 考试结果案例 + 外教审核合作</li></ul>
+<p><strong>5 条优势：</strong>① 24/7 随时 · ② 价格 1/15 · ③ 不社恐 · ④ 评分透明 · ⑤ 进度可追溯</p>`,
+          evidence: ['VELA 05_SWOT · 差异 + 壁垒', '教育专家 · 成人考证壁垒分析', '小普方法论 · 差异化可验证']
+        }
+      },
+
+      '电商': {
+        画像: {
+          text: `<strong>陈美丽 · 29 岁 · 直播电商主播团队选品助理</strong>
+<p>每天筛 200+ SKU · 从 1688 / 淘工厂 / 厂家直供挑 10 个进直播间 · 选错一个会让整场 GMV 掉 30%。</p>
+<p>一日场景：9:00 市场数据简报 → 10:00-14:00 选品 + 样品确认 → 15:00-18:00 脚本 + 话术准备 → 19:00-22:00 直播 → 复盘。</p>
+<p><strong>核心痛点：</strong></p>
+<ul><li>SKU 信息分散 · 商家文案夸大 · 真实评价难找</li><li>退货率预判难 · 选错一场场馆赔万</li><li>同质化严重 · 差异化选品越来越难</li></ul>`,
+          evidence: ['VELA 07 · 选品场景还原', '电商专家 · 直播带货 · 选品策略', 'AI 训练师 · 胜超笔记 · 多模态选型']
+        },
+        定位: {
+          text: `<p><strong>一句话定位：</strong>为直播带货选品团队提供 AI 选品助手 · 1 分钟过 50 个 SKU · 给出选品打分 + 话术初稿 + 退货率预警。</p>
+<p><strong>不是什么：</strong>不替代采购决策 · 不做纯货品比价 · 不代写完整主播脚本。</p>
+<p style="font-size:12px;color:var(--ink-soft)">跟错位竞品划清：电商数据平台 = 数据给你自己看 / 我们 = AI 直接给选品建议 + 话术</p>`,
+          evidence: ['VELA 02 · 定位', '电商行业知识库 · 直播带货', '小普 · 定位清晰不越界']
+        },
+        北极星: {
+          text: `<p><strong>3 候选北极星：</strong></p>
+<ul>
+<li>候选 A：<strong>AI 建议采纳率 AAR</strong> — 目标 ≥ 70% · 衡量系统是否真正有用</li>
+<li>候选 B：<strong>选品退货率 PRR</strong> — 目标 ≤ 15% · 衡量直接业务结果</li>
+<li>候选 C：<strong>选品决策时间 PDCT</strong> — 1小时 → ≤ 15分钟 · 衡量效率</li>
+</ul>
+<p><strong>✅ 选 AAR（AI 采纳率）</strong>：用户真正信任才会采纳 · 高采纳 = 高价值感知 = 高续费</p>
+<p><strong>辅助 3 维护栏：</strong></p>
+<ul><li>🏥 健康：退货率 ≤ 18% · AI 误判率 ≤ 5% · 取消续费 ≤ 8%/月</li><li>📊 深度：SKU 评论库扩增量/月 · Badcase 归类量</li><li>💰 商业：月付 ¥599/团队 · 团队续费率 ≥ 85%</li></ul>`,
+          evidence: ['VELA 16 · 北极星 3 候选选法', '电商专家 · 退货率红线', 'AI 训练师 · 指标设计']
+        },
+        数据: {
+          text: `<p><strong>4 层数据获取策略：</strong></p>
+<ul>
+<li>🌱 <strong>冷启动</strong>：爬取主流直播平台 Top 1000 热品评论 + 退货率公开数据 · 建基准评测集</li>
+<li>📦 <strong>MVP</strong>：10 家选品团队实际使用 · 标注 AI 建议好坏 + 实际退货率回流 · 周更新</li>
+<li>📈 <strong>增长</strong>：选品结果 → 真实销售数据 → 退货率回流 → 预测模型迭代 · 双周</li>
+<li>🏗 <strong>规模</strong>：行业细分（美妆/服饰/家居）子模型 · 季节性特征库 · 跨平台数据融合</li>
+</ul>
+<p><strong>合规要点：</strong>广告法禁词库 · 爬虫合规 · SKU 数据不侵权 · 销售预测免责声明</p>`,
+          evidence: ['VELA 21_模型选型 · 多模态方向', '电商行业 · 数据获取合规', 'AI 训练师 · 火箭兵笔记 · 自动化评测']
+        },
+        竞品: {
+          text: `<p><strong>8 家竞品 × 5 维（效果/成本/易用/数据/扩展）：</strong></p>
+<table style="font-size:12px;width:100%;border-collapse:collapse;line-height:1.6;">
+<tr style="background:var(--paper-dark);font-weight:600"><td style="padding:5px 8px">竞品</td><td>效果</td><td>成本</td><td>易用</td><td>数据力</td><td>扩展</td></tr>
+<tr><td style="padding:5px 8px">飞瓜数据</td><td>7</td><td>6</td><td>7</td><td>9</td><td>7</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">蝉妈妈</td><td>7</td><td>6</td><td>8</td><td>8</td><td>7</td></tr>
+<tr><td style="padding:5px 8px">魔镜市场情报</td><td>7</td><td>5</td><td>6</td><td>9</td><td>7</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">1688 选品工具</td><td>5</td><td>9</td><td>8</td><td>6</td><td>5</td></tr>
+<tr><td style="padding:5px 8px">电商罗盘</td><td>7</td><td>7</td><td>7</td><td>8</td><td>8</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">通用 ChatGPT</td><td>6</td><td>8</td><td>8</td><td>4</td><td>7</td></tr>
+<tr><td style="padding:5px 8px">人工选品老带</td><td>9</td><td>2</td><td>5</td><td>5</td><td>2</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">抖音自带工具</td><td>6</td><td>9</td><td>8</td><td>7</td><td>5</td></tr>
+</table>
+<p style="margin-top:10px"><strong>🎯 真空带</strong>：效果≥7 + 直接给 AI 建议而非数据展示 + 退货率预测 → 目前无玩家做到 → 切入：<strong>AI 主动建议 · 不是数据看板</strong></p>
+<p style="font-size:12px;color:var(--ink-soft)">价格锚点：飞瓜 ¥499/月 · 蝉妈妈 ¥399/月 · 我们 ¥599/月（多了退货率预测 + 话术初稿）</p>`,
+          evidence: ['VELA 02_竞品深度体验 · 8 家 × 5 维', '电商行业知识库 · 选品工具格局', '小普铁律 · 竞品分析必含价格']
+        },
+        壁垒: {
+          text: `<p><strong>3 条差异化：</strong></p>
+<ul><li>① 多模态（图/文/评论/视频）同时分析 · 不只看标题和价格</li><li>② 退货率预测模型 · 用真实销售数据回流 · 越用越准</li><li>③ AI 话术初稿 · 基于 SKU 卖点 + 目标客群 · 自动生成开场</li></ul>
+<p><strong>3 层壁垒：</strong></p>
+<ul><li>🧠 数据壁垒：10 万+ SKU 真实退货率标注集 · 不可快速复制</li><li>📋 模型壁垒：退货率预测模型 · 需要大量真实销售数据才能训练</li><li>🤝 关系壁垒：头部直播团队背书 · 退货率改善案例</li></ul>
+<p><strong>5 条优势：</strong>① 从数据到决策 · ② 退货率护栏 · ③ 话术秒出 · ④ 多模态 · ⑤ 飞轮越用越准</p>`,
+          evidence: ['VELA 05_SWOT · 差异 + 壁垒', '电商专家 · 选品壁垒', 'AI 训练师 · 多模态评测']
+        }
+      },
+
+      '宠物': {
+        画像: {
+          text: `<strong>李晓雨 · 26 岁 · 上海互联网公司运营 · 独居养了 2 岁英短猫"豆腐"</strong>
+<p>工作日独居 · 每天 8:30-21:00 在公司 · 回家就看猫。豆腐一有异常就开始焦虑，搜帖子越搜越怕。</p>
+<p>一日场景：7:30 喂猫 → 上班 → 12:30 远程看摄像头 → 20:00 回家陪猫 → 21:30 发现豆腐吐了 → 搜索"猫咪呕吐严不严重" → 越看越焦虑（"可能是肾衰竭"）→ 不知道要不要打车去 24h 宠物医院（单程 ¥60）。</p>
+<p><strong>核心痛点：</strong></p>
+<ul><li>症状判断焦虑：搜索结果极端吓人 · 实际只是毛球症 · 白跑医院 ¥300+</li><li>就诊成本高：24h 宠物医院单次 ¥150-800 · 一年在"不知道严不严重"上花 ¥5000+</li><li>档案碎片化：疫苗本/就诊记录散落各处 · 换医院得从头描述</li></ul>`,
+          evidence: ['VELA 07_用户画像 · JTBD + 一日场景叙事', '宠物行业 · 调研 78% 宠物主有过此困惑', 'AI 训练师 · 蔡雨洋笔记 · C端用户情绪驱动']
+        },
+        定位: {
+          text: `<p><strong>一句话定位：</strong>为都市独居宠物主提供 AI 症状初判 + 就诊决策助手 · 10 秒内告诉你"要不要去医院" · 减少 60% 的焦虑性就诊。</p>
+<p><strong>不是什么：</strong></p>
+<ul><li>不是替代兽医 · 不给诊疗建议 · 只做分诊初判</li><li>不是宠物电商 · 不卖东西 · 只解决健康决策焦虑</li><li>不是通用宠物 App · 垂直"症状焦虑"这一场景</li></ul>
+<p style="font-size:12px;color:var(--ink-soft)">跟错位竞品划清：宠物医生 App = 在线问诊贵 / 波奇宠物 = 电商附属 / 小红书 = 内容散乱 / 我们 = 10秒决策</p>`,
+          evidence: ['VELA 02_竞品 + VELA 04_立项 · 一句话定位公式', '宠物行业 · C端合规压力低', '小普方法论 · 定位含"不是什么"']
+        },
+        北极星: {
+          text: `<p><strong>3 候选北极星：</strong></p>
+<ul>
+<li>候选 A：<strong>月活用户 AI 症状自查次数 / 月活（人均月查次）</strong> — 目标 3 次/月/用户 · 衡量核心价值交付频率</li>
+<li>候选 B：<strong>就诊决策准确率 DAR</strong> — 被 AI 说"低风险"后真实不需急诊率 ≥ 97% · 衡量质量</li>
+<li>候选 C：<strong>月付费用户续费率 MRR</strong> — 目标 ≥ 85% · 衡量价值感知</li>
+</ul>
+<p><strong>✅ 选人均月查次</strong>：真遇到问题才查 · 1次 = 1次真实价值交付 · 高 = 用户信任我们</p>
+<p><strong>辅助 3 维护栏：</strong></p>
+<ul><li>🏥 健康：AI 误判率 ≤ 3% · 取消率 ≤ 8%/月 · 滥用率（日查 10 次+）≤ 0.5%</li><li>📊 深度：宠物症状 Badcase 回流量/月 · 品种/年龄个性化覆盖率</li><li>💰 商业：会员 ¥28/月 · 月流水目标 ¥140 万（5 万付费用户）</li></ul>`,
+          evidence: ['VELA 16_指标体系 · 北极星 3 候选选法', '宠物专家 · C端健康场景指标', 'VELA 11_PRD · 反指标护栏铁律']
+        },
+        数据: {
+          text: `<p><strong>4 层数据获取策略：</strong></p>
+<ul>
+<li>🌱 <strong>冷启动</strong>：与 3 家宠物医院合作 · 2000 例脱敏问诊记录（症状描述 + 最终诊断）· 建基准评测集</li>
+<li>📦 <strong>MVP</strong>：首批 1000 用户症状自查 · 用户事后告知"实际去没去 / 结果如何" · 双周回流</li>
+<li>📈 <strong>增长</strong>：Badcase 归类（AI说低风险但实际需急诊）· 品种/年龄子模型迭代 · 月更新</li>
+<li>🏗 <strong>规模</strong>：宠物症状知识图谱 · 品种差异库（英短/金毛/柴犬各自常见病）· 跨城市兽医合作</li>
+</ul>
+<p><strong>合规要点：</strong>宠物数据无个人医疗数据限制 · 必加"不替代兽医诊断"免责声明 · 图片存储 OSS 即可</p>`,
+          evidence: ['VELA 21_模型选型 · C端多模态', '宠物行业 · 数据获取合规（轻）', 'AI 训练师 · 蔡雨洋笔记 · 评测集设计']
+        },
+        竞品: {
+          text: `<p><strong>8 家竞品 × 5 维（效果/成本/便利/AI化/差异化）：</strong></p>
+<table style="font-size:12px;width:100%;border-collapse:collapse;line-height:1.6;">
+<tr style="background:var(--paper-dark);font-weight:600"><td style="padding:5px 8px">竞品</td><td>效果</td><td>成本</td><td>便利</td><td>AI化</td><td>差异化</td></tr>
+<tr><td style="padding:5px 8px">宠物医生 App</td><td>8</td><td>5</td><td>7</td><td>5</td><td>4</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">波奇宠物</td><td>5</td><td>8</td><td>7</td><td>4</td><td>3</td></tr>
+<tr><td style="padding:5px 8px">小红书/帖子搜索</td><td>4</td><td>9</td><td>8</td><td>3</td><td>5</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">知乎宠物板块</td><td>5</td><td>9</td><td>7</td><td>3</td><td>4</td></tr>
+<tr><td style="padding:5px 8px">派对宠物（问诊）</td><td>7</td><td>5</td><td>7</td><td>4</td><td>4</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">直接去宠物医院</td><td>9</td><td>2</td><td>3</td><td>1</td><td>2</td></tr>
+<tr><td style="padding:5px 8px">ChatGPT 问症状</td><td>6</td><td>8</td><td>8</td><td>8</td><td>5</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">百度搜索</td><td>3</td><td>9</td><td>9</td><td>2</td><td>2</td></tr>
+</table>
+<p style="margin-top:10px"><strong>🎯 真空带</strong>：效果≥7 + 成本≥7 + AI化≥7 + 针对宠物症状垂直化 → 目前无玩家 → 切入：<strong>AI症状初判 → 就诊决策 · 10秒给结论</strong></p>
+<p style="font-size:12px;color:var(--ink-soft)">价格锚点：宠物医生问诊 ¥30-100/次 · ChatGPT ¥20/月 · 我们 ¥28/月（专业宠物垂类 · 有个性化档案）</p>`,
+          evidence: ['VELA 02_竞品深度体验 · 8 家 × 5 维', '宠物行业知识库 · 宠物健康 App 格局', '小普铁律 · 竞品分析必含价格']
+        },
+        壁垒: {
+          text: `<p><strong>3 条差异化：</strong></p>
+<ul><li>① 垂直"要不要去医院"这一决策场景 · 回答最高频焦虑 · 不做通用宠物平台</li><li>② AI 初判 + 风险等级（低/中/高）+ 建议行动 三件套 · 不给模糊答案</li><li>③ 宠物个性化档案 · 基于品种/年龄/既往病史给更精准判断</li></ul>
+<p><strong>AI 赋能边界（N34 分析）：</strong></p>
+<ul>
+<li>✅ <strong>必须 AI</strong>：症状初判 — 千变万化 · 品种差异大 · 规则无法穷举</li>
+<li>📈 <strong>AI 增强</strong>：体重趋势异常预警 — 传统算均值 · AI 加季节/年龄模型</li>
+<li>📋 <strong>传统即可</strong>：疫苗到期提醒 / 医院地图 — 日期计算 + 高德 API</li>
+<li>❌ <strong>AI 拖累</strong>：具体用药指导 — 合规风险极高 · 强确定性 AI 增加错误率</li>
+</ul>
+<p><strong>3 层壁垒：</strong>宠物症状 Badcase 库 2000 条 · 品种/年龄个性化模型 · 真实就诊结果回流</p>`,
+          evidence: ['VELA 05_SWOT + VELA 03_BP · 差异/壁垒/优势', '宠物专家 · 症状初判 vs 诊疗边界', 'CLAUDE.md · N34 AI 赋能边界分析铁律']
+        }
+      },
+
+      '企业SaaS': {
+        画像: {
+          text: `<strong>刘哥 · 41 岁 · 某制造业集团 HR 总监</strong>
+<p>管 8000 人的薪资 / 考勤 / 入职 / 培训 · 每月月初做薪资核算 3 天 · 累出头痛。</p>
+<p>一日场景：月初 1 日 8:00 开始核算 → 提取各地子公司考勤数据（手工合并 Excel）→ 比对社保基数 → 算个税 → 月 4 日凌晨 2 点完成 · 发现还有 3% 错账。</p>
+<p><strong>核心痛点：</strong></p>
+<ul><li>多地子公司用不同 HR 系统 · 数据合并手工 · 每月 3% 错账率 · 发错工资被员工投诉</li><li>劳动法 + 个税算法频繁更新 · 记不全</li><li>月底核算占 3 天 · 影响其他 HR 工作</li></ul>`,
+          evidence: ['VELA 07_用户画像 · JTBD + 一日场景', '企业 SaaS · HR 业务深度', 'AI 训练师 · 评测维度']
+        },
+        定位: {
+          text: `<p><strong>一句话定位：</strong>为 5000+ 人中大型企业 HR 提供 AI 薪资核算助手 · 月底 3 天核算压到 4 小时 · 错账率 3% → 0.3%。</p>
+<p><strong>不是什么：</strong></p>
+<ul><li>不是全套 HR 系统 · 只做薪资核算这一环节</li><li>不替代 HR 判断 · 合规边界的判断权在 HR</li><li>不做 C 端个人工资计算 · 专注企业 B 端</li></ul>
+<p style="font-size:12px;color:var(--ink-soft)">跟错位竞品划清：SAP/用友 = 大而全 ERP / 薪人薪事 = 中小企业 / 我们 = 大型企业薪资核算 AI 增强</p>`,
+          evidence: ['VELA 02 · 定位', '企业 SaaS · HR 赛道定位', '小普 · 定位含"不是什么"']
+        },
+        北极星: {
+          text: `<p><strong>3 候选北极星：</strong></p>
+<ul>
+<li>候选 A：<strong>月薪核算完成时间 MPCT</strong> — 3 天 → ≤ 4 小时 · 最直接量化效率</li>
+<li>候选 B：<strong>错账率 EPR</strong> — 3% → 0.3% · 衡量质量结果</li>
+<li>候选 C：<strong>HR 操作满意度 UXS</strong> — NPS ≥ 40 · 衡量体验</li>
+</ul>
+<p><strong>✅ 选 MPCT</strong>：时间最可量化 · HR 每月感受最深 · 和 ROI 直接挂钩</p>
+<p><strong>辅助 3 维护栏：</strong></p>
+<ul><li>🏥 健康：错账率 ≤ 0.3% · 员工申诉率 ≤ 0.5% · 数据泄露事件 0</li><li>📊 深度：劳动法更新响应时间 · 合规知识库覆盖率</li><li>💰 商业：NRR ≥ 110% · 企业扩员后自动提升套餐</li></ul>`,
+          evidence: ['VELA 16_指标体系 · 北极星 3 候选选法', 'HR 专业指标体系', 'AI 训练师 · 评测维度']
+        },
+        数据: {
+          text: `<p><strong>4 层数据获取策略：</strong></p>
+<ul>
+<li>🌱 <strong>冷启动</strong>：与 5 家制造业企业签脱敏协议 · 2 年历史薪资数据 · 作基准评测集</li>
+<li>📦 <strong>MVP</strong>：20 家 POC 企业实际使用 · HR 打标 AI 核算建议对错 · 月回流</li>
+<li>📈 <strong>增长</strong>：劳动法/个税变更自动感知 → 规则库更新 → 全量企业推送 · 合规响应 ≤ 3 天</li>
+<li>🏗 <strong>规模</strong>：行业细分（制造/零售/互联网）薪资结构库 · 多地区差异规则库</li>
+</ul>
+<p><strong>合规要点：</strong>员工工资属于个人隐私 · 个保法 + ISO 27001 · 私有化部署 · 数据不出企业</p>`,
+          evidence: ['VELA 21_模型选型 · B端私有化', '企业 SaaS · 数据安全规范', 'AI 训练师 · 评测集设计']
+        },
+        竞品: {
+          text: `<p><strong>8 家竞品 × 5 维（效果/合规/成本/交付/生态）：</strong></p>
+<table style="font-size:12px;width:100%;border-collapse:collapse;line-height:1.6;">
+<tr style="background:var(--paper-dark);font-weight:600"><td style="padding:5px 8px">竞品</td><td>效果</td><td>合规</td><td>成本</td><td>交付</td><td>生态</td></tr>
+<tr><td style="padding:5px 8px">SAP SuccessFactors</td><td>9</td><td>9</td><td>2</td><td>4</td><td>9</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">用友薪福社</td><td>7</td><td>8</td><td>5</td><td>6</td><td>8</td></tr>
+<tr><td style="padding:5px 8px">金蝶云苍穹</td><td>7</td><td>8</td><td>5</td><td>6</td><td>8</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">薪人薪事</td><td>6</td><td>7</td><td>8</td><td>8</td><td>6</td></tr>
+<tr><td style="padding:5px 8px">北森 HR</td><td>7</td><td>8</td><td>6</td><td>7</td><td>7</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">钉钉薪资模块</td><td>5</td><td>7</td><td>9</td><td>9</td><td>8</td></tr>
+<tr><td style="padding:5px 8px">Excel + 人工</td><td>5</td><td>8</td><td>9</td><td>8</td><td>4</td></tr>
+<tr style="background:var(--paper)"><td style="padding:5px 8px">RPA + 脚本</td><td>6</td><td>7</td><td>7</td><td>6</td><td>4</td></tr>
+</table>
+<p style="margin-top:10px"><strong>🎯 真空带</strong>：效果≥7 + 合规≥8 + 成本≥6 + 交付≥7 → <strong>针对 5000+ 人大企业 · 比 SAP 便宜 · 比薪人薪事专业 · AI 增强不是纯规则</strong></p>
+<p style="font-size:12px;color:var(--ink-soft)">价格锚点：SAP ¥100万+/年 · 用友 ¥30-80万/年 · 我们 ¥10-30/人/月（阶梯）· 5000人企业约 ¥60-150万/年</p>`,
+          evidence: ['VELA 02_竞品深度体验 · 8 家 × 5 维', '企业 SaaS · HR 系统格局', '小普铁律 · 竞品分析必含价格']
+        },
+        壁垒: {
+          text: `<p><strong>3 条差异化：</strong></p>
+<ul><li>① 专注薪资核算 · 不做全套 HR · 垂直深度 vs SAP 大而全</li><li>② AI 智能对账 · 多地多系统数据自动合并 · 合规规则库实时更新</li><li>③ 劳动法 + 个税更新自动感知 · HR 不用手动更新规则</li></ul>
+<p><strong>3 层壁垒：</strong></p>
+<ul><li>🧠 数据壁垒：HR 领域 Badcase 库 · 多地区劳动法差异知识库</li><li>🔒 合规壁垒：ISO 27001 + 私有化部署 · 大企业合规要求门槛</li><li>🤝 关系壁垒：制造业 TOP 50 背书 · NRR 110%+ 的客户成功</li></ul>
+<p><strong>5 条优势：</strong>① 多地多系统打通 · ② AI 智能对账 · ③ 合规实时更新 · ④ NRR 110% · ⑤ 阶梯定价灵活</p>`,
+          evidence: ['VELA 05_SWOT · 差异 + 壁垒', '企业 SaaS 合规 · ISO 27001', 'AI 训练师 · 胜超笔记 · B端迭代']
+        }
+      }
+    };
+
+    // 通用降级模板（适配新六步铁律）
+    function genericTemplate(industry, need) {
+      return {
+        画像: {
+          text: `<strong>（${industry} 行业典型用户 · 待行业专家具体化）</strong>
+<p>需求："${need}"</p>
+<p>请描述：具体的一个人 · 年龄/职业/城市 · 一日场景 · 3 条核心痛点（不是"白领"标签）。</p>`,
+          evidence: [`VELA 07 · 用户画像通用模板`, `${industry} 行业专家（待召唤）`, `AI 训练师通用评测框架`]
+        },
+        定位: {
+          text: `<p>一句话定位：为 ${industry} 行业的 [目标用户] 在 [场景] 提供 [核心能力] · 解决 [核心痛点] · 区别于竞品的差异是 [待填]。</p>
+<p><strong>不是什么：</strong>（3 条排除 · 跟错位竞品划清界限）</p>`,
+          evidence: [`VELA 02 · 定位公式`, `${industry} 行业 8 项结构`, `小普 · 定位含"不是什么"`]
+        },
+        北极星: {
+          text: `<p><strong>3 候选北极星（${industry} 行业）：</strong></p>
+<ul><li>候选 A：[效率指标] — 时间/数量/准确率 · 最直接量化</li><li>候选 B：[质量指标] — 结果质量 · 衡量真实价值</li><li>候选 C：[商业指标] — 续费/增长 · 衡量长期价值</li></ul>
+<p>选 1 个 + 辅助 3 维护栏（健康 / 深度 / 商业）· 反指标不少于 2 个。</p>`,
+          evidence: [`VELA 16_指标体系 · 北极星 3 候选选法`, `${industry} 行业 KPI 参考`]
+        },
+        数据: {
+          text: `<p><strong>4 层数据获取策略（${industry} 行业）：</strong></p>
+<ul>
+<li>🌱 <strong>冷启动</strong>：从哪里获取初始训练数据 · 多少量 · 脱敏方式</li>
+<li>📦 <strong>MVP</strong>：真实用户使用 → 打标回流 · 多少量/周</li>
+<li>📈 <strong>增长</strong>：Badcase 迭代 · 模型更新频率</li>
+<li>🏗 <strong>规模</strong>：知识图谱 / 细分子模型 / 跨场景迁移</li>
+</ul>
+<p><strong>合规要点：</strong>${industry} 行业数据合规红线待行业专家补充。</p>`,
+          evidence: [`VELA 21_模型选型 · RAG 四门决策`, `${industry} 行业数据合规规范`]
+        },
+        竞品: {
+          text: `<p><strong>8 家竞品 × 5 维扫描（待专家填 ${industry} 行业具体竞品）：</strong></p>
+<ul>
+<li>格式：竞品名 · 效果/合规/成本/交付/生态 各 1-10 分</li>
+<li><strong>🎯 真空带</strong>：找出所有竞品都不强的交叉区 → 我们的机会</li>
+<li><strong>价格锚点必填</strong>：竞品定价 vs 我们的差异化定价策略</li>
+</ul>
+<p>建议召唤 ${industry} 行业专家 · 补 8 家真实竞品数据。</p>`,
+          evidence: [`VELA 02_竞品深度体验 · 8 家 × 5 维矩阵`, `${industry} 行业竞品 · 待专家填`, `小普铁律 · 竞品分析必含价格`]
+        },
+        壁垒: {
+          text: `<p><strong>3 条差异化</strong>（${industry} 行业具体化）：</p>
+<ul><li>① [差异化 1]</li><li>② [差异化 2]</li><li>③ [差异化 3]</li></ul>
+<p><strong>3 层壁垒：</strong>数据壁垒 / 合规壁垒 / 关系壁垒（${industry} 行业待具体化）</p>
+<p><strong>5 条优势：</strong>① [优势 1] · ② [优势 2] · ③ [优势 3] · ④ [优势 4] · ⑤ [优势 5]</p>`,
+          evidence: [`VELA 05_SWOT + VELA 03_BP · 差异/壁垒/优势`, `${industry} 行业专家补充`]
+        }
+      };
+    }
+
+    const template = INDUSTRY_TEMPLATES[req.industry] || genericTemplate(req.industry, req.need);
+
+    // ─── 4. 流水线：六步铁律顺序跑 ─────────────────
+    // 步骤对应：用户画像/核心定位/北极星指标/数据获取/竞品深扫/壁垒推导
+    const STEP_NAMES = ['画像', '定位', '北极星', '数据', '竞品', '壁垒'];
+    // 10 件套映射到 6 步（每步触发几件）
+    const STEP_TO_KITS = {
+      1: [0], 2: [2], 3: [1], 4: [5], 5: [3, 4, 6, 7], 6: [8, 9]
+    };
+
+    // 闪电档每步 10-15s · 标准档每步 180s（演示模式 · 标准档 MVP 版先用 30s/步让演示不太久）
+    const STEP_DURATION = req.mode === 'lightning' ? 11000 : 30000;
+
+    let paused = false;
+    let stepTimers = [];
+
+    function renderStep(idx) {
+      const key = STEP_NAMES[idx];
+      const data = template[key];
+      document.getElementById(`step${idx + 1}Content`).innerHTML = data.text;
+      const ev = document.getElementById(`step${idx + 1}Evidence`);
+      ev.innerHTML = `<div class="eb-title">🔗 依据</div><ul>${data.evidence.map(e => `<li>${e}</li>`).join('')}</ul>`;
+    }
+
+    function runStep(idx) {
+      if (idx >= 6) {
+        // 全跑完
+        document.getElementById('pipelineBadge').textContent = '完成';
+        document.getElementById('pipelineBadge').style.background = 'var(--sage)';
+        document.getElementById('nextActions').style.display = 'block';
+        document.getElementById('nextActions').scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+      if (paused) return;
+
+      const el = document.getElementById(`step${idx + 1}`);
+      el.classList.remove('pending');
+      el.classList.add('running', 'open');
+      document.getElementById(`step${idx + 1}Status`).textContent = '🔄 生成中';
+
+      // 对应 kit 标 working
+      (STEP_TO_KITS[idx + 1] || []).forEach(k => setKitStatus(k, 'working'));
+
+      const t = setTimeout(() => {
+        renderStep(idx);
+        el.classList.remove('running');
+        el.classList.add('done');
+        document.getElementById(`step${idx + 1}Status`).textContent = '✅ 完成';
+        (STEP_TO_KITS[idx + 1] || []).forEach(k => setKitStatus(k, 'done'));
+        runStep(idx + 1);
+      }, STEP_DURATION);
+      stepTimers.push(t);
+    }
+
+    // 启动
+    setTimeout(() => runStep(0), 400);
+
+    // ─── 5. 交互控制 ───────────────────────
+    window.toggleStep = function(n) {
+      document.getElementById(`step${n}`).classList.toggle('open');
+    };
+
+    window.rerunStep = function(n) {
+      const el = document.getElementById(`step${n}`);
+      el.classList.remove('done');
+      document.getElementById(`step${n}Status`).textContent = '🔄 重新生成';
+      setTimeout(() => {
+        renderStep(n - 1);
+        el.classList.add('done');
+        document.getElementById(`step${n}Status`).textContent = '✅ 完成（已重跑）';
+      }, 1800);
+    };
+
+    window.editStep = function(n) {
+      const contentEl = document.getElementById(`step${n}Content`);
+      if (contentEl.dataset.editing === '1') return;
+      contentEl.dataset.editing = '1';
+      const oldHtml = contentEl.innerHTML;
+      contentEl.innerHTML = `
+        <textarea id="edit${n}" style="width:100%; min-height:180px; padding:10px; font-family:var(--font-sans); font-size:13px; border:1.5px solid var(--peach); border-radius:8px;">${contentEl.textContent}</textarea>
+        <div style="margin-top:8px; display:flex; gap:8px;">
+          <button class="step-op-btn" onclick="saveEdit(${n})">💾 保存</button>
+          <button class="step-op-btn" onclick="cancelEdit(${n}, \`${oldHtml.replace(/`/g, '\\`')}\`)">✕ 取消</button>
+        </div>
+      `;
+    };
+
+    window.saveEdit = function(n) {
+      const val = document.getElementById(`edit${n}`).value;
+      const contentEl = document.getElementById(`step${n}Content`);
+      contentEl.innerHTML = `<p>${val.replace(/\n/g, '</p><p>')}</p>`;
+      contentEl.dataset.editing = '0';
+      document.getElementById(`step${n}Status`).textContent = '✅ 完成（人工修改）';
+    };
+
+    window.cancelEdit = function(n, oldHtml) {
+      const contentEl = document.getElementById(`step${n}Content`);
+      contentEl.innerHTML = oldHtml;
+      contentEl.dataset.editing = '0';
+    };
+
+    // CEO 拍板通过
+    window.ceoApprove = function() {
+      document.getElementById('nextActions').style.display = 'none';
+      document.getElementById('afterGate').style.display = 'block';
+      document.getElementById('afterGate').scrollIntoView({ behavior: 'smooth' });
+      // IA 信息架构图 · 模拟生成
+      setTimeout(() => {
+        document.getElementById('iaStatus').textContent = '📐 IA 信息架构图 · ✅ 已生成';
+        document.getElementById('iaStatus').style.background = 'rgba(154,168,137,0.12)';
+        document.getElementById('iaStatus').style.borderColor = 'var(--sage)';
+      }, 8000);
+      // PRD 快速版 · 模拟生成
+      setTimeout(() => {
+        document.getElementById('prdStatus').textContent = '📄 PRD 快速版 · ✅ 已生成';
+        document.getElementById('prdStatus').style.background = 'rgba(154,168,137,0.12)';
+        document.getElementById('prdStatus').style.borderColor = 'var(--sage)';
+      }, 14000);
+    };
+
+    // 暂停按钮
+    document.getElementById('pauseBtn').addEventListener('click', (e) => {
+      paused = !paused;
+      e.target.textContent = paused ? '▶ 继续' : '⏸ 暂停';
+      if (!paused) {
+        // 找下一个 pending 继续
+        for (let i = 0; i < 6; i++) {
+          if (document.getElementById(`step${i + 1}`).classList.contains('pending')) {
+            runStep(i);
+            break;
+          }
+        }
+      } else {
+        // 清所有定时器
+        stepTimers.forEach(t => clearTimeout(t));
+      }
+    });
+
+  })();
+</script>
+</body>
+</html>

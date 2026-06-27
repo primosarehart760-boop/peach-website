@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎬 桃子公司办公室 · 游戏风俯视</title>
+  <title>🎬 办公室 · Peach Studio</title>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/launcher.css">
@@ -113,7 +113,7 @@
         "ceo       ceo       directors directors directors"
         "pm        pm        design    design    design"
         "tech      tech      tech      tech      data"
-        "biz       biz       biz       test      test"
+        "biz       biz       biz       test      archive"
         "expert    expert    expert    expert    expert";
       gap: 22px;
       min-height: 860px;
@@ -709,7 +709,7 @@
 <!-- 导航 -->
 <nav class="nav">
   <div class="container nav-content">
-    <a href="index.html" class="nav-logo"><span class="emoji">🍑</span>桃子公司</a>
+    <a href="index.html" class="nav-logo"><span class="emoji">🍑</span>Peach Studio</a>
     <div class="nav-links">
       <a href="index.html" class="nav-link">首页</a>
       <a href="methodology.html" class="nav-link">🎯 方法论</a>
@@ -721,26 +721,29 @@
   </div>
 </nav>
 
+<!-- 🆕 v1.1 · 41 工位 9 分区 + 实时活动（2026-04-23 阶段 4 注入） -->
+<section id="peach-office-v11"></section>
+<script src="js/peach_office_v11.js"></script>
+
 <div class="office-page">
   <div class="container wide">
 
     <!-- 页面头 -->
     <div class="office-header">
       <p class="eyebrow">游戏风俯视 · 真公司办公室</p>
-      <h1>走进 <span class="accent">桃子公司</span> 办公室</h1>
+      <h1>走进 <span class="accent">Peach Studio</span> 办公室</h1>
       <p class="lead">
-        点任意工位看员工的人格 · 铁律 · 禁区 —— 19 位 AI 员工 + 3 位总监 + 20 位行业专家 · 每个都有严格分工 · 每个都能被召唤干活。这不是动画演示 · 是真运作的公司。
+        点任意工位看员工的人格 · 铁律 · 禁区 —— 42 位常驻 AI 员工 + 200 位行业专家 · 每个都有严格分工 · 每个都能被召唤干活。这不是动画演示 · 是真运作的公司。
       </p>
     </div>
 
     <!-- 状态栏 -->
     <div class="status-bar">
-      <div class="status-item ceo"><span class="dot"></span><span class="num">1</span> CEO</div>
-      <div class="status-item busy"><span class="dot"></span><span class="num">10</span> 执行员工</div>
-      <div class="status-item busy"><span class="dot"></span><span class="num">3</span> 总监审查</div>
-      <div class="status-item"><span class="dot"></span><span class="num">3</span> 业务岗</div>
-      <div class="status-item"><span class="dot"></span><span class="num">1</span> 测试工程师</div>
-      <div class="status-item"><span class="dot"></span><span class="num">20</span> 行业专家（待命）</div>
+      <div class="status-item ceo"><span class="dot"></span><span class="num">2</span> CEO</div>
+      <div class="status-item busy"><span class="dot"></span><span class="num">4</span> 总监</div>
+      <div class="status-item busy"><span class="dot"></span><span class="num">4</span> 质量审查</div>
+      <div class="status-item"><span class="dot"></span><span class="num">32</span> 执行员工</div>
+      <div class="status-item"><span class="dot"></span><span class="num">200+</span> 行业专家（待命）</div>
     </div>
 
     <!-- 办公室地图 -->
@@ -958,7 +961,7 @@
         <div class="bsi model">🔮 Doubao-1.5-pro-32k</div>
         <div class="bsi ctx-bar">CTX <div class="ctx-progress"><div class="ctx-fill" id="ctxFill"></div></div><span id="ctxPct">32%</span></div>
         <div class="bsi chat">💬 <span class="chat-num" id="chatNum">3</span> 活跃会话</div>
-        <div class="bsi brand">AGENT TOWN · 桃子公司</div>
+        <div class="bsi brand">AGENT TOWN · Peach Studio</div>
       </div>
 
       <div style="text-align:center; color:var(--ink-faint); font-size:12px; margin-top:14px;">
@@ -1071,7 +1074,7 @@ const AGENTS = {
   },
   "01_PM": {
     avatar: "🧑‍🎤", name: "PM · 产品经理", role: "PRD 15 板块 · 画像 · 流程 · 指标", dept: "执行层",
-    def: "产品经理 · 桃子公司的灵魂岗之一。按 VELA 11_PRD 模板严格产出 · 15 板块（VELA 9 + 桃子自加 6）· 画像必具体到一个人 · 不是标签。",
+    def: "产品经理 · Peach Studio的灵魂岗之一。按 VELA 11_PRD 模板严格产出 · 15 板块（VELA 9 + 桃子自加 6）· 画像必具体到一个人 · 不是标签。",
     rules: ["画像必具体人（林小雨 28 岁 4A）", "北极星不选 DAU / MAU", "PRD 必含反指标 + 交互逻辑表 + 边界异常矩阵", "Gherkin 验收必真写"],
     can: ["Brief + PRD + 画像 + 旅程 + 流程图"],
     ban: ["不做具体代码", "不做具体设计", "不做模型技术选型（算法干）"]
