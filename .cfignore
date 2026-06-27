@@ -1,0 +1,10 @@
+node_modules/
+bridge/
+worker/
+_designs/
+.git/
+.wrangler/
+*.command
+*.log
+.DS_Store
+.env
