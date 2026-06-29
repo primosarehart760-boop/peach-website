@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧠 专家团 · Peach Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/launcher.css">
+  <style>
+    /* ── 专家团页面样式 ── */
+    .experts-hero {
+      text-align: center;
+      padding: var(--space-3xl) 0 var(--space-xl);
+    }
+    .experts-hero h1 {
+      font-size: clamp(36px, 5vw, 56px);
+      font-family: var(--font-serif);
+      line-height: 1.1;
+      margin-bottom: var(--space-sm);
+    }
+    .experts-hero .subtitle {
+      color: var(--ink-soft);
+      font-size: 18px;
+      margin-bottom: var(--space-lg);
+    }
+    .experts-stats {
+      display: flex;
+      gap: var(--space-xl);
+      justify-content: center;
+      margin-bottom: var(--space-xl);
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-num {
+      font-family: var(--font-serif);
+      font-size: 48px;
+      color: var(--peach);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--ink-faint);
+      margin-top: 4px;
+    }
+
+    /* ── 搜索栏 ── */
+    .expert-search-bar {
+      max-width: 480px;
+      margin: 0 auto var(--space-lg);
+      position: relative;
+    }
+    .expert-search-bar input {
+      width: 100%;
+      padding: 14px 20px 14px 44px;
+      border: 2px solid var(--paper-dark);
+      border-radius: 14px;
+      font-size: 16px;
+      font-family: var(--font-sans);
+      background: var(--paper-light);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .expert-search-bar input:focus {
+      border-color: var(--peach);
+    }
+    .expert-search-bar::before {
+      content: '🔍';
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+    }
+
+    /* ── Tab 栏 ── */
+    #expert-tabs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: var(--space-md);
+    }
+    .expert-tab {
+      padding: 10px 24px;
+      border: 2px solid var(--paper-dark);
+      border-radius: 12px;
+      background: var(--paper-light);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--ink-soft);
+    }
+    .expert-tab:hover {
+      border-color: var(--peach);
+    }
+    .expert-tab.active {
+      background: var(--peach);
+      color: white;
+      border-color: var(--peach);
+    }
+    .expert-tab .count {
+      display: inline-block;
+      background: rgba(255,255,255,0.3);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+    .expert-tab.active .count {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* ── 子筛选栏 ── */
+    #expert-sub-filters {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: var(--space-xl);
+      flex-wrap: wrap;
+    }
+    .sub-filter {
+      padding: 6px 16px;
+      border: 1.5px solid var(--paper-dark);
+      border-radius: 20px;
+      background: transparent;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--ink-soft);
+      font-family: var(--font-sans);
+    }
+    .sub-filter:hover {
+      border-color: var(--peach);
+      color: var(--peach);
+    }
+    .sub-filter.active {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+
+    /* ── 计数 ── */
+    #expert-count {
+      text-align: center;
+      color: var(--ink-faint);
+      font-size: 14px;
+      margin-bottom: var(--space-md);
+    }
+
+    /* ── 卡片网格 ── */
+    #expert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-md);
+      padding-bottom: var(--space-3xl);
+    }
+    .expert-card {
+      background: var(--paper-light);
+      border: 2px solid var(--paper-dark);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      transition: all 0.25s;
+      cursor: default;
+    }
+    .expert-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+      border-color: var(--peach);
+    }
+    .expert-emoji {
+      font-size: 40px;
+      margin-bottom: var(--space-xs);
+    }
+    .expert-name {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+    .expert-dept {
+      font-size: 12px;
+      color: var(--peach);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-sm);
+    }
+    .expert-desc {
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.6;
+      margin-bottom: var(--space-sm);
+    }
+    .expert-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .expert-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--paper-dark);
+      color: var(--ink-soft);
+    }
+
+    /* ── 底部说明 ── */
+    .experts-footer-note {
+      text-align: center;
+      padding: var(--space-xl) 0;
+      color: var(--ink-faint);
+      font-size: 14px;
+      line-height: 1.8;
+      border-top: 1px solid var(--paper-dark);
+      margin-top: var(--space-xl);
+    }
+
+    @media (max-width: 768px) {
+      #expert-grid { grid-template-columns: 1fr; }
+      .experts-stats { gap: var(--space-md); }
+      .stat-num { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav id="peach-nav"></nav>
+
+<div class="container">
+  <!-- Hero -->
+  <div class="experts-hero">
+    <p class="hand" style="color: var(--peach); margin-bottom: var(--space-sm);">一人公司 · 全员就位</p>
+    <h1>🧠 专家团</h1>
+    <p class="subtitle">42 位公司员工 + 21 位行业专家 · 覆盖产品全生命周期 × 21 个行业</p>
+
+    <div class="experts-stats">
+      <div class="stat-item">
+        <div class="stat-num">42</div>
+        <div class="stat-label">公司员工</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">21</div>
+        <div class="stat-label">行业专家</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">8</div>
+        <div class="stat-label">层审批链</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">33</div>
+        <div class="stat-label">VELA 模板</div>
+      </div>
+    </div>
+
+    <!-- 搜索 -->
+    <div class="expert-search-bar">
+      <input type="text" placeholder="搜索专家名称、技能、行业..." oninput="searchExperts(this.value)">
+    </div>
+  </div>
+
+  <!-- Tab 切换 -->
+  <div id="expert-tabs"></div>
+
+  <!-- 子筛选 -->
+  <div id="expert-sub-filters"></div>
+
+  <!-- 计数 -->
+  <div id="expert-count"></div>
+
+  <!-- 卡片网格 -->
+  <div id="expert-grid"></div>
+
+  <!-- 底部说明 -->
+  <div class="experts-footer-note">
+    <p>每位员工都有独立的 VELA 8+1 段式 System Prompt · 配备评测集和 BadCase 库</p>
+    <p>行业专家按需激活 · CEO 自动匹配 · 每次任务注入行业认知铁律</p>
+    <p style="margin-top: var(--space-sm);">
+      <a href="methodology.html" style="color: var(--peach);">查看方法论矩阵 →</a>
+      &nbsp;&nbsp;
+      <a href="team.html" style="color: var(--peach);">查看组织架构 →</a>
+    </p>
+  </div>
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/peach-nav.js"></script>
+<script src="js/launcher.js"></script>
+<script src="js/peach_experts_v11.js"></script>
+</body>
+</html>
