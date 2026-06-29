@@ -3457,7 +3457,7 @@
         try { sessionStorage.setItem('peach_cog_html', section.outerHTML); } catch(_) {}
       }
 
-      const es = new EventSource(BRIDGE + '/api/stream/' + runId);
+      const es = new EventSource(BRIDGE + '/api/stream/' + runId + '?product=' + encodeURIComponent(product) + '&industry=' + encodeURIComponent(industry));
 
       es.addEventListener('hello', e => {
         appendLog('[桃子桥 已连接] run_id=' + JSON.parse(e.data).run_id + '\n', '#3fb950');

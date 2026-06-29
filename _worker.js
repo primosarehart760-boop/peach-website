@@ -684,12 +684,16 @@ async function runAgent(env, runId, batchId, spell) {
 /**
  * 处理 /api/stream/{runId}（流式输出 · 用于分析阶段实时展示）
  */
-async function handleStream(runId, env) {
-  const run = await getRun(env, runId);
-  if (!run) return jsonResp({ error: 'Run not found' }, 404);
+async function handleStream(runId, env, searchParams) {
+  // 优先从 URL query params 取产品/行业（不依赖 KV）
+  const product = searchParams?.get('product') || '';
+  const industry = searchParams?.get('industry') || '';
 
-  // 如果已完成，直接返回结果（Claude CLI 兼容格式）
-  if (run.status === 'completed') {
+  // 也尝试从 KV 读（如果有的话）
+  const run = await getRun(env, runId);
+
+  // 如果已完成且有缓存文本，直接返回
+  if (run?.status === 'completed' && run.output_text) {
     const encoder = new TextEncoder();
     const msgId = 'msg_' + runId;
     const body = new ReadableStream({
@@ -708,43 +712,49 @@ async function handleStream(runId, env) {
     });
   }
 
-  // 如果是 pending/running 状态 → 实时调 DeepSeek 流式输出
-  if (run.status === 'running' || run.agent_key === 'analyze') {
-    // 读取请求参数
-    const paramsRaw = env?.KV ? await env.KV.get(`run_params:${runId}`) : null;
-    const params = paramsRaw ? JSON.parse(paramsRaw) : {};
+  // 实时调 DeepSeek 流式输出（不需要 KV 中有记录）
+  const finalProduct = product || run?.product || '';
+  const finalIndustry = industry || run?.industry || '';
 
-    const product = params.product || run.product || '';
-    const industry = params.industry || run.industry || '';
-    const analysisSlug = params.slug || product.replace(/\s+/g, '_').slice(0, 20);
-
-    // 加载分析 spell
-    const industryContext = await loadIndustryExpert(env, industry);
-    const today = new Date().toISOString().split('T')[0];
-
-    const { system, user } = await loadSpell(env, SPELLS.analyze, {
-      PRODUCT_REQUEST: product,
-      INDUSTRY: industry || '通用',
-      PROJECT_SLUG: analysisSlug,
-      TODAY: today,
-      INDUSTRY_EXPERT_CONTEXT: industryContext,
-      USER_INPUT: `请分析以下产品方向：${product}${industry ? '，行业：' + industry : ''}`,
-    }, { injectKnowledge: false });
-
-    // 流式调用 DeepSeek
-    const deepseekStream = await callDeepSeekStream(env, system, user);
-
-    // 返回 SSE 流
-    return new Response(transformToFrontendSSE(deepseekStream, runId), {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Access-Control-Allow-Origin': '*',
+  if (!finalProduct) {
+    // 没有产品信息，无法分析
+    const encoder = new TextEncoder();
+    const body = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(formatClaudeSSE('msg_' + runId, '❌ 缺少产品信息，请返回首页重新提交')));
+        controller.enqueue(encoder.encode(`event: done\ndata: {}\n\n`));
+        controller.close();
       },
+    });
+    return new Response(body, {
+      headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Access-Control-Allow-Origin': '*' },
     });
   }
 
-  return jsonResp({ error: 'Run not streamable', run_status: run.status });
+  const analysisSlug = finalProduct.replace(/\s+/g, '_').slice(0, 20);
+  const industryContext = await loadIndustryExpert(env, finalIndustry);
+  const today = new Date().toISOString().split('T')[0];
+
+  const { system, user } = await loadSpell(env, SPELLS.analyze, {
+    PRODUCT_REQUEST: finalProduct,
+    INDUSTRY: finalIndustry || '通用',
+    PROJECT_SLUG: analysisSlug,
+    TODAY: today,
+    INDUSTRY_EXPERT_CONTEXT: industryContext,
+    USER_INPUT: `请分析以下产品方向：${finalProduct}${finalIndustry ? '，行业：' + finalIndustry : ''}`,
+  }, { injectKnowledge: false });
+
+  // 流式调用 DeepSeek
+  const deepseekStream = await callDeepSeekStream(env, system, user);
+
+  // 返回 SSE 流（transformToFrontendSSE 会在结束时发 done 事件）
+  return new Response(transformToFrontendSSE(deepseekStream, runId), {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
 }
 
 // ── 辅助函数 ──
@@ -1693,9 +1703,10 @@ async function route(path, request, env, ctx) {
   }
 
   // GET /api/stream/:runId · SSE 实时流
-  const streamMatch = path.match(/^\/api\/stream\/([a-z0-9]+)$/);
+  const streamMatch = path.match(/^\/api\/stream\/([a-z0-9]+)/);
   if (streamMatch && request.method === 'GET') {
-    return handleStream(streamMatch[1], env);
+    const streamUrl = new URL(request.url);
+    return handleStream(streamMatch[1], env, streamUrl.searchParams);
   }
 
   // GET /api/batch-status/:batchId · 批次状态
