@@ -484,7 +484,7 @@ async function handleRun(request, env) {
   const runId = genId();
   const analysisSlug = slug || product.replace(/\s+/g, '_').slice(0, 20);
 
-  // 创建运行记录
+  // 创建运行记录（status=pending，等 /api/stream 连上再开始调 DeepSeek）
   await createRun(env, runId, {
     agentKey: 'analyze',
     spellPath: SPELLS.analyze,
@@ -493,32 +493,19 @@ async function handleRun(request, env) {
     mode: mode || 'lightning',
   });
 
-  // 加载分析 spell
-  const industryContext = await loadIndustryExpert(env, industry);
-  const today = new Date().toISOString().split('T')[0];
+  // 把请求参数存到 KV，供 /api/stream 读取
+  if (env?.KV) {
+    await env.KV.put(`run_params:${runId}`, JSON.stringify({
+      product, industry, slug: analysisSlug, mode: mode || 'lightning',
+    }));
+  }
 
-  const { system, user } = await loadSpell(env, SPELLS.analyze, {
-    PRODUCT_REQUEST: product,
-    INDUSTRY: industry || '通用',
-    PROJECT_SLUG: analysisSlug,
-    TODAY: today,
-    INDUSTRY_EXPERT_CONTEXT: industryContext,
-    USER_INPUT: `请分析以下产品方向：${product}${industry ? '，行业：' + industry : ''}`,
-  }, { injectKnowledge: false });
-
-  // 流式调用 DeepSeek
-  const stream = await callDeepSeekStream(env, system, user);
-
-  // 返回 SSE 流 + run_id header
-  return new Response(transformToFrontendSSE(stream, runId), {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'X-Run-Id': runId,
-      'X-Slug': analysisSlug,
-      'Access-Control-Allow-Origin': '*',
-    },
+  // 返回 JSON（前端拿到 run_id 后跳 results.html 连 /api/stream）
+  return jsonResp({
+    run_id: runId,
+    slug: analysisSlug,
+    phase: 'analyze',
+    project_dir: `projects/${analysisSlug}`,
   });
 }
 
@@ -526,14 +513,13 @@ async function handleRun(request, env) {
  * 处理 /api/generate（生成阶段 · 闪电档）
  * 并发 PRD + UI → 串行 Demo
  */
-async function handleGenerate(request, env) {
+async function handleGenerate(request, env, ctx) {
   const body = await request.json();
   const { analyze_run_id, analysis_text, product, industry, slug, mode } = body;
 
   const batchId = genId();
   const today = new Date().toISOString().split('T')[0];
   const analysisSlug = slug || product?.replace(/\s+/g, '_').slice(0, 20) || 'project';
-  const industryContext = await loadIndustryExpert(env, industry);
 
   const baseVars = {
     PRODUCT_REQUEST: product || '',
@@ -541,21 +527,49 @@ async function handleGenerate(request, env) {
     PROJECT_SLUG: analysisSlug,
     TODAY: today,
     ANALYSIS_CONTEXT: analysis_text || '',
-    INDUSTRY_EXPERT_CONTEXT: industryContext,
+    INDUSTRY_EXPERT_CONTEXT: '',
   };
 
-  if (mode === 'lightning' || !mode) {
-    return await runLightning(env, batchId, baseVars);
-  }
+  // 立即返回 batch_id，后台执行 Agent
+  const bgWork = (async () => {
+    try {
+      baseVars.INDUSTRY_EXPERT_CONTEXT = await loadIndustryExpert(env, industry);
+      if (mode === 'lightning' || !mode) {
+        await runLightningBg(env, batchId, baseVars);
+      } else {
+        await runStandardBg(env, batchId, baseVars);
+      }
+    } catch (err) {
+      console.error('Generate bg error:', err);
+      try { await updateBatch(env, batchId, { status: 'failed', error: err.message }); } catch(_) {}
+    }
+  })();
 
-  // 标准档先返回 batch_id，后续通过 /api/batch-status 查进度
-  return jsonResp({ batch_id: batchId, mode: 'standard', message: '标准档暂未实现' });
+  // ctx.waitUntil 让 Worker 在返回响应后继续执行
+  if (ctx?.waitUntil) ctx.waitUntil(bgWork);
+
+  // 先创建 batch 记录再返回
+  await createBatch(env, batchId, {
+    phase: mode === 'lightning' || !mode ? 'lightning' : 'standard',
+    mode: mode || 'lightning',
+    product: product || '',
+    industry: industry || '',
+    slug: analysisSlug,
+    runIds: [],
+  });
+
+  return jsonResp({
+    batch_id: batchId,
+    mode: mode || 'lightning',
+    status: 'running',
+    run_ids: {},
+  });
 }
 
 /**
- * 闪电档：并发 PRD + UI → 串行 Demo
+ * 闪电档（后台执行）：并发 PRD + UI → 串行 Demo
  */
-async function runLightning(env, batchId, vars) {
+async function runLightningBg(env, batchId, vars) {
   const prdRunId = genId();
   const uiRunId = genId();
   const demoRunId = genId();
@@ -604,12 +618,45 @@ async function runLightning(env, batchId, vars) {
 
   await pushBatchEvent(env, batchId, { type: 'lightning_done' });
 
-  return jsonResp({
-    batch_id: batchId,
-    mode: 'lightning',
-    run_ids: { prd: prdRunId, ui: uiRunId, demo: demoRunId },
-    status: 'completed',
-  });
+  // 后台执行，不返回 Response
+  await updateBatch(env, batchId, { status: 'completed' });
+}
+
+/**
+ * 标准档（后台执行）：按阶段顺序执行 Agent
+ */
+async function runStandardBg(env, batchId, vars) {
+  // 标准档先跑 P1 的 agent
+  const p1Agents = ['market', 'competitor', 'n34'];
+  const today = new Date().toISOString().split('T')[0];
+
+  for (const agentKey of p1Agents) {
+    const agentInfo = STANDARD_SPELL_MAP[agentKey];
+    if (!agentInfo || !BUNDLE[agentInfo.spell]) continue;
+
+    const runId = genId();
+    await createRun(env, runId, { agentKey, spellPath: agentInfo.spell, batchId, mode: 'standard' });
+
+    try {
+      const spell = await loadSpell(env, agentInfo.spell, {
+        ...vars,
+        USER_INPUT: `请执行任务。产品：${vars.PRODUCT_REQUEST}`,
+      });
+      const stream = await callDeepSeekStream(env, spell.system, spell.user);
+      const fullText = await collectStreamText(stream);
+      const files = parseOutputFiles(fullText);
+      await saveFilesToR2(env, batchId, files);
+      await markRunComplete(env, runId, batchId, fullText);
+      await pushBatchEvent(env, batchId, { type: 'agent_done', key: agentKey, run_id: runId });
+    } catch (err) {
+      await updateRun(env, runId, { status: 'failed', error: err.message });
+      await pushBatchEvent(env, batchId, { type: 'agent_error', key: agentKey, error: err.message });
+    }
+  }
+
+  // P1 完成，等待 CEO Gate
+  await updateBatch(env, batchId, { status: 'gate_pending', pending_phases: ['p3', 'p4', 'p5', 'p6'] });
+  await pushBatchEvent(env, batchId, { type: 'p1_done' });
 }
 
 /**
@@ -661,7 +708,43 @@ async function handleStream(runId, env) {
     });
   }
 
-  return jsonResp({ error: 'Streaming only available for analyze phase', run_status: run.status });
+  // 如果是 pending/running 状态 → 实时调 DeepSeek 流式输出
+  if (run.status === 'running' || run.agent_key === 'analyze') {
+    // 读取请求参数
+    const paramsRaw = env?.KV ? await env.KV.get(`run_params:${runId}`) : null;
+    const params = paramsRaw ? JSON.parse(paramsRaw) : {};
+
+    const product = params.product || run.product || '';
+    const industry = params.industry || run.industry || '';
+    const analysisSlug = params.slug || product.replace(/\s+/g, '_').slice(0, 20);
+
+    // 加载分析 spell
+    const industryContext = await loadIndustryExpert(env, industry);
+    const today = new Date().toISOString().split('T')[0];
+
+    const { system, user } = await loadSpell(env, SPELLS.analyze, {
+      PRODUCT_REQUEST: product,
+      INDUSTRY: industry || '通用',
+      PROJECT_SLUG: analysisSlug,
+      TODAY: today,
+      INDUSTRY_EXPERT_CONTEXT: industryContext,
+      USER_INPUT: `请分析以下产品方向：${product}${industry ? '，行业：' + industry : ''}`,
+    }, { injectKnowledge: false });
+
+    // 流式调用 DeepSeek
+    const deepseekStream = await callDeepSeekStream(env, system, user);
+
+    // 返回 SSE 流
+    return new Response(transformToFrontendSSE(deepseekStream, runId), {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  }
+
+  return jsonResp({ error: 'Run not streamable', run_status: run.status });
 }
 
 // ── 辅助函数 ──
@@ -1598,7 +1681,7 @@ async function onRequest(context) {
   }
 }
 
-async function route(path, request, env) {
+async function route(path, request, env, ctx) {
   // POST /api/run · 启动分析
   if (path === '/api/run' && request.method === 'POST') {
     return handleRun(request, env);
@@ -1606,7 +1689,7 @@ async function route(path, request, env) {
 
   // POST /api/generate · 启动生成
   if (path === '/api/generate' && request.method === 'POST') {
-    return handleGenerate(request, env);
+    return handleGenerate(request, env, ctx);
   }
 
   // GET /api/stream/:runId · SSE 实时流
@@ -1810,9 +1893,9 @@ export default {
       }
 
       try {
-        // 从 pathname 提取 subPath
-        const subPath = url.pathname; // 已经是 /api/xxx 格式
-        const response = await route(subPath, request, env);
+        // 从 pathname 提取 subPath · 传入 ctx 用于后台任务
+        const subPath = url.pathname;
+        const response = await route(subPath, request, env, ctx);
         return addCors(response);
       } catch (err) {
         console.error('API error:', err);
